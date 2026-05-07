@@ -1,0 +1,216 @@
+\documentclass[12pt]{article}
+
+% === Packages ===
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault} % modern sans-serif look
+
+% === Formatting tweaks ===
+\setstretch{1.15}
+\setlist[enumerate]{itemsep=0.4em, topsep=0.2em}
+\titleformat{\section}{\Large\bfseries\sffamily}{\thesection.}{1em}{}
+\titleformat{\subsection}{\large\bfseries\sffamily}{\thesubsection}{1em}{}
+
+% === Title ===
+\title{\vspace{-2em}\textbf{Applied Mathematics Oral Exam Questions and Model Answers}\\
+\large From Euler to Navier--Stokes}
+\author{Prepared for Graduate Oral Examination}
+\date{}
+
+\begin{document}
+\section*{Sample Oral Exam Questions Based on Non-Dimensionalization}
+\subsection*{Questions and Model Answers}
+
+% -------------------------------------------
+\subsection*{1. Why do we nondimensionalize the Navier--Stokes equations?}
+
+\textbf{Answer.}
+Nondimensionalization allows us to:
+\begin{itemize}
+    \item compare flows of different physical scales,
+    \item reduce the number of free parameters,
+    \item identify the dominant physical balances,
+    \item ensure numerical stability by revealing appropriate scaling.
+\end{itemize}
+According to the tutorial (see p.~2 of the PDF), you either work in real units
+or report dimensionless parameters. Dimensionless variables like
+$x' = x/L$, $u'=u/U$, and $t'=tU/L$ appear directly in the IBFE formulation
+whenever the fluid equations are nondimensionalized.
+
+
+% -------------------------------------------
+\subsection*{2. Derive the nondimensional incompressible Navier--Stokes equations.}
+
+\textbf{Answer.}
+Start from dimensional Navier--Stokes:
+\[
+\rho\left(
+\frac{\partial \mathbf{u}}{\partial t} + (\mathbf{u}\cdot\nabla)\mathbf{u}
+\right)
+= -\nabla p + \mu\nabla^2\mathbf{u}.
+\]
+
+Use the definitions (PDF p.~4):
+\[
+x'=\frac{x}{L},\quad t'=\frac{tU}{L},\quad u'=\frac{u}{U},
+\quad p'=\frac{p}{\rho U^2},\quad \nabla'=L\nabla.
+\]
+Substituting and rearranging yields
+\[
+\frac{\partial \mathbf{u}'}{\partial t'}
++ \mathbf{u}'\cdot\nabla'\mathbf{u}'
+= -\nabla' p' + \frac{1}{Re}\nabla'^2\mathbf{u}',
+\]
+where
+\[
+Re = \frac{\rho UL}{\mu}.
+\]
+
+
+% -------------------------------------------
+\subsection*{3. What is the physical meaning of the Reynolds number in IBFE simulations?}
+
+\textbf{Answer.}
+From the definition in the tutorial (p.~4), $Re=\rho UL/\mu$ measures the ratio of
+inertial to viscous forces.  
+In IBFE:
+\begin{itemize}
+    \item Low $Re$ implies the flow is dominated by viscosity, requiring smaller 
+          time steps and possibly implicit treatment of stiffness.
+    \item High $Re$ implies inertia-dominated flow, requiring careful resolution
+          of vortices and wake structures.
+    \item The choice of $Re$ determines how elastic boundary forces scale and how
+          strong spreading forces must be on the Eulerian grid.
+\end{itemize}
+The plot on p.~5 shows how real biological and engineered systems span several
+orders of magnitude in $Re$.
+% -------------------------------------------
+\subsection*{4. How do you nondimensionalize force per unit length in IBFE?}
+
+\textbf{Answer.}
+If a Lagrangian fiber applies a force per unit length $F$, the dimensionless force
+depends on the Reynolds regime (p.~7):
+\[
+F' = 
+\begin{cases}
+F / (\rho L U^2), & Re>1,\\[6pt]
+F / (\mu U), & Re<1.
+\end{cases}
+\]
+This scaling ensures consistency with the nondimensional Navier--Stokes
+equations so that structural forcing terms are comparable in magnitude to the
+fluid terms being solved.
+
+% -------------------------------------------
+\subsection*{5. How is the dimensionless beam bending stiffness $k'_{\text{beam}}$ derived?}
+
+\textbf{Answer.}
+The bending stiffness in 2D has units of $\mathrm{N\cdot m}$ (PDF p.~8).
+For $Re>1$, the nondimensional bending stiffness is (p.~12):
+\[
+k'_{\text{beam}}=\frac{k_{\text{beam}}}{\rho U^2 L^3}.
+\]
+This comes from comparing the physical bending force scale
+($k_{\text{beam}}/L^2$) to the inertial fluid stress scale
+($\rho U^2$).  
+Similarly, for $Re<1$:
+\[
+k'_{\text{beam}}=\frac{k_{\text{beam}}}{\mu U L^2}.
+\]
+
+% -------------------------------------------
+\subsection*{6. Estimate bending stiffness and explain how it affects numerical stability.}
+
+\textbf{Answer.}
+Page~15 notes that $k'_{\text{beam}}\approx 10$ produces moderate bending.
+In IBFE:
+\begin{itemize}
+    \item Too large $k_{\text{beam}}$ leads to numerical stiffness and requires
+          smaller time steps or implicit treatment.
+    \item Too small $k_{\text{beam}}$ produces exaggerated deformation and mesh
+          distortion.
+    \item Estimating $k_{\text{beam}}$ using physical $U_{\max}$ and boundary 
+          length ensures meaningful nondimensionalization.
+\end{itemize}
+
+% -------------------------------------------
+\subsection*{7. How do you estimate a spring constant for immersed boundary structures?}
+
+\textbf{Answer.}
+From p.~16,
+\[
+k_{\text{spring}} \approx \frac{F_b}{x_s},
+\]
+where $x_s$ is the desired displacement and $F_b$ depends on Reynolds number:
+\[
+F_b \sim
+\begin{cases}
+\frac{1}{2}\rho\,dx^{(\mathrm{dim}-1)}U^2, & Re>1,\\[6pt]
+\mu\,dx\,U, & Re<1.
+\end{cases}
+\]
+In IBFE, this determines how stiff the immersed material is relative to fluid
+stresses, preventing unrealistic penetration or stretching of elastic boundaries.
+
+% -------------------------------------------
+\subsection*{8. What dimensionless groups govern oscillatory or pumping flows?}
+
+\textbf{Answer.}
+Several groups appear in your notes:
+\begin{itemize}
+    \item \textbf{Dimensionless time:} $t'=tU/L$ (p.~6).
+    \item \textbf{Dimensionless frequency:} $f'=fL/U$ (p.~6).
+    \item \textbf{Strouhal number:} $St = fA/U$ (pp.~18--19),
+          governing vortex shedding and propulsive efficiency
+          ($0.2<St<0.4$ for efficient swimmers).
+    \item \textbf{Womersley number:} $\alpha = L\sqrt{\omega/\nu}$ (p.~20),
+          characterizing oscillatory flow in biological systems such as arteries.
+\end{itemize}
+These determine how oscillations couple to fluid inertia and viscosity, crucial
+in pumping or swimming IBFE simulations.
+
+% -------------------------------------------
+\subsection*{9. How does nondimensionalization guide mesh and time-step choices?}
+
+\textbf{Answer.}
+The dimensionless groups determine:
+\begin{itemize}
+    \item the smallest spatial scales needing resolution 
+          (e.g., boundary layers for large $Re$ or Womersley number),
+    \item the maximum allowable Courant number for explicit schemes,
+    \item stiffness in structural models for large $k'_{\text{beam}}$ or 
+          $k'_{\text{spring}}$,
+    \item time-step requirements for coupled fluid–structure interaction.
+\end{itemize}
+For example, high Strouhal number flows induce rapid vortex shedding,
+necessitating careful time-step selection.  
+Similarly, low-Re IBFE simulations require fine Eulerian grids because viscous 
+diffusion dominates.
+
+% -------------------------------------------
+\subsection*{10. Explain the physical meaning of the Péclet number and how it applies in IBFE.}
+
+\textbf{Answer.}
+From p.~22,
+\[
+Pe = \frac{\text{advective transport rate}}
+         {\text{diffusive transport rate}}
+       = \frac{LU}{D}.
+\]
+In IBFE:
+\begin{itemize}
+    \item For passive scalars or mass/chemical transport, $Pe$ determines
+          whether advection or diffusion dominates.
+    \item If $Pe \gg 1$, steep gradients require enhanced mesh resolution or
+          stabilization.
+    \item If $Pe \ll 1$, diffusion smooths fields, potentially relaxing mesh
+          requirements.
+\end{itemize}
+This impacts numerical performance whenever diffusion terms are included in
+the Eulerian equations solved alongside fluid–structure interaction.
+
+\end{document}

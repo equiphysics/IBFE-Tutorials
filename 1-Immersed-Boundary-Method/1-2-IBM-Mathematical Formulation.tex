@@ -1,0 +1,648 @@
+\documentclass{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{seagull}
+
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb}
+\usepackage{bm}
+
+\title[IBM Overview]{Overview of IBM and Numerical Considerations}
+\author{Laura A. Miller}
+\date{}
+
+\begin{document}
+
+%=======================================================
+\begin{frame}
+\titlepage
+\end{frame}
+
+%=======================================================
+\begin{frame}{Fluid-Structure Interaction}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\textbf{High Reynolds numbers}
+\begin{itemize}
+    \item Whale heart: chambered pump
+    \item Cayman stingray: flapping locomotion
+\end{itemize}
+
+\column{0.48\textwidth}
+\textbf{Low Reynolds numbers}
+\begin{itemize}
+    \item Cilia in the respiratory tract: micropumps
+    \item \emph{E. coli}: flagellar locomotion
+\end{itemize}
+\end{columns}
+
+\medskip
+\begin{center}
+% Placeholder for slide image (page 2)
+\fbox{\includegraphics[width=0.6\textwidth]{pictures/1-2/Re-pics.png}}
+\end{center}
+\end{frame}
+
+%=======================================================
+\begin{frame}{Modeling the fluid: Navier--Stokes equations}
+\small
+\begin{itemize}
+    \item This is essentially $F=ma$ for a parcel of fluid.
+    \item Let $\mathbf{v}(\mathbf{x},t)$ give the velocity at position $\mathbf{x}$ and time $t$.
+    \item Let $p(\mathbf{x},t)$ be the pressure at position $\mathbf{x}$ and time $t$.
+    \item $\rho$ is the density of the fluid, and $\mu$ is the viscosity of the fluid.
+\end{itemize}
+
+\medskip
+% Optional: insert your preferred Navier--Stokes form here:
+\[
+\rho\left(\frac{\partial \mathbf{v}}{\partial t}+\mathbf{v}\cdot\nabla \mathbf{v}\right)
+=
+-\nabla p+\mu \Delta \mathbf{v}+\mathbf{f},\qquad \nabla\cdot\mathbf{v}=0.
+\]
+\end{frame}
+
+%=======================================================
+\begin{frame}{Describing the fluid: Non-dimensional Navier--Stokes equations}
+\small
+The Navier--Stokes equation can be put into dimensionless form using the following definitions:
+\begin{itemize}
+    \item $L$ is the characteristic length (e.g.\ length of a wing).
+    \item $V$ is the characteristic velocity (e.g.\ max velocity of wing tip).
+\end{itemize}
+
+\medskip
+% Optional: include nondimensionalization summary
+\[
+\mathbf{x}=L\mathbf{x}^\ast,\quad t=\frac{L}{V}t^\ast,\quad \mathbf{v}=V\mathbf{v}^\ast,\quad p=\rho V^2 p^\ast.
+\]
+\end{frame}
+
+%=======================================================
+\begin{frame}{Reynolds number}
+\small
+\begin{itemize}
+    \item Flows of the same $\mathrm{Re}$ are dynamically similar.
+    \item Physical models are scaled to the same $\mathrm{Re}$.
+    \begin{itemize}
+        \item Bigger models of small organisms can be made by increasing the viscosity of the fluid.
+        \item Smaller models of bigger organisms can be made by reducing viscosity or increasing velocity.
+    \end{itemize}
+\end{itemize}
+
+\medskip
+% Optional:
+\[
+\mathrm{Re}=\frac{\rho V L}{\mu}.
+\]
+\end{frame}
+
+%=======================================================
+\begin{frame}{Describing the boundary}
+\small
+\begin{itemize}
+    \item In the immersed boundary method, boundaries are always elastic.
+    \begin{itemize}
+        \item They can be stiff enough that they act like rigid objects.
+        \item They can be moved in prescribed ways using target points.
+    \end{itemize}
+    \item Boundaries have been modeled to resist bending, stretching, and twisting.
+    \item All of these properties can change in time in prescribed ways or according to other models.
+\end{itemize}
+\end{frame}
+
+%=======================================================
+\begin{frame}{Immersed boundary approach to fluid-structure interaction}
+\small
+\begin{itemize}
+    \item Discretize the Eulerian equations on a Cartesian grid. Solve for velocity and pressure.
+    \item Discretize the Lagrangian equations on a curvilinear mesh. Solve for force density and position.
+\end{itemize}
+
+\medskip
+\begin{center}
+\textbf{Lagrangian description:}\quad $ \mathbf{X}(\mathbf{r},t),\ \mathbf{F}(\mathbf{r},t)$\\
+\textbf{Eulerian description:}\quad $\mathbf{u}(\mathbf{x},t),\ p(\mathbf{x},t),\ \mathbf{f}(\mathbf{x},t)$
+\end{center}
+\end{frame}
+
+%=======================================================
+\begin{frame}{Numerical method}
+\small
+At each time step:
+\begin{enumerate}
+    \item Solve the equations of fluid motion defined on the Eulerian grid with elastic body force density $\mathbf{f}(\mathbf{x},t)$.
+    \item Move the boundary at the local fluid velocity. Determine the velocity at each Lagrangian point through interpolation.
+    \item Forces exerted on the fluid by the boundary are determined using the elastic deformation of the boundary.
+    \item Spread the force from the boundary to the Eulerian grid to obtain the elastic body force density used in the next time step.
+\end{enumerate}
+\end{frame}
+
+%=======================================================
+%=======================================================
+% Slide 9 (page 09): Spreading (continuum + discrete)
+%=======================================================
+\begin{frame}{Spread the elastic force density from the curvilinear mesh onto the Cartesian grid}
+\footnotesize
+
+\textbf{Continuum force-spreading (Lagrangian $\to$ Eulerian):}
+\[
+\mathbf{f}(\mathbf{x},t)
+=
+\int_{\mathcal{U}}
+\mathbf{F}(q,t)\,\delta\!\big(\mathbf{x}-\mathbf{X}(q,t)\big)\,dq,
+\qquad \mathbf{x}\in\Omega.
+\]
+
+\medskip
+\textbf{Discrete force-spreading:}
+Let $\mathbf{x}_{\mathbf{i}}$, $\mathbf{i}\in\mathbb{Z}^d$, denote Eulerian grid points in $d$
+spatial dimensions, and let $q_m$ denote Lagrangian nodes with spacing $\Delta q$.
+
+\[
+\mathbf{f}^{\,n}(\mathbf{x}_{\mathbf{i}})
+=
+\sum_{m}
+\mathbf{F}^{\,n}_m\;
+\delta_h\!\big(\mathbf{x}_{\mathbf{i}}-\mathbf{X}^{\,n}_m\big)\;\Delta q.
+\]
+
+\begin{center}
+% Placeholder for slide image (page 9)
+\fbox{\includegraphics[width=0.3\textwidth]{pictures/1-2/force-spread1.png}}
+\end{center}
+\end{frame}
+
+%=======================================================
+% Slide 10 (page 10): Spreading kernel structure (tensor product)
+%=======================================================
+\begin{frame}{Spread the elastic force density from the curvilinear mesh onto the Cartesian grid}
+\footnotesize
+
+\textbf{Continuum force-spreading (Lagrangian $\to$ Eulerian):}
+\[
+\mathbf{f}(\mathbf{x},t)
+=
+\int_{\mathcal{U}}
+\mathbf{F}(q,t)\,\delta\!\big(\mathbf{x}-\mathbf{X}(q,t)\big)\,dq,
+\qquad \mathbf{x}\in\Omega.
+\]
+
+\medskip
+\textbf{Discrete force-spreading:}
+Let $\mathbf{x}_{\mathbf{i}}$, $\mathbf{i}\in\mathbb{Z}^d$, denote Eulerian grid points in $d$
+spatial dimensions, and let $q_m$ denote Lagrangian nodes with spacing $\Delta q$.
+ Then
+\[
+\mathbf{f}^{\,n}(\mathbf{x}_{\mathbf{i}})
+=
+\sum_{m}
+\mathbf{F}^{\,n}_m\;
+\delta_h\!\big(\mathbf{x}_{\mathbf{i}}-\mathbf{X}^{\,n}_m\big)\;\Delta q.
+\]
+
+\begin{center}
+% Placeholder for slide image (page 10)
+\fbox{\includegraphics[width=0.3\textwidth]{pictures/1-2/force-spread2.png}}
+\end{center}
+\end{frame}
+
+%=======================================================
+% Slide 11 (page 11): Interpolation (continuum + discrete)
+%=======================================================
+\begin{frame}{Interpolate the velocity field from the Cartesian grid onto the curvilinear mesh}
+\footnotesize
+
+\textbf{Continuum velocity interpolation (Eulerian $\to$ Lagrangian):}
+\[
+\frac{\partial \mathbf{X}}{\partial t}(q,t)
+=
+\mathbf{U}(q,t)
+=
+\int_{\Omega}
+\mathbf{u}(\mathbf{x},t)\,
+\delta\!\big(\mathbf{x}-\mathbf{X}(q,t)\big)\,d\mathbf{x}.
+\]
+
+\medskip
+\textbf{Discrete velocity interpolation:}
+\[
+\mathbf{U}^{\,n}_m
+=
+\sum_{\mathbf{i}}
+\mathbf{u}^{\,n}(\mathbf{x}_{\mathbf{i}})\,
+\delta_h\!\big(\mathbf{x}_{\mathbf{i}}-\mathbf{X}^{\,n}_m\big)\,
+h^{d}.
+\]
+
+\begin{center}
+% Placeholder for slide image (page 11)
+\fbox{\includegraphics[width=0.3\textwidth]{pictures/1-2/vel-spread1.png}}
+\end{center}
+\end{frame}
+
+%=======================================================
+% Slide 12 (page 12): Structure update (no-slip) + full time-step block
+%=======================================================
+\begin{frame}{Interpolate the velocity field from the Cartesian grid onto the curvilinear mesh}
+\footnotesize
+\[
+\frac{\partial \mathbf{X}}{\partial t}(q,t)
+=
+\mathbf{U}(q,t)
+=
+\int_{\Omega}
+\mathbf{u}(\mathbf{x},t)\,
+\delta\!\big(\mathbf{x}-\mathbf{X}(q,t)\big)\,d\mathbf{x}.
+\]
+
+\medskip
+\textbf{Discrete velocity interpolation:}
+\[
+\mathbf{U}^{\,n}_m
+=
+\sum_{\mathbf{i}}
+\mathbf{u}^{\,n}(\mathbf{x}_{\mathbf{i}})\,
+\delta_h\!\big(\mathbf{x}_{\mathbf{i}}-\mathbf{X}^{\,n}_m\big)\,
+h^{d}.
+\]
+
+\medskip
+\begin{center}
+% Placeholder for slide image (page 12)
+\fbox{\includegraphics[width=0.3\textwidth]{pictures/1-2/vel-spread2.png}}
+\end{center}
+\end{frame}
+
+
+%=======================================================
+\begin{frame}{Numerical analysis -- key ideas}
+\small
+\begin{itemize}
+    \item Numerical analysis is not only the design of numerical methods, but also their analysis.
+    \item Three central concepts in this analysis are:
+    \begin{itemize}
+        \item convergence: whether the method approximates the solution,
+        \item order: how well it approximates the solution, and
+        \item stability: whether errors are damped out.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+%=======================================================
+\begin{frame}{Numerical instability}
+\small
+\begin{itemize}
+    \item Instability: Typically, algorithms would approach the right solution in the limit if there were no round-off or truncation errors,
+    but depending on the specific computational method, errors can be magnified instead of damped,
+    causing the error to grow exponentially.
+\end{itemize}
+\end{frame}
+
+%=======================================================
+\begin{frame}{Numerical Stability: A Simple Test Problem}
+\footnotesize
+
+Consider the initial value problem
+\begin{equation}
+y'(t) = -15y(t), \qquad t \ge 0, \qquad y(0)=1.
+\tag{1}
+\end{equation}
+
+\medskip
+
+The exact solution (shown in cyan) is
+\begin{equation}
+y(t) = e^{-15t}, \qquad \text{with } y(t)\to 0 \text{ as } t\to \infty.
+\tag{2}
+\end{equation}
+
+\medskip
+
+We seek a numerical solution that exhibits the same qualitative behavior.
+
+\medskip
+
+The figure (right) illustrates numerical issues for various integrators applied to this equation:
+
+\begin{enumerate}
+    \item \textbf{Forward Euler with step size $h=\tfrac14$} oscillates wildly and quickly exits the range of the graph (shown in red).
+    \item \textbf{Forward Euler with step size $h=\tfrac18$} remains within the graph boundaries but oscillates about zero (shown in green).
+    \item \textbf{Trapezoidal method} (the two-stage Adams--Moulton method),
+    \begin{equation}
+    y_{n+1}
+    =
+    y_n
+    + \frac{h}{2}\bigl(f(t_n,y_n) + f(t_{n+1},y_{n+1})\bigr),
+    \tag{3}
+    \end{equation}
+    produces a much better result (shown in blue).
+\end{enumerate}
+
+\end{frame}
+
+
+%=======================================================
+\begin{frame}{Instability}
+\small
+\begin{itemize}
+    \item Download \href{https://drive.google.com/file/d/1HQaBpyIyApmSH9ANMryyLZ1-3ZLQ58JN/view?usp=sharing}{\texttt{stiff\_ode\_example.m}} on github in the MATLAB codes folder. 
+    \item \texttt{stiff\_ode\_example(dt, tfinal)}
+    \begin{itemize}
+        \item \texttt{dt} is the time step size and \texttt{tfinal} is the final time.
+    \end{itemize}
+    \item Try the following parameter values to observe the instability:
+    \begin{itemize}
+        \item \texttt{stiff\_ode\_example(0.2, 1)}
+        \item \texttt{stiff\_ode\_example(0.1, 1)}
+        \item \texttt{stiff\_ode\_example(0.01, 1)}
+    \end{itemize}
+\end{itemize}
+
+\medskip
+\begin{center}
+% Placeholder (page 16)
+\fbox{\includegraphics[width=0.65\textwidth]{pictures/1-2/instability.png}}
+\end{center}
+\end{frame}
+
+%=======================================================
+\begin{frame}{IBAMR instabilities}
+\small
+\begin{itemize}
+    \item Instabilities typically occur when the time step is too big.
+    \item The time step necessary for stability is inversely proportional to the force applied to the fluid.
+    \begin{itemize}
+        \item The forcing term is typically what causes the instability (not the CFL condition).
+    \end{itemize}
+    \item Strategy: Avoid large forces by minimizing accelerations and very stiff springs.
+\end{itemize}
+\end{frame}
+
+%=======================================================
+\begin{frame}{Courant--Friedrichs--Lewy (CFL) Condition}
+\small
+\begin{itemize}
+    \item The CFL condition is a \emph{necessary stability condition} for many explicit time-stepping schemes,
+    especially for hyperbolic and advection-dominated PDEs.
+    
+    \item It requires that numerical information does not propagate faster than physical information
+    across the computational grid.
+    
+    \item In $n$ dimensions, a representative CFL condition takes the form:
+\end{itemize}
+
+\medskip
+\[
+\Delta t \;\le\; C_{\max}
+\min_{\alpha=1,\dots,n}
+\frac{\Delta x}{|u_\alpha|},
+\]
+
+\medskip
+\begin{itemize}
+    \item where $u_\alpha$ are characteristic velocities and $C_{\max}\le 1$ depends on the numerical scheme.
+    \item In practice, $C_{\max}$ is often chosen conservatively (e.g.\ $0.5$).
+    \item In IBAMR, advection CFL constraints are usually not the dominant time-step restriction.
+\end{itemize}
+\end{frame}
+
+
+%=======================================================
+\begin{frame}{Convergence}
+\small
+\begin{itemize}
+    \item A numerical method is said to be convergent if the numerical solution approaches the exact solution as the step size $h$ goes to 0.
+    \item In the immersed boundary method you typically need to worry about convergence in space.
+    \item Is the flow around the boundary well resolved? Are shed vortices well resolved?
+\end{itemize}
+\end{frame}
+
+%=======================================================
+\begin{frame}{Heat equation}
+\small
+\begin{itemize}
+    \item To look at an example that incorporates issues of instability and convergence in space and time, we will simulate the heat equation.
+    \begin{itemize}
+        \item Download \href{https://drive.google.com/file/d/1UQLG1yxNSD3-hM5FYkJqcDhOcTFCq981/view?usp=sharing}{\texttt{heat\_equation.m}} on github.
+    \end{itemize}
+    \item Let $u(x,t)$ give the temperature at time $t$ and position $x$ along a 1D bar.
+\end{itemize}
+\end{frame}
+
+%=======================================================
+\begin{frame}{Heat equation}
+\small
+\begin{itemize}
+    \item This script implements a finite difference scheme for the heat equation with $D=1$.
+    \item Both analytical and numerical solutions are plotted at a single time ($t=0.1$).
+    \item Intuitively, this is like modeling the heat distribution on a bar with hot spots.
+    \item Over time the heat diffuses.
+\end{itemize}
+
+\medskip
+\begin{center}
+% Placeholder (page 21)
+\fbox{\includegraphics[width=0.4\textwidth]{pictures/1-2/heat-eqm.png}}
+\end{center}
+\end{frame}
+
+%=======================================================
+\begin{frame}{Heat equation}
+\small
+\begin{itemize}
+    \item Type \texttt{heat\_equation(n,T)} in the MATLAB command window where
+    $n$ = number of spatial steps and $T$ = number of time steps.
+    \item Try the following parameters to show convergence in space:
+    \begin{itemize}
+        \item Set $T=100$.
+        \item Try $n=3, 5, 10, 20$.
+    \end{itemize}
+\end{itemize}
+
+\medskip
+\begin{center}
+% Placeholder (page 22)
+\fbox{\includegraphics[width=0.60\textwidth]{pictures/1-2/heat2.png}}
+\end{center}
+\end{frame}
+
+%=======================================================
+\begin{frame}{Heat equation}
+\small
+\begin{itemize}
+    \item Now we will consider instability due to too large of a time step, as well as convergence in time.
+    \item Set $n=10$.
+    \item Try $T = 2,4,8,16,32,64$.
+    \item Since the simulation runs until time = $0.1$, $\Delta t = 0.1/T$.
+\end{itemize}
+
+\medskip
+\begin{center}
+% Placeholder (page 23)
+\fbox{\includegraphics[width=0.60\textwidth]{pictures/1-2/heat3.png}}
+\end{center}
+\end{frame}
+
+%=======================================================
+\begin{frame}{Rate of convergence}
+\small
+\begin{itemize}
+    \item In numerical analysis, the speed at which a convergent sequence approaches its limit is called the rate of convergence.
+    \item Suppose that the sequence $\{x_k\}$ converges to the number $L$.
+    \item We say that this sequence converges linearly to $L$ if there exists a number $\mu\in(0,1)$ such that \dots
+    \item The number $\mu$ is called the rate of convergence.
+\end{itemize}
+
+% Optional: fill in the standard inequality if desired:
+\[
+|x_{k+1}-L|\le \mu |x_k-L|.
+\]
+\end{frame}
+
+%=======================================================
+\begin{frame}{Order of convergence}
+\small
+\begin{itemize}
+    \item The sequence converges with order $q$ to $L$ for $q>1$ if \dots
+    \item In particular:
+    \begin{itemize}
+        \item $q=2$: quadratic convergence
+        \item $q=3$: cubic convergence
+    \end{itemize}
+\end{itemize}
+
+% Optional: standard definition
+\[
+\lim_{k\to\infty}\frac{|x_{k+1}-L|}{|x_k-L|^q}=C.
+\]
+\end{frame}
+
+%=======================================================
+\begin{frame}{Immersed boundary method}
+\small
+\begin{itemize}
+    \item Old idea was that you want 2 boundary points for every fluid grid point.
+    \item This may not be the best choice now.
+    \item IBFE uses a 1:1 ratio.
+    \item Second order in space if smooth boundaries.
+    \item First order in space if edges.
+    \item Typically use $512\times512$ grids for fluid domain.
+    \item Time step either first or second order, depending on version.
+    \item Typically use $\Delta t = 10^{-5}$ or $10^{-6}$ when characteristic time is $t=1$.
+    \begin{itemize}
+        \item For example, one wing stroke every 1 unit in time.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+%=======================================================
+\begin{frame}{IBAMR -- How it speeds things up}
+\small
+\begin{itemize}
+    \item IBAMR is a parallelized and adaptive version of the immersed boundary method.
+    \begin{itemize}
+        \item This is a major coding challenge!
+    \end{itemize}
+    \item The spatial grid of the fluid is locally refined near the boundaries and regions of high vorticity.
+\end{itemize}
+\end{frame}
+
+%=======================================================
+\begin{frame}{The basic immersed boundary approach to fluid-structure interaction}
+\small
+\begin{itemize}
+    \item Discretize the Eulerian equations on a Cartesian grid
+    \begin{itemize}
+        \item Refine the Cartesian grid near the boundary
+    \end{itemize}
+    \item Discretize the Lagrangian equations on a moving curvilinear mesh
+    \begin{itemize}
+        \item Curvilinear mesh always at same refinement level
+    \end{itemize}
+    \item Fluid-structure coupling via regularized delta functions
+\end{itemize}
+
+\medskip
+\begin{center}
+% Placeholder (page 28)
+\fbox{\includegraphics[width=0.35\textwidth]{pictures/1-2/IBAMR.png}}
+\end{center}
+
+\end{frame}
+
+%=======================================================
+\begin{frame}{Adaptive mesh refinement (AMR)}
+\small
+\begin{center}
+% Placeholder (page 29)
+\fbox{\includegraphics[width=0.60\textwidth]{pictures/1-2/AMR.png}}
+\end{center}
+\end{frame}
+
+
+
+%=======================================================
+\begin{frame}{Appendix}
+\centering
+\Large Appendix
+\end{frame}
+
+%=======================================================
+\begin{frame}{Mathematical formulation}
+\small
+The IB formulation of the equations of motion for an elastic incompressible
+structure immersed in a viscous, incompressible fluid is:
+
+\medskip
+\begin{itemize}
+    \item $\mathbf{x}=(x,y)$ are fixed Cartesian (physical) coordinates
+    \item $q$ is the Lagrangian (material) coordinate attached to the structure
+    \item $\mathbf{X}(q,t)$ is the physical position of material point $q$ at time $t$
+    \item $\mathbf{u}$ is the Eulerian velocity field
+    \item $\mathbf{F}$ is the Lagrangian elastic force density generated by deformations to the structure
+\end{itemize}
+
+% Optional: insert the standard coupled IB equations here if desired.
+\end{frame}
+
+%=======================================================
+\begin{frame}{Lagrangian--Eulerian Interaction}
+\small
+Given the configuration of the elastic structure $\mathbf{X}(q,t)$ and the corresponding
+curvilinear elastic force density $\mathbf{F}(q,t)$, the equivalent Eulerian elastic force
+density $\mathbf{f}(\mathbf{x},t)$ is computed via \dots
+
+\medskip
+% If you want, you can paste your "integrate over a region" derivation here.
+
+\end{frame}
+
+%=======================================================
+\begin{frame}{Smoothed approximations to the Dirac delta function}
+\small
+We define the regularized two-dimensional delta function as the product
+of one-dimensional regularized delta functions.
+
+\medskip
+What properties should $\phi(r)$ possess?
+\begin{itemize}
+    \item Continuous
+    \item Bounded support
+    \item Discrete moment conditions
+    \item Conservation of momentum / total force
+    \item Conservation of angular momentum / torque
+    \item Constraints to approximate grid independence
+\end{itemize}
+
+% Optional: include your preferred kernel definitions here.
+\end{frame}
+
+%=======================================================
+\begin{frame}
+\centering
+\Large Questions?
+\end{frame}
+
+\end{document}

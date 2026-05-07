@@ -1,0 +1,531 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage{amsmath,amssymb,bm,mathtools}
+\usepackage{graphicx}
+\usepackage{physics} % optional; remove if you prefer not to use it
+
+% -------------------- Notation --------------------
+\newcommand{\x}{\bm{x}}
+\newcommand{\uu}{\bm{u}}
+\newcommand{\pp}{p}
+\newcommand{\Rey}{\mathrm{Re}}
+\newcommand{\St}{\mathrm{St}}
+\newcommand{\Wo}{\alpha}
+\newcommand{\avg}[1]{\overline{#1}}
+\newcommand{\ubar}{\avg{\uu}}
+\newcommand{\up}{\uu'}
+\newcommand{\grad}{\nabla}
+\newcommand{\Div}{\nabla\cdot}
+\newcommand{\Lap}{\Delta}
+
+% -------------------- Title --------------------
+\title[Pipe Flow \& Transition]{Pipe Flow and Transition to Turbulence\\Background for Studying Aortic Turbulence}
+\author{Your Name}
+\date{}
+
+\begin{document}
+
+% ============================================================
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ============================================================
+\begin{frame}{Where we are going (25 slides)}
+\textbf{Goal:} build a math-friendly path from laminar pipe flow $\to$ transition $\to$ what changes in the aorta.
+
+\begin{enumerate}
+  \item The laminar baseline: Poiseuille flow and pressure drop
+  \item Dimensionless parameters: why Reynolds number matters
+  \item Why pipe transition is subtle: linear stability vs finite-amplitude transition
+  \item What transition looks like: puffs, slugs, intermittency
+  \item Bridge to the aorta: pulsatility, curvature/branches, compliance, inflow disturbances
+\end{enumerate}
+
+\vspace{0.5em}
+\textit{(Figures are placeholders; swap in your favorites.)}
+\end{frame}
+
+% ============================================================
+\section{Laminar pipe flow: the baseline}
+
+\begin{frame}{Pipe flow setup and assumptions}
+\textbf{Geometry:} straight circular pipe of radius $R$ and diameter $D=2R$.
+
+\textbf{Assumptions for the baseline model:}
+\begin{itemize}
+  \item incompressible Newtonian fluid with density $\rho$ and viscosity $\mu$
+  \item rigid, straight pipe; no-slip at the wall
+  \item steady, fully developed, axisymmetric flow
+\end{itemize}
+
+\textbf{Unknowns:} velocity field $\uu(\x,t)$ and pressure $\pp(\x,t)$.
+
+\vspace{0.8em}
+\textbf{Figure placeholder:} pipe geometry, coordinates $(x,r,\theta)$, and velocity profile sketch.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Incompressible Navier--Stokes (starting point)}
+Dimensional incompressible Navier--Stokes:
+\begin{align*}
+\rho\left(\partial_t \uu + (\uu\cdot\grad)\uu\right) &= -\grad \pp + \mu \Lap \uu,\\
+\Div \uu &= 0.
+\end{align*}
+
+\begin{block}{Interpretation of terms}
+\begin{itemize}
+  \item $\rho\,\partial_t\uu$: unsteady acceleration
+  \item $\rho(\uu\cdot\grad)\uu$: convective acceleration (nonlinearity)
+  \item $-\grad p$: pressure forces
+  \item $\mu \Lap \uu$: viscous diffusion (momentum smoothing)
+\end{itemize}
+\end{block}
+
+\textbf{Key theme:} transition/turbulence is driven by the competition between inertia and viscosity.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Fully developed pipe flow reduction}
+For steady, axisymmetric, fully developed flow:
+\[
+\uu = (u(r),0,0),\qquad \partial_t u = 0,\qquad \partial_x u = 0,\qquad \partial_\theta u = 0.
+\]
+
+Continuity $\Div\uu=0$ is automatically satisfied.
+
+The axial momentum equation reduces to a radial ODE:
+\[
+0 = -\frac{d\pp}{dx} + \mu\left(\frac{1}{r}\frac{d}{dr}\left(r\frac{du}{dr}\right)\right).
+\]
+
+\begin{block}{Boundary conditions}
+\[
+u(R)=0 \quad\text{(no-slip)},\qquad \frac{du}{dr}(0)=0 \quad\text{(symmetry)}.
+\]
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Poiseuille solution (parabolic profile)}
+Integrate the ODE:
+\[
+\frac{1}{r}\frac{d}{dr}\left(r\frac{du}{dr}\right) = \frac{1}{\mu}\frac{d\pp}{dx}.
+\]
+
+Result (Poiseuille flow):
+\[
+u(r)=\frac{-1}{4\mu}\frac{d\pp}{dx}\left(R^2-r^2\right).
+\]
+
+\begin{block}{Sanity checks}
+\begin{itemize}
+  \item Maximum at centerline: $u(0)=u_{\max}$
+  \item Zero at wall: $u(R)=0$
+  \item Smooth at $r=0$
+\end{itemize}
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Flow rate, mean velocity, wall shear stress}
+Volumetric flow rate:
+\[
+Q = \int_0^R 2\pi r\,u(r)\,dr
+= \frac{-\pi R^4}{8\mu}\frac{d\pp}{dx}.
+\]
+
+Mean velocity:
+\[
+U := \frac{Q}{\pi R^2} = \frac{-R^2}{8\mu}\frac{d\pp}{dx},
+\qquad
+u_{\max}=2U.
+\]
+
+Wall shear stress:
+\[
+\tau_w = \mu \left.\frac{du}{dr}\right|_{r=R}
+= \frac{-R}{2}\frac{d\pp}{dx}.
+\]
+
+\textbf{Message:} even laminar flow links \emph{pressure gradient} $\leftrightarrow$ \emph{shear stress} $\leftrightarrow$ \emph{flow rate}.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Pressure drop and friction factor (engineering link)}
+Over a length $L$:
+\[
+\Delta p = p_{\text{in}}-p_{\text{out}} = -\frac{d p}{dx}L.
+\]
+
+Laminar pipe flow relation:
+\[
+\Delta p = \frac{8\mu L}{R^2}U = \frac{32\mu L}{D^2}U.
+\]
+
+A common nondimensional drag measure is the Darcy friction factor $f$:
+\[
+f := \frac{8\tau_w}{\rho U^2}.
+\]
+
+For laminar flow one obtains:
+\[
+f = \frac{64}{\Rey},\qquad \Rey=\frac{\rho U D}{\mu}.
+\]
+
+\textbf{Bridge:} in turbulence, the $\Delta p$--$U$ relationship changes dramatically.
+\end{frame}
+
+% ============================================================
+\section{Nondimensionalization and key parameters}
+
+\begin{frame}{Nondimensionalization (what does Re really measure?)}
+Choose scales:
+\[
+x = D\,x^*,\quad t=\frac{D}{U}t^*,\quad \uu = U\,\uu^*,\quad p = \rho U^2 p^*.
+\]
+
+Substitute into NS (drop $^*$):
+\[
+\partial_t \uu + (\uu\cdot\grad)\uu = -\grad p + \frac{1}{\Rey}\Lap\uu,\qquad \Div\uu=0.
+\]
+
+\begin{block}{Interpretation}
+\[
+\Rey=\frac{\text{inertial effects}}{\text{viscous effects}}=\frac{\rho U D}{\mu}.
+\]
+Large $\Rey$ typically means stronger nonlinear interactions and a wider range of active scales.
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Why Reynolds number controls ``how hard'' DNS becomes}
+A rough mental model:
+\begin{itemize}
+  \item Largest scales $\sim D$ (pipe diameter)
+  \item Smallest dynamically relevant scales shrink as $\Rey$ increases
+  \item Resolving everything requires many grid points across many scales
+\end{itemize}
+
+\begin{block}{Takeaway}
+Even if you can solve Navier--Stokes, \textbf{resolving all scales} at large $\Rey$ quickly becomes infeasible for realistic cardiovascular geometries.
+\end{block}
+
+\textbf{Figure placeholder:} ``scale separation'' cartoon (largest eddies $\to$ smallest eddies).
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{What changes when flow becomes turbulent?}
+Two practical signals:
+\begin{itemize}
+  \item \textbf{Pressure drop increases:} friction factor departs from $64/\Rey$.
+  \item \textbf{Velocity fluctuations appear:} $\uu(\x,t)$ becomes irregular in time and space.
+\end{itemize}
+
+A standard decomposition (previewing RANS ideas):
+\[
+\uu(\x,t)=\ubar(\x)+\up(\x,t),\qquad \avg{\up}=0.
+\]
+
+\begin{block}{Statistics matter}
+Even if $\avg{\up}=0$, the variance is not:
+\[
+\avg{u'^2}\neq 0,\ \avg{u'v'}\neq 0.
+\]
+These correlations influence the mean flow and pressure drop.
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Pipe flow: the ``paradox'' that makes transition interesting}
+For many shear flows (boundary layers), linear instability (e.g., TS waves) provides an onset mechanism.
+
+\begin{block}{Pipe flow is different (key message)}
+The laminar Poiseuille profile is \textbf{linearly stable} to infinitesimal disturbances over a wide range of $\Rey$,
+yet in practice the flow can transition to turbulence when disturbances are large enough.
+\end{block}
+
+This is often described as:
+\[
+\textbf{subcritical transition:}\quad \text{finite-amplitude disturbances matter.}
+\]
+
+\textbf{Implication for aorta:} strong inflow disturbances (jets, shear layers) may be crucial.
+\end{frame}
+
+% ============================================================
+\section{Mechanisms: from stability to finite-amplitude transition}
+
+\begin{frame}{Perturbation equations (how we analyze transition)}
+Write:
+\[
+\uu = \uu_0 + \tilde{\uu},
+\]
+where $\uu_0$ is the laminar base flow (Poiseuille) and $\tilde{\uu}$ is a perturbation.
+
+Plug into NS and subtract the base-flow equation:
+\[
+\partial_t \tilde{\uu} + (\uu_0\cdot\grad)\tilde{\uu} + (\tilde{\uu}\cdot\grad)\uu_0
++(\tilde{\uu}\cdot\grad)\tilde{\uu}
+= -\grad \tilde{p} + \frac{1}{\Rey}\Lap \tilde{\uu},
+\quad \Div \tilde{\uu}=0.
+\]
+
+\begin{block}{What to point out}
+\begin{itemize}
+  \item linear terms: $(\uu_0\cdot\grad)\tilde{\uu}$ and $(\tilde{\uu}\cdot\grad)\uu_0$
+  \item nonlinear term: $(\tilde{\uu}\cdot\grad)\tilde{\uu}$ (energy transfer across modes)
+\end{itemize}
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Energy method (one clean math lens)}
+Define perturbation kinetic energy:
+\[
+E(t)=\frac12\int_\Omega \abs{\tilde{\uu}}^2\,dV.
+\]
+
+A standard manipulation (dot with $\tilde{\uu}$ and integrate) yields:
+\[
+\frac{dE}{dt} = \underbrace{-\int_\Omega \tilde{u}_i \tilde{u}_j\,\partial_j (u_0)_i\,dV}_{\text{production from mean shear}}
+\;-\;\underbrace{\frac{1}{\Rey}\int_\Omega \abs{\grad \tilde{\uu}}^2\,dV}_{\text{viscous dissipation}}.
+\]
+
+\begin{block}{Interpretation}
+Perturbations can grow if they extract enough energy from the mean shear to overcome viscous dissipation.
+\end{block}
+
+\textbf{Aorta bridge:} strong shear (jets, deceleration phases, curvature-driven secondary flows) can boost production.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Non-normality and transient growth (why ``stable'' can still amplify)}
+Even if linear eigenmodes decay, the linear operator can be \textbf{non-normal}:
+\[
+\tilde{\uu}(t) = e^{Lt}\tilde{\uu}(0),
+\qquad L \ \text{non-normal} \Rightarrow \ \norm{e^{Lt}} \text{ can grow transiently.}
+\]
+
+\begin{block}{Qualitative picture}
+Certain disturbance shapes can experience large \textbf{transient amplification} before eventually decaying.
+If nonlinear terms kick in during that amplification, the system may transition.
+\end{block}
+
+\textbf{Figure placeholder:} cartoon of energy $E(t)$ showing transient growth then decay (linear) vs transition (nonlinear).
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Finite-amplitude threshold and ``edge'' dynamics (conceptual)}
+A useful way to talk about subcritical transition:
+
+\begin{itemize}
+  \item Very small disturbances decay to laminar flow.
+  \item Large enough disturbances trigger turbulence.
+  \item There is often a complicated ``boundary'' in state space separating outcomes.
+\end{itemize}
+
+\begin{block}{Classroom-friendly phrasing}
+``The laminar state is stable, but not \emph{globally} stable at high enough $\Rey$ under realistic disturbances.''
+\end{block}
+
+\textbf{Figure placeholder:} state-space cartoon (laminar fixed point + turbulent region + separatrix).
+\end{frame}
+
+% ============================================================
+\section{What transition looks like in a pipe}
+
+\begin{frame}{Reynolds experiment: dye filament (classic visualization)}
+\begin{itemize}
+  \item At low $\Rey$, a dye filament stays coherent (laminar).
+  \item As $\Rey$ (or disturbances) increase, the filament breaks up and mixes (transition/turbulence).
+\end{itemize}
+
+\vspace{0.6em}
+\centering
+\fbox{\parbox{0.88\textwidth}{
+\centering
+\textbf{Figure placeholder:} photo/diagram of the Reynolds dye experiment\\
+\textit{(insert image + short caption + reference)}
+}}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Puffs and slugs (near-onset phenomenology)}
+Near transition, turbulence can appear as \textbf{localized patches}.
+
+\begin{block}{Definitions (informal)}
+\begin{itemize}
+  \item \textbf{Puff:} localized turbulent region that persists over time without rapidly expanding.
+  \item \textbf{Slug:} turbulent region that grows/expands downstream (and often upstream) with time.
+\end{itemize}
+\end{block}
+
+\textbf{Intermittency:} laminar and turbulent regions coexist in space/time.
+
+\textbf{Figure placeholder:} pipe centerline view with a localized turbulent patch labeled ``puff''.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Spacetime diagram viewpoint (intermittency made visible)}
+A common representation: horizontal = downstream position $x$, vertical = time $t$.
+
+\centering
+\fbox{\parbox{0.88\textwidth}{
+\centering
+\textbf{Figure placeholder:} spacetime diagram showing laminar (light) and turbulent (dark) bands\\
+Include: puff persistence, puff decay, puff splitting, slug growth
+}}
+
+\vspace{0.8em}
+\begin{block}{Why math students like this}
+It suggests \emph{stochastic processes}, \emph{front propagation}, and \emph{spatiotemporal intermittency} as modeling lenses.
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{A few measurable transition ``observables''}
+What you can quantify in experiments/simulations:
+\begin{itemize}
+  \item probability of relaminarization vs sustained turbulence (at given $\Rey$ and disturbance type)
+  \item lifetimes of turbulent episodes (puffs)
+  \item splitting events and effective ``turbulence fraction'' (intermittency)
+  \item friction factor departure from laminar scaling
+\end{itemize}
+
+\begin{block}{Connect back to engineering/physiology}
+For the aorta: pressure loss, wall shear stress statistics, and turbulent fluctuations (e.g., velocity variance) can be clinically/biomechanically relevant.
+\end{block}
+\end{frame}
+
+% ============================================================
+\section{From pipe to aorta: what changes?}
+
+\begin{frame}{Why the aorta is not a pipe (but pipe flow is still useful)}
+Pipe flow is a \textbf{controlled baseline}. The aorta differs in key ways:
+\begin{itemize}
+  \item \textbf{pulsatile forcing} (time-dependent inflow / pressure gradient)
+  \item \textbf{curvature and branching} (secondary flows)
+  \item \textbf{compliant wall} (fluid--structure interaction)
+  \item \textbf{disturbed inflow} (valve jets, swirl, upstream turbulence)
+  \item \textbf{non-circular, tapering geometry} (spatially varying cross-sections)
+\end{itemize}
+
+\begin{block}{Message}
+Pipe flow is the ``spherical cow'' that lets us name mechanisms clearly before adding biological realism.
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Pulsatility: Womersley number and unsteady profiles}
+For oscillatory/periodic forcing at angular frequency $\omega$:
+\[
+\Wo := R\sqrt{\frac{\omega\rho}{\mu}}
+\quad\text{(Womersley number)}.
+\]
+
+\begin{itemize}
+  \item Small $\Wo$: quasi-steady (profiles resemble instantaneous Poiseuille).
+  \item Large $\Wo$: phase-lagged, flatter core profiles; strong unsteady inertia.
+\end{itemize}
+
+\begin{block}{Aorta relevance}
+Pulsatility can shift when/where transition-like behavior appears (especially during acceleration/deceleration phases).
+\end{block}
+
+\textbf{Figure placeholder:} schematic of velocity profiles at different phases of the cardiac cycle (plug-like vs parabolic).
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Curvature/branching: secondary flows and instability pathways}
+Curvature introduces centrifugal effects and \textbf{secondary vortices} (often called Dean vortices).
+
+\begin{itemize}
+  \item Secondary flows redistribute shear and can create localized high-shear regions.
+  \item Branches produce jets, separations, and shear layers.
+\end{itemize}
+
+\begin{block}{Dimensionless marker (optional)}
+A commonly used parameter for curved pipes is the Dean number:
+\[
+\mathrm{De} \sim \Rey \sqrt{\frac{R}{R_c}}
+\]
+where $R_c$ is a curvature radius (details vary by convention).
+\end{block}
+
+\textbf{Figure placeholder:} curved pipe cross-section showing counter-rotating vortices.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Compliance + inflow disturbances: why finite-amplitude matters}
+Two more ``aorta realism'' ingredients:
+
+\begin{columns}[T,onlytextwidth]
+\column{0.5\textwidth}
+\textbf{Compliant wall (FSI)}
+\begin{itemize}
+  \item wall motion changes near-wall shear
+  \item wave propagation and impedance effects
+  \item coupling can add or remove stability
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Disturbed inflow}
+\begin{itemize}
+  \item valve jets and shear layers
+  \item helical/swirl components
+  \item upstream noise/perturbations
+\end{itemize}
+\end{columns}
+
+\vspace{0.7em}
+\begin{block}{Tie-back to subcritical transition}
+If transition requires finite-amplitude disturbances, then realistic inflow and geometry-driven perturbations become central.
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Modeling map for aortic turbulence (what is feasible?)}
+\begin{itemize}
+  \item \textbf{DNS:} highest fidelity, but often too expensive in patient-specific geometries and parameter sweeps.
+  \item \textbf{LES:} resolves large eddies, models subgrid scales; good for separated/jet-driven flows, still costly.
+  \item \textbf{RANS / URANS:} cheapest; outputs mean/phase-averaged fields; depends strongly on closure assumptions.
+  \item \textbf{Hybrid (DES, etc.):} attempt to combine RANS (near-wall) with LES (wake/jet regions).
+\end{itemize}
+
+\begin{block}{Teaching move}
+Show one figure with these methods on an ``accuracy vs cost'' axis and connect to what you want to predict (WSS, pressure drop, fluctuation intensity, etc.).
+\end{block}
+
+\textbf{Figure placeholder:} accuracy--cost chart (DNS/LES/RANS/hybrid).
+\end{frame}
+
+% ============================================================
+\section{Wrap-up}
+
+\begin{frame}{Takeaways + what we add next}
+\textbf{Takeaways from pipe flow:}
+\begin{itemize}
+  \item Poiseuille flow is a clean baseline linking $\Delta p$, $Q$, $\tau_w$.
+  \item $\Rey$ measures inertia vs viscosity; higher $\Rey$ amplifies nonlinear effects and scale range.
+  \item Pipe transition is often \textbf{subcritical}: finite disturbances, transient growth, and nonlinear triggering.
+  \item Near onset, turbulence can be \textbf{intermittent} (puffs/slugs).
+\end{itemize}
+
+\begin{block}{Next modules for the aorta}
+\begin{itemize}
+  \item Pulsatile base flows (Womersley) and phase dependence
+  \item Curvature/branching and shear-layer-driven transition
+  \item How to quantify ``turbulence'' in medical data (variance, spectra, Reynolds stresses, etc.)
+\end{itemize}
+\end{block}
+
+\vspace{0.6em}
+\textbf{References slide placeholder:} add the specific papers/notes you want students to read.
+\end{frame}
+
+\end{document}

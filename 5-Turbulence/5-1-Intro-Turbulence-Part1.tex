@@ -1,0 +1,480 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage{amsmath, amssymb, bm}
+\usepackage{graphicx}
+
+% ---------- Macros ----------
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\uu}{\bm{u}}
+\newcommand{\pp}{p}
+\newcommand{\Rey}{\mathrm{Re}}
+\newcommand{\nuu}{\nu}
+\newcommand{\tmark}[1]{\hfill{\scriptsize\textcolor{gray}{#1}}}
+
+% Uncomment if you want speaker notes:
+% \usepackage{pgfpages}
+% \setbeameroption{show notes on second screen=right}
+
+\title[Turbulence: What is it?]{What is Turbulence?\\Key Features, Examples, and Why It Matters}
+\author{
+\href{https://doi.org/10.52843/cassyni.hrpvdf}{(adapted from Steve Brunton lecture)}}
+\date{}
+
+\begin{document}
+
+% ---------------- Title ----------------
+\begin{frame}
+  \titlepage
+  \note{
+  Goal: build intuition + a math-friendly entry point.
+  No single definition; use a set of hallmark features + canonical examples.
+  }
+\end{frame}
+
+% ---------------- Motivation ----------------
+\begin{frame}{Why turbulence fascinates us}
+\vspace{-0.3em}
+\begin{itemize}
+  \item Turbulence shows up in \textbf{art} and \textbf{language}: roiling, churning, turbulent.
+  \item We have strong intuition for ``turbulent'' vs ``not,'' but a single universal definition is hard.
+  \item So: we focus on \textbf{key features} and \textbf{canonical examples}.
+\end{itemize}
+
+\centering
+\includegraphics[width=0.45\textwidth]{pictures/5-1/da-Vinci.png}
+\vfill
+  \hfill {\footnotesize Source: da Vinci sketch of a turbulent flow}
+\end{frame}
+
+\begin{frame}{Why turbulence fascinates us}
+
+\centering
+\includegraphics[width=0.55\textwidth]{pictures/5-1/Van_Gogh_Starry_Night.jpg}
+\vfill
+  \hfill {\footnotesize Source: Van Gogh - Starry Night}
+\end{frame}
+
+% ---------------- Fingerprint ----------------
+\begin{frame}{A practical ``fingerprint'' of turbulence}
+\textbf{We will treat turbulence as flows that are typically:}
+\begin{enumerate}
+  \item \textbf{Three-dimensional} (3D vortical motion),
+  \item \textbf{Multi-scale} in space and time (big eddies $\rightarrow$ small eddies),
+  \item \textbf{Unsteady} (time-evolving),
+  \item \textbf{Mixing} and strongly transporting scalar/particles.
+\end{enumerate}
+
+\vspace{0.7em}
+\textbf{Mental experiment:} To characterize a turbulent flow, you can add dye upstream$\Rightarrow$ rapid stretching + folding $\Rightarrow$ fast mixing.
+
+\end{frame}
+
+% ---------------- 2D caveat ----------------
+\begin{frame}{A note on 2D vs 3D turbulence}
+\begin{itemize}
+  \item Most ``everyday'' turbulence is \textbf{3D}.
+  \item Some systems are \textbf{approximately 2D} (thin atmosphere/ocean surface).
+  \item 2D turbulence can show different behavior (e.g., organization into large vortices).
+\end{itemize}
+
+\vspace{0.6em}
+\centering
+\includegraphics[width=0.5\textwidth]{pictures/5-1/hurricane.png}
+
+\end{frame}
+
+% ---------------- Course notes pointer ----------------
+\begin{frame}{A recommended reference (from the lecture)}
+\begin{itemize}
+  \item \href{http://profs.sci.univr.it/~zuccher/downloads/FD-MAE553-Smits.pdf}{Lex Smits (Princeton): \textbf{MAE 553 Viscous Flows and Turbulence} notes.}
+  \item Use as a companion source for canonical flows and experimental intuition.
+\end{itemize}
+
+\vspace{0.8em}
+\centering
+\includegraphics[width=0.5\textwidth]{pictures/5-1/lectures-smit.png}
+
+\end{frame}
+
+% ---------------- Boundary layer simulation ----------------
+\begin{frame}{Example: a turbulent boundary layer (simulation)}
+\begin{itemize}
+  \item High-fidelity simulation of a developing boundary layer (think: flow over a wing/car).
+  \item Observe: \textbf{3D}, \textbf{unsteady}, \textbf{multi-scale}, \textbf{mixing}.
+\end{itemize}
+
+\vspace{0.8em}
+\vspace{0.8em}
+
+\centering
+\href{https://www.youtube.com/watch?v=4KeaAhVoPIw}{\color{blue}\underline{3D Simulation (YouTube)}}
+\end{frame}
+
+
+
+% ---------------- Multiscale structure ----------------
+\begin{frame}{Hallmark: multi-scale structure}
+\begin{itemize}
+  \item ``Zoom in anywhere'' $\Rightarrow$ you see more structure.
+  \item Multi-scale content is a quick visual diagnostic of turbulence.
+\end{itemize}
+
+\vspace{0.7em}
+\textbf{Fun aside (from lecture):} blockbuster explosions look ``high budget'' when they show many scales.
+
+\centering
+\includegraphics[width=0.5\textwidth]{pictures/5-1/explosion.png}
+
+\hfill 
+{\footnotesize Source: Oppenheimer Movie}
+
+\end{frame}
+
+% ---------------- Ocean/atmosphere ----------------
+\begin{frame}{Turbulence at planetary scales}
+\begin{itemize}
+  \item Ocean currents and atmospheric patterns are highly turbulent.
+  \item Turbulent transport $\Rightarrow$ global mixing of heat, salt, nutrients, pollutants.
+\end{itemize}
+
+\vspace{0.6em}
+\centering
+\includegraphics[width=0.5\textwidth]{pictures/5-1/ocean-mix.jpg}
+  \hfill 
+  
+{\footnotesize Source: Ken Smith.}
+\end{frame}
+
+% ---------------- Rayleigh-Bénard + chaos ----------------
+\begin{frame}{Rayleigh--B\'enard convection and chaos}
+\begin{itemize}
+  \item Heated from below, cooled from above $\Rightarrow$ convective instability.
+  \item Unsteady + multi-scale + mixing (often used to motivate chaotic dynamics).
+  \item Historical link: Lorenz (1963) studied simplified models of convective rolls.
+\end{itemize}
+
+\vspace{0.5em}
+\vspace{0.5em}
+
+\centering
+\href{https://www.youtube.com/watch?v=YkN6F6LJzGU}{\color{blue}\underline{3D Simulation (YouTube)}}
+
+\end{frame}
+
+% ---------------- Navier–Stokes entry ----------------
+\begin{frame}{Mathematical entry point: incompressible Navier--Stokes}
+\begin{align*}
+\frac{\partial\uu}{\partial t} + (\uu\cdot\nabla)\uu &= -\nabla \pp + \frac{1}{Re}\, \Delta \uu,\\
+\nabla\cdot\uu &= 0.
+\end{align*}
+
+\[
+\mathbf{u}(\mathbf{x},t)=
+\begin{bmatrix}
+u(\mathbf{x},t)\\
+v(\mathbf{x},t)\\
+w(\mathbf{x},t)
+\end{bmatrix}
+\]
+
+
+\begin{itemize}
+  \item $\uu(\bm{x},t)\in\R^3$ is a 3-component velocity field.
+  \item Rich behavior emerges as parameters/forcing/geometry change.
+\end{itemize}
+
+\end{frame}
+
+% ---------------- Reynolds number ----------------
+\begin{frame}{Reynolds number: a control knob for complexity}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.58\textwidth}
+    \begin{itemize}
+      \item The \textbf{Reynolds number} is a dimensionless ratio of inertial to viscous effects:
+      \[
+        \Rey \sim \frac{U L}{\nuu}.
+      \]
+      \item Increasing $U$ or $L$ generally increases flow complexity and turbulence.
+      \item Rule of thumb from lecture: $\Rey$ relates large scales to smallest scales present.
+    \end{itemize}
+  \end{column}
+
+  \begin{column}{0.42\textwidth}
+    \centering
+    \includegraphics[width=0.8\linewidth]{pictures/5-1/flow-cylinder.png}
+  \end{column}
+\end{columns}
+\end{frame}
+
+
+% ---------------- Drag vs Re ----------------
+\begin{frame}{Drag depends strongly on Reynolds number}
+\begin{itemize}
+  \item As flow regime changes with $\Rey$, the drag coefficient can change dramatically.
+  \item Implication: ``just changing speed'' can change force laws in big ways.
+\end{itemize}
+
+\vspace{0.7em}
+    \centering
+    \includegraphics[width=0.5\linewidth]{pictures/5-1/drag.png}
+
+\end{frame}
+
+% ---------------- Galileo aside ----------------
+\begin{frame}{Aside: Galileo's ball drop through multiple regimes}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.55\textwidth}
+    % left column content goes here (text, bullets, equations)
+\begin{itemize}
+  \item Falling ball accelerates $\Rightarrow$ effective $\Rey$ increases during the fall.
+  \item Drag force can be highly unsteady and regime-dependent.
+  \item Heavy objects: turbulent drag may be negligible relative to weight; light objects: not.
+  \item It's not so obvious that gravitational acceleration should be a constant.
+\end{itemize}
+\end{column}
+\begin{column}{0.45\textwidth}
+    \centering
+    \includegraphics[width=0.75\linewidth]{pictures/5-1/galileo.jpg}
+     \vfill
+    \raggedleft{\footnotesize Source: The legendary experiment on Pisa.}
+  \end{column}
+\end{columns}
+\end{frame}
+
+% ---------------- Osborne Reynolds ----------------
+\begin{frame}{Why ``Reynolds''? Pipe-flow experiments (1883)}
+\begin{itemize}
+  \item Osborne Reynolds observed transitions in pipe flow as speed increased:
+  \begin{itemize}
+    \item laminar (layered, steady),
+    \item transitional,
+    \item turbulent (roiling, disordered).
+  \end{itemize}
+  \item Pipe flow remains a core engineering problem: pumping water/sewage/fluids efficiently.
+\end{itemize}
+
+\vspace{0.5em}
+\centering
+    \includegraphics[width=0.65\linewidth]{pictures/5-1/04-reynolds.jpg}
+  \hfill 
+  
+{\footnotesize Source: The famous pipe flow experiments of Reynolds.}
+\end{frame}
+
+\begin{frame}{Transition to turbulence}
+\begin{itemize}
+  \item A classical experiment is to inject dye into a tube to visualize the flow.
+  \item As the Reynolds number is increased (by increasing speed), the line of dye becomes unsteady and then turbulent.
+\end{itemize}
+
+\vspace{0.8em}
+\vspace{0.8em}
+
+\centering
+\href{https://youtu.be/BBiR6FWmyv4}{\color{blue}\underline{Pipe flow transition to turbulence (YouTube)}}
+\end{frame}
+% ---------------- Turbulence is not random ----------------
+\begin{frame}{Turbulence is not ``random'': coherent structures}
+\begin{itemize}
+  \item Turbulence has stochastic aspects, but it is not structureless noise.
+  \item \textbf{Coherent structures} (organized patterns) can persist within complex flows.
+  \item Similar large-scale patterns can appear across wildly different Reynolds numbers.
+\end{itemize}
+
+\vspace{0.5em}
+\centering
+    \includegraphics[width=0.9\linewidth]{pictures/5-1/vonkarman.png}
+      \hfill 
+      
+{\footnotesize Source: An Album of Computational Fluid Motion.}
+
+\end{frame}
+
+% ---------------- Brown & Roshko mixing layers ----------------
+\begin{frame}{Mixing layers: laminar vs turbulent share patterns}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.5\textwidth}
+    \begin{itemize}
+      \item Classic mixing-layer images show:
+      \begin{itemize}
+        \item Bottom: low-$\Rey$ (laminar), \item Middle: intermediate-$\Rey$ (transitional), and \item Top: high-$\Rey$ (turbulent).
+        \end{itemize}
+        \item All cases share recognizable, coherent structures.
+        \item Turbulence adds scales and distortion, but does not erase organization.
+      \end{itemize}
+  \end{column}
+
+  \begin{column}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{pictures/5-1/mixing-layers.png}
+
+    \vfill
+    \raggedleft{\footnotesize Source: Brown \& Roshko-style mixing-layers.}
+  \end{column}
+\end{columns}
+\end{frame}
+
+
+% ---------------- Intermittency ----------------
+\begin{frame}{Another hallmark: intermittency}
+\begin{itemize}
+  \item Turbulence can be \textbf{patchy} in space/time:
+  \begin{itemize}
+    \item turbulent region $\rightarrow$ calm region $\rightarrow$ turbulent again.
+  \end{itemize}
+  \item Picture: smoke plume, clouds in the boundary layer, bursts of turbulence.
+  \item Useful concept: an ``intermittency function'' that switches on/off turbulence.
+\end{itemize}
+
+\vspace{0.5em}
+\centering
+    \includegraphics[width=0.55\linewidth]{pictures/5-1/intermitancy.png}
+
+    \vfill
+    {\footnotesize Source: Smith and Smits, 1988.}
+
+\end{frame}
+
+\begin{frame}{Intermittency in pipe flow}
+\centering
+    \includegraphics[width=0.4\linewidth]{pictures/5-1/local-turbulence.png}
+    
+\vfill
+    {\footnotesize Source: Nikitin, N. \& Pimanov, V.. (2015). Numerical study of localized turbulent structures in a pipe. Fluid Dynamics. 50. 655-664.} 
+    \end{frame}
+% ---------------- Canonical flows ----------------
+\begin{frame}{How we handle complexity: canonical flows}
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.5\textwidth}
+    \begin{itemize}
+      \item Canonical flows: isotropic turbulence, wall-bounded flows, boundary layers, mixing layers, pipe flow, channel flow, cavity flow, wakes, jets.
+      \item Strategy: distill turbulence into idealized building blocks.
+      \item Real systems combine many of these (boundary layer + wake + jet + mixing layer).
+    \end{itemize}
+  \end{column}
+
+  \begin{column}{0.48\textwidth}
+    \centering
+    \includegraphics[width=0.75\linewidth]{pictures/5-1/album.png}
+  \end{column}
+\end{columns}
+\end{frame}
+
+
+% ---------------- Examples: wakes, mixing layers, jets ----------------
+\begin{frame}{Examples of canonical flows and why they matter}
+\begin{columns}[T,onlytextwidth]
+\column{0.33\textwidth}
+\textbf{Wakes}
+\begin{itemize}
+  \item drag and unsteady forces
+  \item vehicles, trains, projectiles, fish, birds
+\end{itemize}
+
+ \vspace{0.5em}
+ \vspace{0.5em}
+\includegraphics[width=0.9\linewidth]{pictures/5-1/baseball.png}
+
+\column{0.33\textwidth}
+\textbf{Mixing layers}
+\begin{itemize}
+  \item shear-driven mixing
+  \item ocean waves, atmospheric inversion layers
+\end{itemize}
+
+ \vspace{0.5em}
+ \vspace{0.5em}
+\includegraphics[width=0.9\linewidth]{pictures/5-1/thermal.png}
+
+\column{0.33\textwidth}
+\textbf{Jets}
+\begin{itemize}
+  \item thrust and power
+  \item noise and quality-of-life impacts
+\end{itemize}
+
+ \vspace{0.5em}
+ \vspace{0.5em}
+\includegraphics[width=0.9\linewidth]{pictures/5-1/jet.png}
+
+\end{columns}
+
+
+\end{frame}
+
+% ---------------- Big-picture: model/optimize/control ----------------
+\begin{frame}{End goal: predict, optimize, and control}
+\begin{itemize}
+  \item Engineering and scientific aim: develop models that predict how outcomes change with design knobs.
+  \item Examples: increase lift, decrease drag, enhance mixing, reduce noise.
+  \item Control: actively manipulate flow for better performance.
+\end{itemize}
+
+\vspace{0.5em}
+\centering
+    \includegraphics[width=0.65\linewidth]{pictures/5-1/wing-fin.jpg}
+
+    \vfill
+    {\footnotesize Source: Ball, P. Wing and fin motions share universal principles. Nature (2014).}
+    
+\end{frame}
+
+% =====================================================================
+% OPTIONAL / IF TIME (adds ~2--4 minutes)
+% =====================================================================
+
+\begin{frame}{Preview: Reynolds decomposition}
+
+Recall the Navier-Stokes equations:
+
+\begin{align*}
+\frac{\partial\uu}{\partial t} + (\uu\cdot\nabla)\uu &= -\nabla \pp + \frac{1}{Re}\, \Delta \uu,\\
+\nabla\cdot\uu &= 0.
+\end{align*}
+
+To model turbulence, we will use the Reynolds Decomposition:
+\[
+\uu(\bm{x},t) = \overline{\uu}(\bm{x}) + \uu'(\bm{x},t),
+\qquad
+\overline{\uu}(\bm{x}) := \lim_{T\to\infty}\frac{1}{T}\int_{0}^{T}\mathbf{u}(\mathbf{x},t)\,dt.
+\]
+\begin{itemize}
+  \item Mean flow $\overline{\uu}$: time-averaged ``average frame of the movie''.
+  \item Fluctuations $\uu'$: turbulent deviations around the mean.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Why averaging became natural historically}
+\begin{itemize}
+  \item Before modern field measurements (e.g., PIV/laser sheets), data were often pointwise.
+  \item Hot-wire anemometry: long time series at one point $\rightarrow$ build statistics.
+  \item Averaging is both practical (data) and useful (reduced modeling complexity).
+
+  \vspace{0.5em}
+    \vspace{0.5em}
+\centering
+    \includegraphics[width=0.55\linewidth]{pictures/5-1/flow-measure.png}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Takeaways}
+\begin{itemize}
+  \item Turbulence is hard to define, but easy to recognize by its \textbf{fingerprint}:
+  \[
+  \text{3D} \;+\; \text{multi-scale} \;+\; \text{unsteady} \;+\; \text{mixing}.
+  \]
+  \item The Navier--Stokes equations remain the anchor; $\Rey$ controls regime/complexity.
+  \item Coherent structures and intermittency mean turbulence is \textbf{not} pure randomness.
+  \item Canonical flows are how we build understanding and models.
+\item What's next: Reynolds averaging/closure.
+\end{itemize}
+\end{frame}
+
+\end{document}

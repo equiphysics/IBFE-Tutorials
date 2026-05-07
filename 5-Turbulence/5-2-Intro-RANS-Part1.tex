@@ -1,0 +1,368 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{graphicx}
+
+% ---------------- Macros ----------------
+\newcommand{\uu}{\bm{u}}
+\newcommand{\x}{\bm{x}}
+\newcommand{\pp}{p}
+\newcommand{\Rey}{\mathrm{Re}}
+\newcommand{\avg}[1]{\overline{#1}}
+\newcommand{\up}{\uu'}
+\newcommand{\ubar}{\avg{\uu}}
+
+\title[RANS I: Continuity]{RANS Part 1: Reynolds Decomposition \& the Mass Continuity Equation}
+\author{\href{https://www.youtube.com/watch?v=mDt-HJEXK6g}{(adapted from Steve Brunton lecture)}}
+\date{}
+
+% Uncomment if you want speaker notes:
+% \usepackage{pgfpages}
+% \setbeameroption{show notes on second screen=right}
+
+\begin{document}
+
+% ---------------- Title ----------------
+\begin{frame}
+  \titlepage
+  \note{
+  Goal today: set up time averaging + Reynolds decomposition, then apply it to incompressibility.
+  End result: both mean flow and fluctuations are divergence-free.
+  }
+\end{frame}
+
+% ---------------- Roadmap ----------------
+\begin{frame}{Roadmap (Part 1)}
+\begin{itemize}
+  \item Start with incompressible Navier--Stokes (nondimensional form).
+  \item Define the Reynolds decomposition: $\uu(\x,t)=\ubar(\x)+\up(\x,t)$.
+  \item Define the time-average operator and its key properties.
+  \item Plug decomposition into \textbf{mass continuity} $\nabla\cdot\uu=0$.
+  \item Time-average to derive:
+  \[
+    \nabla\cdot\ubar = 0,
+    \qquad
+    \nabla\cdot\up = 0.
+  \]
+\end{itemize}
+\note{
+Keep this as a promise: we will not touch momentum closure today.
+}
+\end{frame}
+
+% ---------------- Governing equations ----------------
+\begin{frame}{Incompressible Navier--Stokes (nondimensional)}
+We work with the incompressible Navier--Stokes equations:
+\begin{align*}
+\frac{\partial \uu}{\partial t} + (\uu\cdot\nabla)\uu &= -\nabla \pp + \frac{1}{\Rey}\,\Delta \uu,\\
+\nabla\cdot\uu &= 0.
+\end{align*}
+
+\begin{itemize}
+  \item $\uu(\x,t)\in\mathbb{R}^3$ is the velocity field.
+  \item $\pp(\x,t)$ is pressure (scaled).
+  \item $\Rey$ is the Reynolds number (controls relative strength of inertia vs viscosity).
+\end{itemize}
+
+\textbf{Interpretation:} first line is  \textbf{momentum conservation}, second line is \textbf{mass conservation} (incompressibility).
+\end{frame}
+
+% ---------------- Vector components ----------------
+\begin{frame}{Reminder: $\uu$ is a 3-component field}
+Write
+\[
+\uu(\x,t) =
+\begin{bmatrix}
+u(\x,t)\\
+v(\x,t)\\
+w(\x,t)
+\end{bmatrix},
+\qquad
+\x=(x,y,z).
+\]
+
+Then incompressibility is
+\[
+\nabla\cdot\uu = \frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} + \frac{\partial w}{\partial z} = 0.
+\]
+
+\textbf{Today:} we will apply Reynolds averaging to this equation.
+\end{frame}
+
+% ---------------- Reynolds decomposition ----------------
+\begin{frame}{Reynolds decomposition}
+We decompose the flow into a mean and a fluctuation:
+\[
+\uu(\x,t) = \ubar(\x) + \up(\x,t).
+\]
+
+Component-wise:
+\[
+u = \avg{u} + u',\quad
+v = \avg{v} + v',\quad
+w = \avg{w} + w'.
+\]
+
+\begin{itemize}
+  \item Mean flow $\ubar(\x)$ is \textbf{time-averaged} (depends only on space).
+  \item Fluctuations $\up(\x,t)$ capture all remaining unsteady turbulent content.
+\end{itemize}
+
+\note{
+Emphasize: in this setup, bar is time average; primes are deviations from that mean.
+}
+\end{frame}
+
+% ---------------- Time average definition ----------------
+\begin{frame}{Time average (stationary assumption)}
+Define the time average at each spatial point:
+\[
+\avg{\uu}(\x) \;:=\; \lim_{T\to\infty}\frac{1}{T}\int_0^T \uu(\x,t)\,dt.
+\]
+
+\begin{itemize}
+  \item We assume the flow is \textbf{statistically stationary} so the limit exists.
+  \item Then the fluctuation is defined by
+  \[
+  \up(\x,t) := \uu(\x,t) - \ubar(\x).
+  \]
+\end{itemize}
+
+\textbf{Historical motivation:} point measurements (e.g., hot-wire) $\Rightarrow$ long time series at fixed $\x$.
+
+\note{
+Stationarity means statistics don’t change in time (after transients).
+}
+\end{frame}
+
+\begin{frame}{Reynolds decomposition}
+\centering
+\includegraphics[width=0.55\textwidth]{pictures/5-2/Reynolds-decomposition.png}
+\vfill
+  \hfill {\footnotesize Source: McDonough, James (2009). Lectures in elementary fluid dynamics: physics, mathematics and applications.}
+\end{frame}
+
+\begin{frame}{Turbulent pipe flow}
+\centering
+\includegraphics[width=0.7\textwidth]{pictures/5-2/pipe-flow-turbulent.jpg}
+\vfill
+  \hfill {\footnotesize Source: https://www.tec-science.com/mechanics/gases-and-liquids/pressure-loss-in-pipe-systems/}
+  \end{frame}
+% ---------------- Why do this? ----------------
+\begin{frame}{Why average? (model reduction viewpoint)}
+Direct simulation of fully turbulent Navier--Stokes may require resolving:
+\begin{itemize}
+  \item largest energetic scales \textbf{and} smallest dissipative scales,
+  \item often $\Rightarrow$ millions to billions of degrees of freedom.
+\end{itemize}
+\vfill
+
+In many applications, we care about \textbf{mean quantities} (e.g., drag, lift, separation)
+and perhaps a few low-order statistics of fluctuations.
+\vfill
+
+\begin{block}{Key idea}
+Try to model $\ubar(\x)$ and selected statistics of $\up$ without resolving every eddy.
+\end{block}
+
+\end{frame}
+
+% ---------------- Properties of averaging ----------------
+\begin{frame}{Algebra you need: properties of time averages}
+Let $\avg{\cdot}$ denote time averaging.
+
+\begin{itemize}
+  \item \textbf{Zero-mean fluctuation:} $\avg{\up}=0$ (by definition).
+  \item \textbf{Linearity:} $\avg{u+v}=\avg{u}+\avg{v}$.
+  \item \textbf{Idempotent:} $\avg{\avg{u}}=\avg{u}$.
+  \item \textbf{Mean of mean times quantity:} 
+  $\avg{\avg{u}\cdot v}=\avg{u}\cdot \avg{v}$.
+  \item \textbf{Mean times mean:} if $u=\avg{u}$ and $v=\avg{v}$ then $\avg{u\cdot v} = u \cdot v$.
+\end{itemize}
+\vfill
+
+\begin{block}{Important warning (closure starts here)}
+In general,
+\[
+\avg{u \cdot v}\neq \avg{u}\, \cdot \avg{v}.
+\]
+\end{block}
+
+
+\end{frame}
+
+% ---------------- Commuting derivatives ----------------
+\begin{frame}{Commuting the average with spatial derivatives}
+Because we average in \textbf{time} (not space), we typically use:
+\[
+\avg{\frac{\partial u}{\partial s}}
+=
+\frac{\partial}{\partial s}\avg{u},
+\]
+provided we can interchange differentiation and integration (regularity assumptions).
+
+\begin{itemize}
+  \item If we time average a derivative, it's the same as the derivative of the time average.
+  \item This is what makes the continuity derivation clean.
+  \item Note we are \textbf{not} averaging in space here.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Variance and higher moments of the fluctuation}
+\begin{block}{Important warning}
+\[
+\avg{u'^2}\neq 0
+\]
+\end{block}
+\vfill
+\begin{itemize}
+  \item The time average of the fluctuation is zero, $\avg{\up}=0$.
+  \item The time average of the variance and higher order moments of the fluctuation is not zero.
+  \item These higher moments are important in the dynamics of the fluid, and we will need to keep track of them.
+  \item These are called Reynolds stresses because they have the units of stress.
+\end{itemize}
+    
+\end{frame}
+
+\begin{frame}{The heart of the closure problem}
+    \begin{itemize}
+        \item We are trying to take this very complicated equation that is space and time varying, and get an estimate of how the mean flow evolves and what the variances and Reynolds stresses are going to look like.
+        \item But we don't want to solve NS in space and time everywhere.
+        \item This challenge is at the heart of the closure problem. We end up with more unknowns than equations.
+        \item We will need to make approximations and assumptions based on physical intuition to build closure models to determine the unknowns.
+        \item ML is helping us to build these approximations.
+    \end{itemize}
+\end{frame}
+
+% ---------------- Plug into continuity ----------------
+\begin{frame}{Step 1: plug decomposition into continuity}
+Start with incompressibility:
+\[
+\nabla\cdot\uu = 0.
+\]
+
+Substitute $\uu=\ubar+\up$:
+\[
+\nabla\cdot(\ubar+\up)=0
+\quad\Rightarrow\quad
+\nabla\cdot\ubar + \nabla\cdot\up = 0.
+\]
+
+In components:
+\begin{align*}
+\frac{\partial \avg{u}}{\partial x} + \frac{\partial \avg{v}}{\partial y} + \frac{\partial \avg{w}}{\partial z}
+\;+\;
+\frac{\partial u'}{\partial x} + \frac{\partial v'}{\partial y} + \frac{\partial w'}{\partial z}
+=0.
+\end{align*}
+
+\note{
+Point out: this identity holds pointwise in space and time.
+}
+\end{frame}
+
+% ---------------- Time average the continuity equation ----------------
+\begin{frame}{Step 2: time-average the continuity equation}
+We can learn a lot by time averaging this equation, so take the time average of
+\[
+\nabla\cdot\ubar + \nabla\cdot\up = 0.
+\]
+
+Using commutation with spatial derivatives and $\avg{\up}=0$:
+\[
+\avg{\nabla\cdot\ubar} + \avg{\nabla\cdot\up} = 0
+\quad\Rightarrow\quad
+\nabla\cdot\ubar + \nabla\cdot\avg{\up}=0
+\quad\Rightarrow\quad
+\nabla\cdot\ubar = 0.
+\]
+
+\begin{block}{Result 1}
+\[
+\nabla\cdot\ubar = 0 \qquad\text{(mean flow is divergence-free).}
+\]
+\end{block}
+
+\note{
+Emphasize: this is a clean consequence of linearity + commutation + zero-mean prime.
+}
+\end{frame}
+
+% ---------------- Deduce fluctuating divergence-free ----------------
+\begin{frame}{Step 3: deduce divergence-free fluctuations}
+Recall the pointwise identity:
+\[
+\nabla\cdot\ubar + \nabla\cdot\up = 0 \quad\text{(for all $\x,t$)}.
+\]
+
+But we just proved $\nabla\cdot\ubar=0$ (for all $\x$), hence
+\[
+\nabla\cdot\up = -\,\nabla\cdot\ubar = 0.
+\]
+
+\begin{block}{Result 2}
+\[
+\nabla\cdot\up = 0 \qquad\text{(fluctuations are divergence-free).}
+\]
+\end{block}
+
+\note{
+This is a nice moment: one equation gives two constraints after decomposition + averaging.
+}
+\end{frame}
+
+% ---------------- Interpretation ----------------
+\begin{frame}{Interpretation: what did we gain?}
+We started with one constraint:
+\[
+\nabla\cdot\uu = 0.
+\]
+
+After Reynolds decomposition + time averaging we obtain:
+\[
+\nabla\cdot\ubar = 0,
+\qquad
+\nabla\cdot\up = 0.
+\]
+
+\begin{itemize}
+  \item This will simplify bookkeeping in the momentum derivation.
+  \item The hard part is \textbf{not} continuity---it’s what averaging does to \textbf{nonlinear products}.
+\end{itemize}
+
+
+\end{frame}
+
+% ---------------- Preview of next lecture ----------------
+\begin{frame}{Preview: momentum equation and closure}
+Next, we will substitute
+\[
+\uu=\ubar+\up,\qquad \pp=\avg{\pp}+\pp'
+\]
+into
+\[
+\frac{\partial \uu}{\partial t} + (\uu\cdot\nabla)\uu = -\nabla \pp + \frac{1}{\Rey}\Delta\uu
+\]
+and time-average.
+
+\end{frame}
+
+% ---------------- End slide ----------------
+\begin{frame}{Takeaways}
+\begin{itemize}
+  \item Reynolds decomposition: $\uu=\ubar+\up$ with $\avg{\up}=0$.
+  \item Time averaging (stationary assumption) + commutation with spatial derivatives.
+  \item Applying to continuity yields:
+  \[
+  \nabla\cdot\ubar=0,\qquad \nabla\cdot\up=0.
+  \]
+  \item Next: momentum averaging $\Rightarrow$ Reynolds stresses and the closure problem.
+\end{itemize}
+\end{frame}
+
+\end{document}

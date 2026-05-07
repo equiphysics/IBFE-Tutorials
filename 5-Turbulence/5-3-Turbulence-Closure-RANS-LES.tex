@@ -1,0 +1,469 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage{amsmath,amssymb,bm}
+\usepackage{mathtools}
+
+% -------------------- Notation --------------------
+\newcommand{\x}{\bm{x}}
+\newcommand{\uu}{\bm{u}}
+\newcommand{\pp}{p}
+\newcommand{\Rey}{\mathrm{Re}}
+\newcommand{\avg}[1]{\overline{#1}}
+\newcommand{\up}{\uu'}
+\newcommand{\ubar}{\avg{\uu}}
+\newcommand{\grad}{\nabla}
+\newcommand{\Div}{\nabla\cdot}
+\newcommand{\Lap}{\Delta}
+
+\title[Turbulence Modeling]{Turbulence Modeling: RANS, LES, and Hybrid Ideas}
+\author{(adapted from Steve Brunton)}
+\date{}
+
+\begin{document}
+
+% ------------------------------------------------------------
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Why turbulence modeling? (design + HPC)}
+Engineering design often needs \textbf{quantities of interest}:
+\begin{itemize}
+  \item lift and drag on wings / bodies,
+  \item separation and stall prediction,
+  \item turbine performance and noise,
+  \item wake interactions (wind farms, vehicles).
+\end{itemize}
+
+\begin{block}{Core tension}
+High fidelity $\Rightarrow$ expensive. \\
+Design optimization/control requires \emph{many} simulation runs $\Rightarrow$ we need models that are cheaper than DNS.
+\end{block}
+
+\vspace{1em}
+\textbf{Figure placeholder:} DNS movie / boundary layer turbulence visualization.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{DNS is amazing... and usually too expensive}
+Direct Numerical Simulation (DNS) resolves \emph{all} relevant space/time scales.
+
+\begin{itemize}
+  \item Even a \textbf{small} region (e.g., section of an airfoil) can require massive resources.
+  \item A full aircraft / full automobile at realistic Reynolds numbers: typically out of reach.
+\end{itemize}
+
+\begin{block}{Cost scaling intuition}
+As Reynolds number increases, the range of scales widens (largest eddies $\to$ smallest eddies), so grid/time-step requirements explode.
+\end{block}
+
+\textbf{Figure placeholder:} mesh + reported core-hours (e.g., ``35 million core hours'') from the example.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Goal of turbulence modeling}
+Instead of resolving everything, we seek \textbf{approximations} that yield:
+\begin{itemize}
+  \item acceptable accuracy for engineering quantities,
+  \item much lower computational cost,
+  \item robustness across many parameter changes (geometry, speed, AoA, etc.).
+\end{itemize}
+
+\begin{block}{Two major families}
+\begin{itemize}
+  \item Reynolds-Averaged Navier--Stokes (RANS): model \emph{statistics} of turbulence.
+  \item Large Eddy Simulation (LES): resolve large eddies, model subgrid scales (SGS).
+\end{itemize}
+\end{block}
+
+\textbf{Preview:} Hybrid ideas (DES) mix RANS + LES.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Review: Reynolds decomposition (RANS entry point)}
+Decompose the velocity (and pressure):
+\[
+\uu(\x,t)=\ubar(\x)+\up(\x,t),
+\qquad
+\pp(\x,t)=\avg{\pp}(\x)+\pp'(\x,t),
+\qquad
+\avg{\up}=0,\ \avg{\pp'}=0.
+\]
+
+Start from incompressible Navier--Stokes (nondimensional):
+\begin{align*}
+\partial_t \uu + (\uu\cdot\grad)\uu &= -\grad \pp + \frac{1}{\Rey}\Lap\uu,\\
+\Div\uu &= 0.
+\end{align*}
+
+\begin{block}{From the continuity equation}
+\[
+\Div\ubar=0,\qquad \Div\up=0.
+\]
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Review: where closure appears (momentum)}
+After averaging momentum you get mean-flow equations with extra terms:
+\[
+(\ubar\cdot\grad)\ubar
+=
+-\grad \avg{\pp}
++\frac{1}{\Rey}\Lap \ubar
+-\Div \bm{R},
+\qquad
+\bm{R}=\avg{\up\,\up^T}.
+\]
+
+\begin{block}{Reynolds stresses}
+\[
+\bm{R}=
+\begin{bmatrix}
+\avg{u'u'} & \avg{u'v'} & \avg{u'w'}\\
+\avg{v'u'} & \avg{v'v'} & \avg{v'w'}\\
+\avg{w'u'} & \avg{w'v'} & \avg{w'w'}
+\end{bmatrix}.
+\]
+\end{block}
+
+\textbf{Closure problem:} $\bm{R}$ is unknown and depends on the turbulent fluctuations.
+We need $\bm{R}\approx \mathcal{M}(\ubar,\grad\ubar,\ldots)$.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Why not write an exact equation for $\bm{R}$? (hierarchy)}
+If you try to derive transport equations for the Reynolds stresses by multiplying the fluctuating equations and averaging, you get terms involving \textbf{triple correlations} (third moments):
+\[
+\avg{u'_i u'_j u'_k}, \quad \text{etc.}
+\]
+
+Then equations for third moments involve fourth moments, and so on.
+
+\begin{block}{The never-ending ladder}
+Second moments depend on third moments \\
+Third moments depend on fourth moments \\
+$\vdots$ \\
+This is a genuine mathematical closure issue.
+\end{block}
+
+\textbf{Takeaway:} practical modeling requires assumptions/approximations.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Stress form in Einstein notation (compact RANS statement)}
+A common compact form emphasizes ``stress divergence'' structure.
+(Here, indices $i,j\in\{1,2,3\}$; repeated indices are summed.)
+
+\[
+\partial_t \avg{u_i} + \avg{u_j}\,\partial_j \avg{u_i}
+=
+-\partial_i \avg{p}
++\frac{1}{\Rey}\partial_j\partial_j \avg{u_i}
+-\partial_j \avg{u_i' u_j'}.
+\]
+
+\begin{block}{Interpretation}
+Pressure, viscosity, and Reynolds stresses all appear as stress/flux divergences.
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Turbulent kinetic energy (TKE) as a modeling lens}
+Define turbulent kinetic energy:
+\[
+k := \frac12\,\avg{u_i' u_i'} = \frac12\left(\avg{(u')^2}+\avg{(v')^2}+\avg{(w')^2}\right).
+\]
+
+TKE helps track the \textbf{energy exchange} between:
+\begin{itemize}
+  \item mean-flow kinetic energy,
+  \item turbulent fluctuations.
+\end{itemize}
+
+\begin{block}{Conceptual idea}
+Many closures aim to model $\bm{R}$ by modeling how $k$ is produced, transported, and dissipated.
+\end{block}
+
+\textbf{Figure placeholder:} energy budget / ``competing terms'' schematic.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{TKE equation: anatomy (high-level)}
+A typical TKE transport equation has the structure:
+\[
+\frac{\partial k}{\partial t} + \avg{u_j}\,\partial_j k
+=
+\underbrace{\mathcal{P}}_{\text{production}}
++\underbrace{\mathcal{T}}_{\text{transport}}
++\underbrace{\mathcal{D}}_{\text{diffusion}}
+-\underbrace{\varepsilon}_{\text{dissipation}}.
+\]
+
+\begin{block}{Production term (key intuition)}
+Production is driven by \textbf{mean shear}:
+\[
+\mathcal{P}\ \sim\ -\avg{u_i' u_j'}\,\partial_j \avg{u_i}.
+\]
+Large gradients in the mean flow (shear layers, separation) pump energy into turbulence.
+\end{block}
+
+\textbf{Use this in words:} ``Separation $\Rightarrow$ strong shear $\Rightarrow$ more turbulence production.''
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Eddy viscosity modeling: simplest closure idea}
+Old but still foundational idea: turbulence acts like an \textbf{effective viscosity}.
+
+\begin{block}{Boussinesq hypothesis (eddy viscosity)}
+Model Reynolds stresses via
+\[
+-\avg{u_i' u_j'}
+\approx
+2\nu_t S_{ij} - \frac{2}{3}k\,\delta_{ij},
+\qquad
+S_{ij}:=\frac12(\partial_i \avg{u_j}+\partial_j \avg{u_i}).
+\]
+\end{block}
+
+\begin{itemize}
+  \item $\nu_t$ is the turbulent (eddy) viscosity.
+  \item The $-\tfrac{2}{3}k\,\delta_{ij}$ term corrects the isotropic part (normal stresses).
+\end{itemize}
+
+\textbf{Figure placeholder:} channel flow / boundary layer sketch + shear.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Eddy viscosity model 0: constant $\nu_t$}
+Most basic choice:
+\[
+\nu_t = \text{constant}.
+\]
+
+Pros:
+\begin{itemize}
+  \item extremely simple,
+  \item sometimes works acceptably after tuning for a specific configuration.
+\end{itemize}
+
+Cons:
+\begin{itemize}
+  \item not predictive across geometries/conditions,
+  \item cannot capture strong spatial variation (near-wall, separation, etc.).
+\end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Prandtl mixing length model: spatially varying $\nu_t$}
+Prandtl's correction: $\nu_t$ varies with local shear and a mixing length $\ell_m$.
+
+A common form:
+\[
+\nu_t \sim \ell_m^2\,\left|\frac{\partial \avg{u}}{\partial y}\right|.
+\]
+
+\begin{itemize}
+  \item Useful for wall-bounded flows (boundary layers, channels).
+  \item Requires empirical/physical choices for $\ell_m$ (near-wall behavior matters).
+\end{itemize}
+
+\textbf{Figure placeholder:} boundary layer thickness growth and mixing length profile.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Two-equation models: $k$--$\varepsilon$ and $k$--$\omega$}
+Modern ``workhorse'' RANS models solve extra PDEs.
+
+\begin{block}{$k$--$\varepsilon$ idea}
+Solve for:
+\begin{itemize}
+  \item $k$ (turbulent kinetic energy),
+  \item $\varepsilon$ (dissipation rate of $k$).
+\end{itemize}
+Then set eddy viscosity via:
+\[
+\nu_t = C_\mu \frac{k^2}{\varepsilon}
+\quad\text{(often with }C_\mu\approx 0.09\text{ empirically).}
+\]
+\end{block}
+
+\textbf{Point to emphasize:} better than constant/mixing-length in many cases, but still imperfect.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Known weakness: adverse pressure gradients + separation}
+Many standard RANS closures struggle with separated flows.
+
+\begin{itemize}
+  \item Adverse pressure gradient can cause flow reversal near the wall.
+  \item Mean profile shows a \textbf{recirculation/separation bubble}.
+\end{itemize}
+
+\begin{block}{Why it matters}
+Predicting separation and stall is critical for aircraft performance and safety.
+\end{block}
+
+\textbf{Figure placeholder:} separation bubble sketch + boundary layer velocity profiles (show reversal).
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Spalart--Allmaras: practical aerospace workhorse}
+Spalart--Allmaras (SA) is a widely used \textbf{one-equation} model, tuned for aerospace applications.
+
+\begin{itemize}
+  \item More efficient than two-equation models.
+  \item Strong historical impact in CFD for lift/drag prediction.
+\end{itemize}
+
+\begin{block}{What to say out loud}
+``SA is a compromise: relatively cheap, reasonably accurate for many aerodynamic flows, and widely validated in industry.''
+\end{block}
+
+\textbf{Figure placeholder:} ``turbulence model options'' screenshot / SA citation mention.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Transition: a different perspective (LES)}
+So far: RANS models \textbf{all} turbulence statistically.
+
+LES takes a different view:
+\begin{itemize}
+  \item Resolve \textbf{large} energetic eddies on the grid,
+  \item Model only \textbf{subgrid} (small) scales.
+\end{itemize}
+
+\begin{block}{Why do this?}
+Large eddies dominate transport and coherent structures (especially in separated flows),
+so resolving them often increases accuracy.
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{LES concept: filtering / coarse-graining}
+LES applies a spatial filter (low-pass) to the Navier--Stokes equations:
+\[
+\uu = \tilde{\uu} + \uu_{\mathrm{sgs}},
+\]
+where $\tilde{\uu}$ is the resolved (filtered) velocity.
+
+\begin{itemize}
+  \item Solve filtered equations on a coarser grid.
+  \item Nonlinearity couples scales $\Rightarrow$ a closure term appears (SGS stress).
+\end{itemize}
+
+\begin{block}{Subgrid-scale (SGS) closure}
+We must model the effect of unresolved scales on resolved scales (analogous to RANS closure, but ``below the filter'').
+\end{block}
+
+\textbf{Figure placeholder:} coarse grid boxes / ``under the hood'' schematic.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Kolmogorov cascade picture (why SGS looks like viscosity)}
+Energy moves from large to small scales (heuristic cascade):
+\begin{itemize}
+  \item production at large scales (driven by mean shear / instabilities),
+  \item inertial transfer across scales,
+  \item dissipation at the smallest scales.
+\end{itemize}
+
+\begin{block}{LES modeling idea}
+Do \emph{not} resolve deep into the dissipation range; treat unresolved small scales as an effective dissipation (often via eddy viscosity SGS models).
+\end{block}
+
+\textbf{Figure placeholder:} Kolmogorov energy spectrum / cascade diagram.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{LES vs RANS: accuracy vs cost}
+\begin{columns}[T,onlytextwidth]
+\column{0.5\textwidth}
+\textbf{RANS}
+\begin{itemize}
+  \item cheaper (often practical for design loops),
+  \item solves mean field + closure PDEs,
+  \item may struggle with strong separation / unsteady structures.
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{LES}
+\begin{itemize}
+  \item more detailed flow structures,
+  \item typically better for separation / wakes,
+  \item much more expensive (often needs HPC).
+\end{itemize}
+\end{columns}
+
+\vspace{0.8em}
+\textbf{Figure placeholder:} side-by-side LES (top) vs unsteady RANS (bottom) visualization for wake/separation.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Large-scale LES application example}
+LES enables simulations at scales where DNS is impossible, e.g.:
+\begin{itemize}
+  \item wind-farm wake interactions across kilometers,
+  \item atmospheric boundary layer transport,
+  \item renewable energy control and optimization studies.
+\end{itemize}
+
+\begin{block}{How to frame it}
+LES is not ``exact,'' but often captures the large-scale mixing and unsteady dynamics that matter for engineering decisions.
+\end{block}
+
+\textbf{Figure placeholder:} wind farm LES vorticity/wake visualization.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Hybrid idea: Detached Eddy Simulation (DES)}
+DES attempts to combine strengths of RANS and LES:
+\begin{itemize}
+  \item use RANS near walls / attached regions (efficiency),
+  \item switch to LES in massively separated wakes (accuracy).
+\end{itemize}
+
+\begin{block}{Mental model}
+``RANS where the flow is comparatively steady/attached; LES where large unsteady eddies dominate.''
+\end{block}
+
+\textbf{Figure placeholder:} schematic showing RANS region near wall + LES region in wake.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Where machine learning enters (preview)}
+Both RANS and LES hinge on closure:
+\begin{itemize}
+  \item RANS: model Reynolds stresses $\avg{u_i' u_j'}$,
+  \item LES: model subgrid stresses / SGS fluxes.
+\end{itemize}
+
+\begin{block}{ML promise (high-level)}
+Use high-fidelity data (DNS/experiments) to learn improved closures:
+\[
+\text{closure} \approx \text{function of resolved/mean features},
+\]
+potentially improving accuracy in hard regimes (separation, adverse pressure gradients).
+\end{block}
+
+\textbf{Next lecture (as in transcript):} deep learning for closure models.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Summary}
+\begin{itemize}
+  \item DNS is accurate but often too expensive for real design loops.
+  \item RANS: average the equations $\Rightarrow$ Reynolds stresses appear $\Rightarrow$ closure problem.
+  \item Eddy viscosity modeling (Boussinesq) is the simplest closure; mixing-length, $k$--$\varepsilon$, SA extend it.
+  \item LES: filter the equations and resolve large eddies; model SGS effects.
+  \item LES is often more accurate (especially for separated flows) but typically much more expensive.
+  \item DES and other hybrids aim to mix RANS efficiency with LES accuracy.
+\end{itemize}
+\end{frame}
+
+\end{document}

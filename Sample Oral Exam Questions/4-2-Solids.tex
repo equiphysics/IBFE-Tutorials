@@ -1,0 +1,279 @@
+\documentclass[12pt]{article}
+
+% === Packages ===
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault} % modern sans-serif look
+
+% === Formatting tweaks ===
+\setstretch{1.15}
+\setlist[enumerate]{itemsep=0.4em, topsep=0.2em}
+\titleformat{\section}{\Large\bfseries\sffamily}{\thesection.}{1em}{}
+\titleformat{\subsection}{\large\bfseries\sffamily}{\thesubsection}{1em}{}
+
+% === Title ===
+\title{\vspace{-2em}\textbf{Applied Mathematics Oral Exam Questions and Model Answers}\\
+\large Solid Mechanics}
+\author{Prepared for Graduate Oral Examination}
+\date{}
+\begin{document}
+\maketitle
+%===========================================================
+% Sample oral exam questions + sample answers
+% Solid mechanics for IBFE (based on IBFE_Tutorials (14))
+%===========================================================
+
+\begin{enumerate}
+
+%-----------------------------------------------------------
+\item \textbf{Configurations and deformation map.}
+State what the reference and current configurations are, and define the deformation map $\chi$.
+
+\textbf{Sample answer:}
+The reference (material) configuration is $\mathcal{B}_0$ with coordinates $X\in\mathcal{B}_0$.
+The current (spatial) configuration is $\mathcal{B}_t$ with coordinates $x\in\mathcal{B}_t$.
+The deformation (motion) is the map
+\[
+x=\chi(X,t):\mathcal{B}_0\to\mathcal{B}_t.
+\]
+
+%-----------------------------------------------------------
+\item \textbf{Deformation gradient.}
+Define the deformation gradient $F_\chi$ and give its geometric meaning.
+
+\textbf{Sample answer:}
+\[
+F_\chi(X,t)=\nabla_X \chi(X,t).
+\]
+It is the local linear map sending reference line elements to current line elements:
+\[
+dx = F_\chi\, dX.
+\]
+
+%-----------------------------------------------------------
+\item \textbf{Jacobian and volume change.}
+Define $J$ and explain how it relates $dV$ and $dv$.
+
+\textbf{Sample answer:}
+\[
+J(X,t)=\det(F_\chi(X,t)).
+\]
+It is the local volume ratio, so volume elements transform as
+\[
+dv = J\, dV.
+\]
+Physically admissible deformations typically require $J>0$.
+
+%-----------------------------------------------------------
+\item \textbf{Quick computation: isotropic stretch.}
+If $\chi(X)=(\lambda X_1,\lambda X_2,\lambda X_3)$, compute $F_\chi$ and $J$.
+
+\textbf{Sample answer:}
+\[
+F_\chi=\lambda I,\qquad J=\det(\lambda I)=\lambda^3.
+\]
+
+%-----------------------------------------------------------
+\item \textbf{Quick computation: simple shear.}
+If $\chi(X)=(X_1+\gamma X_2,\;X_2,\;X_3)$, compute $F_\chi$ and $J$.
+
+\textbf{Sample answer:}
+\[
+F_\chi=
+\begin{pmatrix}
+1&\gamma&0\\
+0&1&0\\
+0&0&1
+\end{pmatrix},
+\qquad
+J=\det(F_\chi)=1.
+\]
+So simple shear is volume-preserving.
+
+%-----------------------------------------------------------
+\item \textbf{Incompressibility condition.}
+What does incompressibility mean in this framework?
+
+\textbf{Sample answer:}
+Local incompressibility means volume preservation:
+\[
+J(X,t)=1\quad \text{for all } X.
+\]
+Equivalently, $I_3=\det(C)=J^2=1$.
+
+%-----------------------------------------------------------
+\item \textbf{Right/left Cauchy--Green tensors.}
+Define $C$ and $B$ and state what they represent.
+
+\textbf{Sample answer:}
+\[
+C = F_\chi^T F_\chi \quad \text{(right Cauchy--Green, reference-frame)},
+\qquad
+B = F_\chi F_\chi^T \quad \text{(left Cauchy--Green, spatial-frame)}.
+\]
+They encode stretch information with rotations factored out.
+
+%-----------------------------------------------------------
+\item \textbf{Green--Lagrange strain.}
+Define the Green--Lagrange strain tensor $E$.
+
+\textbf{Sample answer:}
+\[
+E=\frac12(C-I)=\frac12(F_\chi^T F_\chi - I).
+\]
+It is a finite-strain measure defined in the reference configuration.
+
+%-----------------------------------------------------------
+\item \textbf{Small strain vs finite strain.}
+State the small-strain tensor and when it is valid.
+
+\textbf{Sample answer:}
+With displacement $d(X,t)=\chi(X,t)-X$,
+\[
+\varepsilon=\frac12\bigl(\nabla_X d + (\nabla_X d)^T\bigr),
+\]
+which is valid when displacement gradients are small so higher-order terms can be neglected.
+For larger deformations, use $E=\tfrac12(C-I)$ instead.
+
+%-----------------------------------------------------------
+\item \textbf{Strain invariants.}
+State the standard invariants $I_1,I_2,I_3$ of $C$.
+
+\textbf{Sample answer:}
+\[
+I_1=\mathrm{tr}(C),\qquad
+I_2=\frac12\left[(\mathrm{tr}C)^2-\mathrm{tr}(C^2)\right],\qquad
+I_3=\det(C)=J^2.
+\]
+$I_3$ encodes volume change through $J$.
+
+%-----------------------------------------------------------
+\item \textbf{Cauchy stress and traction.}
+Define Cauchy stress $\sigma$ and traction $t$.
+
+\textbf{Sample answer:}
+The Cauchy stress $\sigma(x,t)$ is the spatial stress tensor.
+The traction on a current surface with unit normal $n$ is
+\[
+t(x,t;n) = \sigma(x,t)\, n,
+\]
+and the differential force on area element $da$ is $df=\sigma n\, da$.
+
+%-----------------------------------------------------------
+\item \textbf{First Piola--Kirchhoff stress.}
+Define the first Piola--Kirchhoff stress $P$ and interpret $P N$.
+
+\textbf{Sample answer:}
+$P(X,t)$ is a reference-frame stress measure such that the force on a reference surface patch
+with unit normal $N$ and area $dA$ is
+\[
+df = P(X,t)\,N\, dA.
+\]
+So $P N$ is the reference traction (force per reference area), expressed as a spatial vector.
+In general $P$ is not symmetric.
+
+%-----------------------------------------------------------
+\item \textbf{Nanson's formula.}
+State Nanson's formula and explain why it matters.
+
+\textbf{Sample answer:}
+Nanson's formula relates oriented area vectors:
+\[
+n\, da = J\,F_\chi^{-T}\,N\, dA.
+\]
+It allows us to equate the same physical force written in the current and reference descriptions,
+and it is the key step in deriving the Piola transform between $P$ and $\sigma$.
+
+%-----------------------------------------------------------
+\item \textbf{Piola transform.}
+Derive (at a high level) the relationship between $P$ and $\sigma$.
+
+\textbf{Sample answer:}
+Equate the same force on corresponding surface patches:
+\[
+\sigma n\, da = P N\, dA.
+\]
+Use Nanson's formula $n\, da = JF_\chi^{-T}N\, dA$ to get
+\[
+\sigma(JF_\chi^{-T}N\, dA)=PN\, dA.
+\]
+Since this holds for all $N$, we obtain
+\[
+P = J\,\sigma\,F_\chi^{-T}.
+\]
+Equivalently,
+\[
+\sigma = \frac{1}{J}P F_\chi^{T}.
+\]
+
+%-----------------------------------------------------------
+\item \textbf{Second Piola--Kirchhoff stress.}
+Define $S$ and relate it to $P$.
+
+\textbf{Sample answer:}
+\[
+S = F_\chi^{-1}P,\qquad \text{equivalently } P = F_\chi S.
+\]
+$S$ is defined in the reference frame and is often symmetric for hyperelastic materials.
+
+%-----------------------------------------------------------
+\item \textbf{Why can $P$ be non-symmetric even if $\sigma$ is symmetric?}
+\textbf{Sample answer:}
+Even if $\sigma=\sigma^T$, the Piola transform $P=J\sigma F_\chi^{-T}$ multiplies $\sigma$
+by $F_\chi^{-T}$, which generally destroys symmetry. $P$ is a two-point (mixed-index) tensor.
+
+%-----------------------------------------------------------
+\item \textbf{Momentum balance: reference form.}
+State the strong form of momentum balance on $\mathcal{B}_0$.
+
+\textbf{Sample answer:}
+A standard reference form is
+\[
+\rho_0(X)\,\ddot{\chi}(X,t) = \nabla_X\cdot P(X,t) + B(X,t),
+\]
+where $\rho_0$ is reference density and $B$ is body force per reference volume.
+
+%-----------------------------------------------------------
+.
+
+
+%-----------------------------------------------------------
+\item \textbf{Why use invariants in isotropic materials?}
+\textbf{Sample answer:}
+For isotropic materials, the energy must be independent of rigid rotations.
+Writing $W$ in terms of invariants of $C$ (or $B$), like $I_1,I_2,I_3$, guarantees rotational invariance.
+
+%-----------------------------------------------------------
+\item \textbf{Compute invariants for a diagonal stretch.}
+If $F_\chi=\mathrm{diag}(\lambda_1,\lambda_2,\lambda_3)$, compute $J$, $I_1$, and $I_3$.
+
+\textbf{Sample answer:}
+\[
+J=\lambda_1\lambda_2\lambda_3,\qquad
+C=\mathrm{diag}(\lambda_1^2,\lambda_2^2,\lambda_3^2),
+\]
+so
+\[
+I_1=\lambda_1^2+\lambda_2^2+\lambda_3^2,\qquad
+I_3=\det(C)=J^2=(\lambda_1\lambda_2\lambda_3)^2.
+\]
+
+%-----------------------------------------------------------
+\item \textbf{Volumetric vs distortional response (concept check).}
+What is meant by separating volumetric and distortional parts of the energy?
+
+\textbf{Sample answer:}
+One often writes $W=W_{\text{iso}}(\text{shape})+W_{\text{vol}}(J)$.
+$W_{\text{vol}}(J)$ penalizes volume change (bulk response), while $W_{\text{iso}}$ controls shape change (shear-like response).
+In the incompressible limit, one enforces $J=1$ (often via a pressure-like Lagrange multiplier).
+
+
+
+\end{enumerate}
+
+
+\end{document}

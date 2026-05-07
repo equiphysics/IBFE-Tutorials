@@ -1,0 +1,200 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{Sample Oral Exam Questions and Answers\\
+Immersed Boundary Method: Integral Transforms and Regularized Delta Functions}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Eulerian--Lagrangian Framework}
+
+\begin{enumerate}[label=\arabic*.]
+
+\item \textbf{What are the Eulerian and Lagrangian variables in the immersed boundary method?}
+
+\textit{Sample answer:}  
+In the immersed boundary method, the fluid is described in Eulerian coordinates by the velocity $u(x,t)$ and pressure $p(x,t)$ defined on a fixed spatial grid.  
+The structure is described in Lagrangian (material) coordinates by a mapping $\chi(X,t)$ that gives the current physical position of each material point $X$ in the reference domain $U$.
+
+\item \textbf{Why are integral transforms needed to couple Eulerian and Lagrangian variables?}
+
+\textit{Sample answer:}  
+Eulerian and Lagrangian variables live on different domains and discretizations. Integral transforms using delta functions allow information to be transferred between these descriptions in a consistent way: forces are spread from the structure to the fluid, and velocities are interpolated from the fluid back to the structure.
+
+\item \textbf{Write the Eulerian--Lagrangian coupling equations used in IB.}
+
+\textit{Sample answer:}  
+Force spreading:
+\[
+f(x,t) = \int_U F(X,t)\,\delta(x-\chi(X,t))\,dX.
+\]
+Velocity interpolation:
+\[
+\frac{\partial \chi}{\partial t}(X,t) = \int_\Omega u(x,t)\,\delta(x-\chi(X,t))\,dx.
+\]
+The delta function transfers quantities between material and physical space.
+
+\item \textbf{What is the physical meaning of the mapping $\chi : U \times [0,T] \to \Omega$?}
+
+\textit{Sample answer:}  
+The mapping $\chi$ takes each material point in the undeformed reference configuration $U$ and maps it to its current position in physical space $\Omega$ at time $t$. It encodes the deformation and motion of the structure.
+
+\item \textbf{Why are two Lagrangian notations commonly used in IB: $X(s,t)$ and $\chi(X,t)$?}
+
+\textit{Sample answer:}  
+The notation $X(s,t)$ emphasizes parameterized curves or surfaces, common in classical IB.  
+The notation $\chi(X,t)$ emphasizes the continuum mechanics viewpoint, where $X$ is a fixed material coordinate and $\chi$ defines a deformation map, which is especially useful for defining stresses and deformation gradients.
+
+\end{enumerate}
+
+\section*{Reference Configuration and Force Definitions}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{What is the Lagrangian reference domain $U$ and why is it fixed in time?}
+
+\textit{Sample answer:}  
+$U$ represents the undeformed material configuration of the structure. It is fixed because material coordinates label physical points of the structure, independent of deformation or motion.
+
+\item \textbf{Explain the distinction between $U$, $\chi(U,t)$, and $\Omega$.}
+
+\textit{Sample answer:}  
+$U$ is the material reference domain, $\chi(U,t)$ is the current physical configuration of the structure, and $\Omega$ is the Eulerian fluid domain. These are distinct sets, and confusing them leads to errors such as incorrectly introducing Jacobians.
+
+\item \textbf{What is the first Piola--Kirchhoff stress and why is it used in IBFE?}
+
+\textit{Sample answer:}  
+The first Piola--Kirchhoff stress $P_e$ is a stress measure defined per unit reference area. It naturally arises from differentiating the elastic strain energy with respect to the deformation gradient, making it well suited for Lagrangian formulations like IBFE.
+
+\item \textbf{How is the Lagrangian elastic force density defined?}
+
+\textit{Sample answer:}  
+The Lagrangian elastic force density is given by
+\[
+F_e(X,t) = \nabla_X \cdot P_e(X,t),
+\]
+which represents force per unit reference volume.
+
+\end{enumerate}
+
+\section*{Force Spreading and the Absence of a Jacobian}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{Write the classical immersed boundary force-spreading formula.}
+
+\textit{Sample answer:}
+\[
+f(x,t) = \int_U F(X,t)\,\delta(x-\chi(X,t))\,dX.
+\]
+
+\item \textbf{Why does no Jacobian appear in this integral?}
+
+\textit{Sample answer:}  
+Because the integral is performed entirely over the reference domain $U$. There is no change of variables from $X$ to $x$, so no Jacobian arises. Geometry enters only through $\chi$ inside the delta function.
+
+\item \textbf{Why is force spreading not a change of variables?}
+
+\textit{Sample answer:}  
+A change of variables rewrites an integral in a new coordinate system. Force spreading instead defines an Eulerian force density as a distribution whose action on test functions matches that of the Lagrangian force under the mapping $\chi$.
+
+\item \textbf{Under what conditions would a Jacobian appear?}
+
+\textit{Sample answer:}  
+A Jacobian appears if forces are defined per unit current physical measure rather than per unit reference measure, such as for volumetric solids, surfaces, or fibers when modeling forces in deformed coordinates.
+
+\end{enumerate}
+
+\section*{Physical Interpretation and Conservation}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{Interpret force spreading by integrating over a fluid region $\Gamma \subset \Omega$.}
+
+\textit{Sample answer:}  
+Integrating $f(x,t)$ over $\Gamma$ yields the total force applied to the fluid in that region, which equals the total Lagrangian force carried by material points whose current positions lie in $\Gamma$.
+
+\item \textbf{Why does IB conserve total force?}
+
+\textit{Sample answer:}  
+Because the delta function satisfies a partition-of-unity property, ensuring that the total Eulerian force equals the total Lagrangian force when integrated over space.
+
+\item \textbf{Why is the Eulerian force density a distribution?}
+
+\textit{Sample answer:}  
+Because forces are supported on a lower-dimensional structure. In the continuum limit, this produces a delta-layer of force rather than a smooth function.
+
+\item \textbf{Why is velocity continuous but pressure discontinuous across the structure?}
+
+\textit{Sample answer:}  
+Viscosity enforces velocity continuity, while singular forces applied at the structure generate jumps in pressure and stress.
+
+\end{enumerate}
+
+\section*{Regularized Delta Functions}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{Why must the Dirac delta be regularized numerically?}
+
+\textit{Sample answer:}  
+The Dirac delta is singular and cannot be represented on a Cartesian grid. A regularized delta distributes forces smoothly over nearby grid points while preserving conservation properties.
+
+\item \textbf{Why must the same kernel be used for spreading and interpolation?}
+
+\textit{Sample answer:}  
+Using the same kernel ensures discrete energy consistency: the work done on the fluid equals the work extracted from the structure.
+
+\item \textbf{What does it mean that force spreading is a local averaging operation?}
+
+\textit{Sample answer:}  
+Each Lagrangian force is distributed over a small neighborhood of grid points, producing a smooth, localized approximation to a singular force.
+
+\end{enumerate}
+
+\section*{Design Criteria for Regularized Delta Functions}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{State Peskin’s zeroth and first moment conditions and their physical meaning.}
+
+\textit{Sample answer:}  
+The zeroth moment condition enforces force conservation.  
+The first moment condition ensures no spurious torque is introduced by force spreading.
+
+\item \textbf{Why are symmetry and translational invariance important?}
+
+\textit{Sample answer:}  
+They ensure numerical results do not depend strongly on the structure’s position relative to the grid, reducing grid-induced artifacts.
+
+\item \textbf{What is the tradeoff between smoothness and cost?}
+
+\textit{Sample answer:}  
+Smoother kernels improve stability and accuracy but require wider stencils, increasing computational cost.
+
+\end{enumerate}
+
+\section*{Common Kernels and Practice}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{Why is Peskin’s 4-point kernel commonly used?}
+
+\textit{Sample answer:}  
+It provides a good balance between smoothness, locality, stability, and computational efficiency while satisfying key moment conditions.
+
+\item \textbf{What happens as $h \to 0$?}
+
+\textit{Sample answer:}  
+The regularized delta converges to the Dirac delta, and the discrete immersed boundary method converges to the continuum formulation.
+
+\end{enumerate}
+
+\end{document}

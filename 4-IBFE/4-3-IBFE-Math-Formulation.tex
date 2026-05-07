@@ -1,0 +1,1082 @@
+\documentclass[aspectratio=169]{beamer}
+
+% -------------------- Theme / packages --------------------
+\usetheme{Madrid}
+\usecolortheme{default}
+\usefonttheme{professionalfonts}
+
+\usepackage{amsmath, amssymb, bm}
+\usepackage{mathtools}
+\usepackage{physics}
+% in preamble
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, calc}
+
+
+
+% -------------------- Macros --------------------
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\x}{\bm{x}}
+\newcommand{\X}{\bm{X}}
+\newcommand{\I}{\bm{I}}
+% ---------- Safe helper macros for the active-tension section ----------
+% (Avoid \f, \F, \G, \A, \B, \fzero etc., which conflict with TeX.)
+\newcommand{\Gext}{\bm{G}}         % external body force (reference)
+\newcommand{\Vtest}{\bm{v}}        % generic test function / virtual displacement
+\newcommand{\fhat}{\bm{f}_0}       % reference fiber direction (unit)
+\newcommand{\avec}{\bm{a}}         % mapped fiber direction a = F f0
+
+% --- helper macros used in the active-tension section ---
+\newcommand{\Vvec}{\bm{\phi}}   % test function (or choose \bm{V})
+\newcommand{\Aten}{\bm{A}}
+
+\newcommand{\bvec}{\bm{b}}
+
+
+\newcommand{\gradX}{\nabla_{\!X}}
+\newcommand{\divX}{\nabla_{\!X}\!\cdot}
+\newcommand{\gradx}{\nabla_{\!x}}
+\newcommand{\divx}{\nabla_{\!x}\!\cdot}
+
+% --- Strain/stress tensors used in Example B ---
+\newcommand{\Cten}{\bm{C}}     % right Cauchy-Green tensor
+\newcommand{\Eten}{\bm{E}}     % Green-Lagrange strain
+\newcommand{\Bten}{\bm{B}}     % left Cauchy-Green (optional)
+\newcommand{\Sten}{\bm{S}}     % 2nd Piola-Kirchhoff (optional)
+
+\newcommand{\eten}{\bm{e}}
+\newcommand{\sigmaC}{\bm{\sigma}} % if not already defined
+\newcommand{\Pten}{\bm{P}}        % if not already defined
+
+
+% Kinematics
+\newcommand{\Fdef}{\bm{F}_{\chi}} % deformation gradient = grad_X chi
+
+% Normals / traction
+\newcommand{\Nvec}{\bm{N}}       % reference normal
+\newcommand{\nvec}{\bm{n}}       % current normal
+\newcommand{\tvec}{\bm{t}}       % traction
+
+% IB/IBFE forces and velocity
+\newcommand{\FLag}{\bm{F}}       % Lagrangian force density (on structure)
+\newcommand{\fEuler}{\bm{f}}     % Eulerian force density (on fluid grid)
+\newcommand{\uEuler}{\bm{u}}     % Eulerian velocity (fluid)
+\newcommand{\ULag}{\bm{U}}       % Lagrangian velocity (structure)
+
+\newcommand{\deltah}{\delta_h}   % regularized delta
+
+% -------------------- Title --------------------
+\title[IBFE Core Ideas]{IBFE Core Ideas: Strong Form, Weak Form, and Coupling}
+\subtitle{Picking up after Module 4 (Hyperelasticity)}
+\author{Laura Miller}
+\institute{University of Arizona}
+\date{\today}
+
+\begin{document}
+
+% ============================================================
+% Title
+% ============================================================
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Overview}
+\tableofcontents
+\end{frame}
+% 
+% ============================================================
+% Roadmap
+% ============================================================
+\begin{frame}{Roadmap (where we are picking up)}
+\small
+From Module 4 you have:
+\[
+\chi(\X,t)\ \Rightarrow\ \Fdef(\X,t)=\gradX\chi(\X,t)\ \Rightarrow\ W(\Fdef)\ \Rightarrow\ \Pten=\pdv{W}{\Fdef}.
+\]
+
+\medskip
+Now we answer three questions:
+\begin{enumerate}
+\item How does \(\Pten\) enter the \textbf{continuum balance laws} (strong form)?
+\item How do we rewrite that in a \textbf{weak form} suitable for IBFE?
+\item How does the structure apply forces to the \textbf{fluid} (IB coupling)?
+\end{enumerate}
+
+\end{frame}
+
+% ============================================================
+% Notation bridge (short)
+% ============================================================
+\begin{frame}{Notation bridge}
+\small
+\textbf{Kinematics (solid):}\quad \(\Fdef(\X,t)=\gradX\chi(\X,t)\) (deformation gradient).
+
+\medskip
+\textbf{Stress (solid):}\quad \(\Pten(\X,t)=\partial W/\partial \Fdef\) (PK1).
+
+\medskip
+\textbf{Forcing (IB/IBFE):}
+\begin{itemize}
+\item \(\FLag(\X,t)\): Lagrangian force density on the structure.
+\item \(\fEuler(\x,t)\): Eulerian force density in the fluid momentum equation.
+\end{itemize}
+
+\medskip
+\textbf{Velocity coupling:}\quad \(\uEuler(\x,t)\) (fluid velocity), \(\ULag(\X,t)=\partial\chi/\partial t\) (structure velocity).
+\end{frame}
+
+% ============================================================
+% INSERT INTO THE "IBFE Core Ideas: Strong Form, Weak Form, and Coupling" DECK
+% This block does two things:
+%   (1) States the coupled IBFE system of equations (continuum-level).
+%   (2) Adds a worked Example B: 3D uniaxial stretch of a block, as a slide sequence.
+% Notation matches your deck:
+%   - Deformation gradient: \Fdef = \gradX \chi
+%   - Lagrangian force density: \FLag
+%   - Eulerian force density: \fEuler
+%   - Eulerian velocity: \uEuler
+% ============================================================
+% ============================================================
+% SECTION: IB method with elastic bodies (reconstructed slides)
+% No external images used. All diagrams are TikZ.
+% Notation aligns with your macros:
+%   chi = \chi,  F = \Fdef = \bm{F}_\chi,  J = det(F),
+%   P = \Pten,  u = \uEuler,  delta_h = \deltah
+% ============================================================
+\section{IB method with elastic bodies (Strong Form)}
+
+% ------------------------------------------------------------
+\begin{frame}{IB method with elastic bodies: geometry and fields}
+\small
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.52\textwidth}
+
+\textbf{Two coordinate ``worlds'':}
+\begin{itemize}
+\item \textbf{Structure (Lagrangian):} reference domain \(B_0\), coordinate \(\X\).
+\item \textbf{Fluid (Eulerian):} physical domain \(\Omega\), coordinate \(\x\).
+\end{itemize}
+
+\medskip
+\textbf{Motion (configuration map):}
+\[
+\x=\chi(\X,t),\qquad \chi(\cdot,t):B_0\to B_t\subset \Omega.
+\]
+
+\medskip
+\textbf{Kinematics:}
+\[
+\Fdef(\X,t)=\nabla_{\!X}\chi(\X,t),\qquad J(\X,t)=\det(\Fdef(\X,t)).
+\]
+
+\end{column}
+\begin{column}{0.48\textwidth}
+\centering
+\includegraphics[width=0.48\paperwidth]{pictures/4-3/IBFE-sketch.png}
+\end{column}
+\end{columns}
+
+\medskip
+\textbf{Big idea:} represent solid elasticity as a contribution to the \emph{Eulerian} forcing/stress in the fluid equations.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Cauchy stress for the fluid--structure system (what the solid adds)}
+\small
+A convenient immersed description uses a \textbf{single Eulerian stress tensor} for the coupled system:
+\[
+\sigmaC(\x,t)=
+\begin{cases}
+\sigmaC^f(\x,t) + \sigmaC^s(\x,t), & \x\in B_t,\\[2pt]
+\sigmaC^f(\x,t), & \x\in \Omega\setminus B_t.
+\end{cases}
+\]
+
+\medskip
+\textbf{Fluid-like stress (Newtonian):}
+\[
+\sigmaC^f(\x,t)= -p(\x,t)\I
++\mu\!\left(\nabla_{\!x}\uEuler(\x,t)+\nabla_{\!x}\uEuler(\x,t)^T\right).
+\]
+
+\medskip
+\textbf{Solid Cauchy stress written via reference (PK1) stress:}
+\[
+\sigmaC^s(\x,t)= J(\X,t)^{-1}\,\Pten(\X,t)\,\Fdef(\X,t)^{T},
+\qquad \x=\chi(\X,t).
+\]
+
+\medskip
+\textbf{Hyperelastic constitutive law:}
+\[
+\Pten(\X,t)=\frac{\partial W}{\partial \Fdef}\Big(\Fdef(\X,t)\Big),\qquad
+\Fdef(\X,t)=\nabla_{\!X}\chi(\X,t),\qquad J=\det(\Fdef).
+\]
+
+\medskip
+\textbf{What this buys you:} the solid’s elasticity can be injected into the fluid momentum balance as an immersed forcing (next slide).
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{IB form of the equations of motion}
+\small
+\textbf{Fluid momentum + incompressibility (in \(\Omega\)):}
+\[
+\rho\left(\pdv{\uEuler}{t}+\uEuler\cdot\nabla_{\!x}\uEuler\right)
+= -\nabla_{\!x}p + \mu\nabla_{\!x}^2\uEuler + \fEuler(\x,t),
+\qquad \nabla_{\!x}\cdot\uEuler(\x,t)=0.
+\]
+
+\medskip
+\textbf{Immersed force density (written as Lagrangian integrals):}
+\[
+\fEuler(\x,t)
+= \int_{B_0}\big(\nabla_{\!X}\cdot \Pten(\X,t)\big)\,
+\deltah\!\left(\x-\chi(\X,t)\right)\,dV
+\]
+\[
+\textbf{t}(\x,t)=\int_{\partial B_0}\big(-\Pten(\X,t)\Nvec(\X)\big)\,
+\deltah\!\left(\x-\chi(\X,t)\right)\,dA.
+\]
+
+\medskip
+\textbf{Kinematic (no-slip) coupling (structure moves with the fluid):}
+\[
+\pdv{\chi}{t}(\X,t)
+= \int_{\Omega}\uEuler(\x,t)\,\deltah\!\left(\x-\chi(\X,t)\right)\,d\x.
+\]
+
+\medskip
+\textbf{Interpretation:} the volume and boundary traction terms are \emph{both} spread to the Eulerian grid using \(\deltah\).
+\end{frame}
+
+
+
+\begin{frame}{From hyperelasticity to traction: what \(\Pten\) means}
+\small
+From the constitutive law,
+\[
+W(\Fdef)\quad\Rightarrow\quad \Pten(\X,t)=\frac{\partial W}{\partial \Fdef}\Big(\Fdef(\X,t)\Big),
+\qquad \Fdef=\nabla_{\!X}\chi.
+\]
+
+\medskip
+\textbf{\(\Pten\) is a reference stress tensor.} Its most direct physical meaning is:
+it produces \emph{traction} (contact force per unit \emph{reference} area).
+
+\medskip
+\textbf{Traction on a reference surface patch:}  
+if \(dA\) is a patch on \(\partial V_0\subset B_0\) with outward unit normal \(\Nvec\), then
+\[
+\underbrace{\tvec_0(\X,t)}_{\substack{\text{force per}\\\text{ref.\ area}}}
+=
+\underbrace{\Pten(\X,t)\,\Nvec(\X)}_{\substack{\text{PK1 stress}\\\text{acting on normal}}}.
+\]
+
+\medskip
+\textbf{Units check (3D):} \([\tvec_0]=\text{N}/\text{m}^2\), \([\Pten]=\text{N}/\text{m}^2\).
+
+
+\end{frame}
+
+\begin{frame}{Traction \(\Rightarrow\) net force \(\Rightarrow\) \(\divX\Pten\) (Newton's law on \(V_0\))}
+\footnotesize
+Let \(V_0\subset B_0\) be any material subregion (fixed in reference coordinates).
+
+\medskip
+\textbf{Total force on \(V_0\) has two pieces:}
+\begin{itemize}
+\item \textbf{Contact forces across the boundary} \(\partial V_0\):
+\[
+\int_{\partial V_0}\Pten(\X,t)\,\Nvec(\X)\,dA.
+\]
+\item \textbf{Body forces throughout the volume} (gravity, active forcing, etc.):
+\[
+\int_{V_0}\bm{B}(\X,t)\,dV.
+\]
+\end{itemize}
+
+\medskip
+\textbf{Newton's 2nd law (reference form):}
+\[
+\frac{d}{dt}\int_{V_0}\rho_0(\X)\,\chi_t(\X,t)\,dV
+=
+\int_{\partial V_0}\Pten\,\Nvec\,dA+\int_{V_0}\bm{B}\,dV.
+\]
+
+\medskip
+Use the reference divergence theorem:
+\[
+\int_{\partial V_0}\Pten\,\Nvec\,dA=\int_{V_0}\divX\Pten\,dV.
+\]
+
+\medskip
+\textbf{Interpretation:} \(\divX\Pten\) is the \emph{internal force per unit reference volume}.
+
+\end{frame}
+
+\begin{frame}{Balance of linear momentum (reference strong form) and the IB goal}
+\small
+Because \(V_0\) is arbitrary, the integral balance implies the \textbf{pointwise strong form}:
+\[
+\rho_0(\X)\,\chi_{tt}(\X,t)=\divX\Pten(\X,t)+\bm{B}(\X,t)
+\qquad \text{in } B_0.
+\]
+
+\medskip
+\textbf{What is \(\bm{B}\)?}
+A \textbf{body force per unit reference volume} (units N/m\(^3\) in 3D). Examples:
+\[
+\text{gravity: }\bm{B}=\rho_0\,\bm{g},\qquad
+\text{active forcing: }\bm{B} \text{ from an active stress/model term.}
+\]
+Often in tutorials we set \(\bm{B}=\bm{0}\) to focus on elastic forces from \(\Pten\).
+
+\medskip
+\textbf{Why we care (IB/IBFE context):}
+the fluid solver wants an \emph{Eulerian} force density \(\fEuler(\x,t)\) on \(\Omega\).
+So we will next rewrite these solid forces (\(\divX\Pten\) and boundary tractions) as an Eulerian forcing term via the IB kernel \(\deltah\).
+\\
+
+ $$\fEuler(\x,t)=\int_{B_0}(\divX\Pten)\,\deltah(\x-\chi)\,dV.$$
+\end{frame}
+
+
+
+
+
+% ------------------------------------------------------------
+%============================================
+% SECTION B: WEAK FORM
+\section{IB method with elastic bodies (Weak Form)}
+% ------------------------------------------------------------
+\begin{frame}{Why introduce a weak form in IB/IBFE? (preview)}
+\small
+In a reference description, elasticity enters through the PK1 stress \(\Pten(\X,t)\).
+In \textbf{strong form}, internal forces appear as \(\divX \Pten\) (and boundary forces as \(\Pten\Nvec\)).
+
+\medskip
+\textbf{In immersed methods, we prefer a weak form because:}
+\begin{itemize}
+\item it avoids computing \(\divX\Pten\) pointwise (noisy with discrete data / sharp interfaces),
+\item it matches how finite elements compute nodal forces (virtual work),
+\item it cleanly handles boundary tractions and body forces,
+\item it produces exactly what the fluid solver needs: an Eulerian force density \(\fEuler(\x,t)\).
+\end{itemize}
+
+\medskip
+\textbf{Key message:} the weak form lets us combine \emph{volume} and \emph{boundary} forces into a single Lagrangian body-force density.
+\end{frame}
+
+% ------------------------------------------------------------
+% ============================================================
+% KEEP THIS FIRST SLIDE EXACTLY AS YOU WROTE IT
+% ============================================================
+\begin{frame}{Strong-form picture: volume forcing + boundary traction}
+\small
+If we start from a reference description of solid forces, two types of contributions can be spread to the Eulerian grid:
+
+\medskip
+\textbf{(1) Volume term (internal + body forces):}
+\[
+\fEuler^{\text{vol}}(\x,t)
+=
+\int_{B_0}\big(\divX\Pten(\X,t) + \bm{B}(\X,t)\big)\,
+\deltah\!\big(\x-\chi(\X,t)\big)\,dV.
+\]
+
+\medskip
+\textbf{(2) Boundary traction term (contact forces on \(\partial B_0\)):}
+\[
+\fEuler^{\text{bdry}}(\x,t)
+=
+\int_{\partial B_0}\big(-\Pten(\X,t)\Nvec(\X)\big)\,
+\deltah\!\big(\x-\chi(\X,t)\big)\,dA.
+\]
+
+\medskip
+\textbf{Total Eulerian forcing:}\quad
+\[
+\fEuler(\x,t)=\fEuler^{\text{vol}}(\x,t)+\fEuler^{\text{bdry}}(\x,t).
+\]
+
+\medskip
+\textbf{Next:} define a \emph{single} Lagrangian force density \(\FLag(\X,t)\) via a weak form so we only need one spreading integral.
+\end{frame}
+
+% % ------------------------------------------------------------
+% INSERT AFTER: Strong-form picture: volume forcing + boundary traction
+\begin{frame}{Assumption that removes the boundary traction term}
+\small
+To simplify the strong-to-weak transition, we impose a condition that makes the boundary traction term vanish.
+
+\medskip
+\textbf{Assumption (pick one and state it explicitly):}
+\begin{itemize}
+\item \textbf{Traction-free boundary:} \(\Pten(\X,t)\,\Nvec(\X)=\bm{0}\) on \(\partial B_0\), \quad or
+\item \textbf{Closed material manifold:} the structure has \emph{no boundary} (e.g.\ closed loop fiber / closed surface), so \(\partial B_0=\emptyset\).
+\end{itemize}
+
+\medskip
+Under either assumption, the boundary traction contribution is zero:
+\[
+\int_{\partial B_0}(\Pten \Nvec)\cdot \bm{\psi}\,dA = 0
+\qquad \text{for all admissible test functions } \bm{\psi}.
+\]
+
+\medskip
+\textbf{Result:} we can focus on a weak form involving only volume integrals over \(B_0\).
+\end{frame}
+
+
+% ------------------------------------------------------------
+\begin{frame}{Start from the strong form (reference configuration)}
+\small
+We start from the reference (material) strong form of momentum balance:
+\[
+\rho_0(\X)\,\ddot{\chi}(\X,t)=\divX \Pten(\X,t)+\bm{B}(\X,t)
+\qquad \text{in } B_0.
+\]
+
+\medskip
+Pick any smooth test function \(\bm{\psi}(\X)\).
+Multiply by \(\bm{\psi}\) and integrate over \(B_0\):
+\[
+\int_{B_0}\rho_0\,\ddot{\chi}\cdot\bm{\psi}\,dV
+=
+\int_{B_0}(\divX\Pten)\cdot\bm{\psi}\,dV
++
+\int_{B_0}\bm{B}\cdot\bm{\psi}\,dV.
+\]
+
+\medskip
+Next we rewrite the stress-divergence term using the divergence theorem.
+\end{frame}
+
+
+% ------------------------------------------------------------
+\begin{frame}{Integration by parts (divergence theorem step)}
+\small
+Use the identity
+\[
+\divX(\Pten^{T}\bm{\psi})=(\divX\Pten)\cdot\bm{\psi}+\Pten:\gradX\bm{\psi}.
+\]
+
+\medskip
+Integrate over \(B_0\) and apply the divergence theorem:
+\[
+\int_{B_0}\divX(\Pten^{T}\bm{\psi})\,dV
+=
+\int_{\partial B_0}(\Pten\Nvec)\cdot\bm{\psi}\,dA.
+\]
+
+\medskip
+Substitute the identity and rearrange:
+\[
+\int_{B_0}(\divX\Pten)\cdot\bm{\psi}\,dV
+=
+-\int_{B_0}\Pten:\gradX\bm{\psi}\,dV
++\int_{\partial B_0}(\Pten\Nvec)\cdot\bm{\psi}\,dA.
+\]
+
+\medskip
+By our imposed assumption (traction-free boundary or no boundary),
+the boundary term is zero, so:
+\[
+\int_{B_0}(\divX\Pten)\cdot\bm{\psi}\,dV
+=
+-\int_{B_0}\Pten:\gradX\bm{\psi}\,dV.
+\]
+\end{frame}
+
+
+% ------------------------------------------------------------
+\begin{frame}{Weak form under the simplifying assumption (no boundary term)}
+\small
+Substitute the integration-by-parts result into the integrated strong form:
+\[
+\int_{B_0}\rho_0\,\ddot{\chi}\cdot\bm{\psi}\,dV
+=
+-\int_{B_0}\Pten:\gradX\bm{\psi}\,dV
++
+\int_{B_0}\bm{B}\cdot\bm{\psi}\,dV.
+\]
+
+\medskip
+\textbf{This is the weak form we will use.}
+It contains only volume integrals on \(B_0\) because the boundary traction term has been eliminated by assumption.
+
+\medskip
+Next we package the right-hand side into a single Lagrangian force density \(\FLag\).
+\end{frame}
+
+
+% ------------------------------------------------------------
+\begin{frame}{Define one Lagrangian force density \(\FLag\) (the ``combine'' step)}
+\small
+We now \textbf{define} the combined Lagrangian force density \(\FLag(\X,t)\)
+(force per unit reference volume) by duality:
+
+\medskip
+For all smooth test functions \(\bm{\psi}(\X)\),
+\[
+\int_{B_0}\FLag(\X,t)\cdot\bm{\psi}(\X)\,dV
+=
+-\int_{B_0}\Pten(\X,t):\gradX\bm{\psi}(\X)\,dV
++
+\int_{B_0}\bm{B}(\X,t)\cdot\bm{\psi}(\X)\,dV.
+\]
+
+\medskip
+With this definition, the weak momentum balance becomes simply
+\[
+\int_{B_0}\rho_0\,\ddot{\chi}\cdot\bm{\psi}\,dV
+=
+\int_{B_0}\FLag\cdot\bm{\psi}\,dV
+\qquad \text{for all } \bm{\psi}.
+\]
+
+\medskip
+\textbf{Next:} spread \(\FLag\) to the Eulerian grid with one integral transform.
+\end{frame}
+
+
+% ============================================================
+% KEEP THIS LAST SLIDE EXACTLY AS YOU WROTE IT
+% ============================================================
+\begin{frame}{IB method with elastic bodies (weak-form version)}
+\footnotesize
+\textbf{Fluid momentum + incompressibility (in \(\Omega\)):}
+\[
+\rho\left(\pdv{\uEuler}{t}+\uEuler\cdot\nabla_{\!x}\uEuler\right)
+= -\nabla_{\!x}p + \mu \Delta \uEuler + \fEuler(\x,t),
+\qquad
+\nabla_{\!x}\cdot\uEuler(\x,t)=0.
+\]
+
+\medskip
+\textbf{Weak-form definition of the solid force (in \(B_0\)):}\quad
+find \(\FLag(\X,t)\) such that for all \(\bm{\psi}(\X)\),
+\[
+\int_{B_0} \FLag(\X,t)\cdot \bm{\psi}(\X)\,dV
+=
+-\int_{B_0} \Pten(\X,t):\gradX\bm{\psi}(\X)\,dV
+\;+\;(\text{body-force terms if present}).
+\]
+
+\medskip
+\textbf{Force spreading (Lagrangian \(\to\) Eulerian):}
+\[
+\fEuler(\x,t)=\int_{B_0}\FLag(\X,t)\,\deltah\!\big(\x-\chi(\X,t)\big)\,dV.
+\]
+
+\medskip
+\textbf{No-slip / kinematic coupling (Eulerian \(\to\) Lagrangian):}
+\[
+\pdv{\chi}{t}(\X,t)=\int_{\Omega}\uEuler(\x,t)\,\deltah\!\big(\x-\chi(\X,t)\big)\,d\x.
+\]
+
+\medskip
+\textbf{Key takeaway:}
+the weak form \emph{combines} the volume forcing and boundary traction contributions into the single Lagrangian body force \(\FLag\),
+so the fluid sees only one immersed forcing term \(\fEuler\).
+\end{frame}
+
+
+
+
+
+
+%===============================================
+% ACTIVE TENSION EXAMPLE
+%==================================================
+%=========================================================
+
+%---------------------------------------------------------
+
+%=========================================================
+
+% ============================================================
+\section{Active tension in IBFE}
+% ============================================================
+
+% ------------------------------------------------------------
+\begin{frame}{Active tension: what we mean (big picture)}
+\small
+Many biological structures generate \textbf{active} forces (muscle, contractile tissue) in addition to
+\textbf{passive} elastic resistance.
+
+\medskip
+A standard continuum modeling choice is an \textbf{additive stress split}:
+\[
+\Pten(\X,t) = \Pten^{p}(\X,t) + \Pten^{a}(\X,t),
+\]
+where
+\begin{itemize}
+\item \(\Pten^{p}\): \textbf{passive hyperelastic} part (often from an energy density \(W(\Fdef)\)),
+\item \(\Pten^{a}\): \textbf{active} part (prescribed/controlled; not necessarily derived from \(W\)).
+\end{itemize}
+
+\medskip
+\textbf{IBFE takeaway:} once you specify \(\Pten^{a}\), it enters the method exactly like passive stress:
+through the weak form that defines the Lagrangian force density and then the Eulerian forcing.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Where active tension enters IBFE (coupling picture)}
+\small
+The Eulerian forcing in Navier--Stokes is obtained by spreading a \textbf{Lagrangian force density}
+\(\FLag(\X,t)\) via a regularized delta kernel \(\deltah\):
+\[
+\fEuler(\x,t)=\int_{B_0}\FLag(\X,t)\,\deltah\!\big(\x-\chi(\X,t)\big)\,dV.
+\]
+
+\medskip
+In IBFE, \(\FLag(\X,t)\) is usually defined through a \textbf{weak (virtual work) statement}
+instead of computing \(\divX\Pten\) and boundary traction terms separately.
+
+\medskip
+\textbf{Key point:} the weak form naturally \textbf{packages volume and boundary traction effects}
+into a single \(\FLag(\X,t)\), which is what we spread to the fluid grid.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Weak form definition of \(\FLag(\X,t)\) (packages volume + traction)}
+\small
+Let \(\bm{\psi}(\X)\) be an arbitrary Lagrangian test function (virtual displacement / weighting function).
+Define \(\FLag(\X,t)\) by requiring:
+\[
+\int_{B_0} \FLag(\X,t)\cdot \bm{\psi}(\X)\,dV
+=
+-\int_{B_0} \Pten(\X,t) : \nabla_{\!X}\bm{\psi}(\X)\,dV
+\;+\;
+\int_{B_0} \Gext(\X,t)\cdot \bm{\psi}(\X)\,dV,
+\]
+where \(\Gext(\X,t)\) is any \textbf{prescribed external body force per reference volume}.
+
+\medskip
+\textbf{Interpretation:}
+\begin{itemize}
+\item The stress term \(-\int \Pten:\nabla_X \Vtest\) represents \textbf{internal virtual work} (passive + active).
+\item In an integration-by-parts derivation, boundary traction work appears as a boundary integral;
+the IBFE approach wraps the net effect into \(\FLag\) so we can spread it cleanly.
+\end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Notation reminder: what does \(\Pten:\nabla_{\!X}\bm{\psi}\) mean?}
+\small
+For two second-order tensors (matrices) \(\bm{A},\bm{B}\in\mathbb{R}^{d\times d}\),
+the \textbf{double contraction} is
+\[
+\bm{A}:\bm{B}
+=
+\mathrm{tr}(\bm{A}^T\bm{B})
+=
+\sum_{i=1}^d\sum_{J=1}^d A_{iJ}\,B_{iJ}.
+\]
+
+\medskip
+In our weak form,
+\[
+\Pten : \nabla_{\!X}\bm{\psi}
+=
+\sum_{i=1}^d\sum_{J=1}^d P_{iJ}\,\pdv{(\bm{\psi})_i}{X_J}.
+\]
+
+\medskip
+\textbf{Mental model:} stress \(\Pten\) pairs with \(\nabla_X \bm{\psi}\) to produce a scalar
+density of virtual work.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Active tension in general: fiber-oriented PK1 stress}
+\small
+A common active model prescribes:
+\begin{itemize}
+\item a \textbf{reference fiber direction field} \(\fhat(\X)\) with \(\|\fhat\|=1\),
+\item a \textbf{tension magnitude} \(T(\X,t)\ge 0\).
+\end{itemize}
+
+\medskip
+Kinematics:
+\[
+\Fdef(\X,t)=\nabla_{\!X}\chi(\X,t),\qquad
+J(\X,t)=\det\Fdef(\X,t),\qquad
+\avec(\X,t)=\Fdef(\X,t)\,\fhat(\X).
+\]
+
+\medskip
+A simple \textbf{PK1 active stress} consistent with “tension along fibers” is
+\[
+\Pten^{a}(\X,t)=J(\X,t)\,T(\X,t)\,\avec(\X,t)\otimes \fhat(\X)
+=
+J\,T\,\Fdef\,\fhat\,\fhat^{T}.
+\]
+
+\medskip
+\textbf{Why this form is convenient:} it is expressed in reference variables and drops directly into
+\(-\int \Pten:\nabla_X \bm{\psi}\).
+\end{frame}
+
+\begin{frame}{PK1 stress \(\mathbf{P}\) is a \emph{two-point} (mixed) tensor: shape \& units check}
+\small
+
+\textbf{Core idea:} the first Piola--Kirchhoff stress maps a \emph{reference} normal to a \emph{current (spatial)} traction.
+That means it ``lives in two worlds'' at once.
+
+\medskip
+\textbf{Traction (reference area \(\rightarrow\) spatial force):}
+\[
+\mathbf{t}_0(\mathbf{X},t) \;=\; \mathbf{P}(\mathbf{X},t)\,\mathbf{N}(\mathbf{X})
+\qquad \text{(force per \emph{reference} area, but direction in \emph{spatial} coordinates)}.
+\]
+
+\medskip
+\textbf{Component form makes the two-point nature explicit:}
+\[
+(t_0)_i \;=\; P_{iI}\,N_I.
+\]
+\begin{itemize}
+\item \(i\): \textbf{spatial} index (direction in the current configuration).
+\item \(I\): \textbf{material} index (attached to the reference configuration).
+\end{itemize}
+
+\medskip
+\textbf{So what ``dimension/shape'' is \(\mathbf{P}\)?}
+\[
+\mathbf{P}\in \mathbb{R}^{d\times d}\ \text{as an array, but with mixed indices }(iI)\text{ (spatial}\times\text{material)}.
+\]
+\end{frame}
+
+\begin{frame}{PK1 stress \(\mathbf{P}\) is a \emph{two-point} (mixed) tensor: shape \& units check}
+\small
+\medskip
+\textbf{Units check (3D):}
+\[
+[\mathbf{t}_0]=\mathrm{N/m^2},\quad [\mathbf{N}]=1,\quad \Rightarrow\ [\mathbf{P}]=\mathrm{N/m^2}.
+\]
+\textit{(Same units as Cauchy stress, but \(\mathbf{P}\) is not symmetric and is not purely spatial.)}
+
+\medskip
+\textbf{Where the strong-form force density comes from:}
+\[
+\underbrace{\nabla_{\!X}\cdot \mathbf{P}}_{\text{spatial vector}}\;\in\mathbb{R}^d,
+\qquad
+\left(\nabla_{\!X}\cdot \mathbf{P}\right)_i=\frac{\partial P_{iI}}{\partial X_I},
+\]
+which is a \emph{spatial} force per unit \emph{reference} volume.
+
+\medskip
+\textbf{Quick comparison:}
+\[
+\begin{array}{lll}
+\text{Cauchy stress } \boldsymbol{\sigma} & : & \sigma_{ij}\ \ (\text{spatial}\times\text{spatial}),\quad \mathbf{t}=\boldsymbol{\sigma}\mathbf{n}\ (\text{per current area})\\[2pt]
+\text{PK1 stress } \mathbf{P} & : & P_{iI}\ \ (\text{spatial}\times\text{material}),\quad \mathbf{t}_0=\mathbf{P}\mathbf{N}\ (\text{per reference area})\\[2pt]
+\text{2nd PK stress } \mathbf{S} & : & S_{IJ}\ \ (\text{material}\times\text{material})\\
+\end{array}
+\]
+\end{frame}
+
+% ------------------------------------------------------------
+
+
+
+% ------------------------------------------------------------
+\begin{frame}{How active tension changes the IBFE force calculation}
+\small
+With \(\Pten=\Pten^{p}+\Pten^{a}\), the weak form becomes
+\[
+\int_{B_0} \FLag\cdot\bm{\psi}\,dV
+=
+-\int_{B_0} \Pten^{p}:\nabla_{\!X}\bm{\psi}\,dV
+-\int_{B_0} \Pten^{a}:\nabla_{\!X}\bm{\psi}\,dV
++\int_{B_0} \Gext\cdot\bm{\psi}\,dV.
+\]
+
+\medskip
+\textbf{Practical FE implementation:}
+\begin{itemize}
+\item Evaluate \(\Pten^{p}\) and \(\Pten^{a}\) at quadrature points.
+\item Add them: \(\Pten=\Pten^{p}+\Pten^{a}\).
+\item Assemble nodal forces using the same weak-form machinery you already have.
+\end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------
+ \begin{frame}{Jellyfish example: fiber direction and active PK1 stress}
+\small
+In the jellyfish IBFE model, the stress is split as
+\[
+\Pten = \Pten^{p} + \Pten^{a},
+\qquad
+\Pten^{a}=J\,T(\X,t)\,\Fdef(\X,t)\,\fhat(\X)\,\fhat(\X)^{T}.
+\]
+(Active tension acts along prescribed fibers in the reference configuration.) % cite in notes if desired
+
+\medskip
+A circumferential (coronal) reference fiber direction is chosen as
+\[
+\fhat(\X)=\left(-\frac{Y}{R},\,\frac{X}{R},\,0\right),
+\qquad
+R=\sqrt{X^2+Y^2}.
+\]
+
+\medskip
+\textbf{Interpretation:} activating \(T(\X,t)\) produces circumferential contraction of the bell.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Jellyfish example: prescribing the activation magnitude \(T(\X,t)\)}
+\small
+The tension magnitude is written as
+\[
+T(\X,t)=T_{\max}\,\gamma(\X,t),
+\qquad
+\gamma(\X,t)=\alpha(Z)\,\beta(t),
+\qquad 0\le \alpha,\beta,\gamma\le 1.
+\]
+
+\medskip
+\textbf{Spatial activation \(\alpha(Z)\):} a smoothed step (logistic) profile that turns on musculature
+in a band (e.g.\ below/above a threshold \(Z_{\lim}\)).
+
+\medskip
+\textbf{Temporal activation \(\beta(t)\):} a periodic “turn on / turn off” function (often built from
+two logistics for activation and relaxation).
+
+
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Jellyfish example: optional external body force \(\Gext(\X,t)\)}
+\small
+In addition to active tension, the jellyfish supplement includes an external restoring force
+to keep part of the bell from drifting:
+\[
+\Gext(\X,t)=
+\begin{cases}
+\kappa\big(\chi(\X,0)-\chi(\X,t)\big), & R\le R_0,\\[4pt]
+\bm{0}, & R>R_0.
+\end{cases}
+\]
+
+\medskip
+\textbf{Interpretation:} a localized spring-like tether (applied in the reference description),
+added through the weak form via \(\int_{B_0}\Gext\cdot \bm{\psi}\,dV\).
+
+\medskip
+\textbf{After assembly:} \(\FLag\) includes passive elastic forces + active forces + this tether,
+and then \(\FLag\) is spread to the Eulerian grid to give \(\fEuler\).
+\end{frame}
+
+% 
+% ============================================================
+% WORKED EXAMPLE B: 3D UNIAXIAL STRETCH OF A SOLID BLOCK
+% ============================================================
+\section{Worked example: 3D uniaxial stretch of a block}
+
+\begin{frame}{Example: problem statement (what we will compute)}
+\small
+\textbf{Goal:} run a 3D uniaxial stretch example through the \emph{solid side} of IBFE,
+and show where the IB coupling would enter.
+
+\medskip
+\textbf{Reference solid:} a block \(B_0 = [0,L]\times[0,H]\times[0,W]\).
+
+\medskip
+\textbf{Prescribed deformation (kinematic test):}
+\[
+\chi(\X)=
+\begin{pmatrix}
+\lambda X_1\\
+X_2\\
+X_3
+\end{pmatrix}
+\quad \text{(stretch along \(X_1\) by factor \(\lambda\)).}
+\]
+
+\medskip
+\textbf{What we compute:}
+\[
+\Fdef,\ J,\ \Cten,\ \Eten,\ W(\Fdef),\ \Pten=\partial W/\partial \Fdef,
+\quad\text{then the weak-form internal force } \FLag.
+\]
+
+\end{frame}
+
+\begin{frame}{Example: kinematics \(\chi \rightarrow \Fdef \rightarrow J\)}
+\small
+For \(\chi(\X)=(\lambda X_1, X_2, X_3)\),
+\[
+\Fdef = \gradX\chi =
+\begin{pmatrix}
+\lambda & 0 & 0\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{pmatrix},
+\qquad
+J=\det(\Fdef)=\lambda.
+\]
+
+\medskip
+\textbf{Line element mapping:}\quad \(d\x=\Fdef\,d\X\).
+
+\medskip
+\textbf{Volume mapping:}\quad \(dv = J\,dV = \lambda\,dV\).
+
+
+\end{frame}
+
+\begin{frame}{Example: strain measures \(\Cten\), \(\Eten\) and invariants}
+\small
+\[
+\Cten=\Fdef^T\Fdef=
+\begin{pmatrix}
+\lambda^2 & 0 & 0\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{pmatrix},
+\qquad
+\Eten=\frac12(\Cten-\I)
+=\frac12
+\begin{pmatrix}
+\lambda^2-1 & 0 & 0\\
+0 & 0 & 0\\
+0 & 0 & 0
+\end{pmatrix}.
+\]
+
+\medskip
+Invariants:
+\[
+I_1=\mathrm{tr}(\Cten)=\lambda^2+2,
+\qquad
+I_3=\det(\Cten)=J^2=\lambda^2.
+\]
+
+
+\end{frame}
+
+\begin{frame}{Example: choose \(W(\Fdef)\) (compressible neo-Hookean)}
+\small
+We choose a standard compressible neo-Hookean energy (per reference volume):
+\[
+W(\Fdef)=\frac{\mu}{2}(I_1-3)-\mu\ln J+\frac{\kappa}{2}(\ln J)^2,
+\]
+with \(I_1=\mathrm{tr}(\Fdef^T\Fdef)\) and \(J=\det(\Fdef)\).
+
+\medskip
+For this deformation:
+\[
+I_1=\lambda^2+2,\qquad J=\lambda,\qquad \ln J = \ln \lambda.
+\]
+
+\medskip
+\textbf{Note}: “\(\mu\) = shear modulus, \(\kappa\) = bulk modulus; large \(\kappa\) enforces near incompressibility.”
+\end{frame}
+
+\begin{frame}{Example: compute \(\Pten\) (closed form for neo-Hookean)}
+\small
+For the neo-Hookean model above, a common closed form is:
+\[
+\Pten = \mu\left(\Fdef-\Fdef^{-T}\right)+\kappa(\ln J)\,\Fdef^{-T}.
+\]
+
+\medskip
+Here \(\Fdef=\mathrm{diag}(\lambda,1,1)\), so
+\[
+\Fdef^{-T}=\mathrm{diag}\left(\frac1\lambda,1,1\right),\qquad \ln J=\ln\lambda.
+\]
+
+Therefore,
+\[
+\Pten =
+\mathrm{diag}\left(
+\mu\left(\lambda-\frac1\lambda\right)+\kappa(\ln\lambda)\frac1\lambda,\ \kappa\ln\lambda,\ \kappa\ln\lambda
+\right).
+\]
+
+\medskip
+\textbf{Important interpretation:} Prescribing \(\chi=(\lambda X_1,X_2,X_3)\) generally induces \emph{nonzero lateral stresses}.
+A true uniaxial-\emph{stress} test would instead enforce \(\sigma_{22}=\sigma_{33}=0\) and solve for lateral contraction.
+
+\end{frame}
+
+\begin{frame}{Example: from stress to forces via the weak form (what IBFE actually computes)}
+\small
+IBFE avoids computing \(\divX\Pten\) pointwise. Instead it uses the weak form.
+
+\medskip
+Define the internal force functional:
+\[
+\mathcal{F}_{\mathrm{int}}[\bm{\phi}]
+:=
+-\int_{B_0} \Pten(\X):\gradX\bm{\phi}(\X)\,dV.
+\]
+
+Then \(\FLag(\X)\) is defined (in an integral sense) so that
+\[
+\int_{B_0}\FLag(\X)\cdot\bm{\phi}(\X)\,dV
+=
+\mathcal{F}_{\mathrm{int}}[\bm{\phi}]
++\ (\text{boundary traction term}) + (\text{body force term}).
+\]
+
+\medskip
+\textbf{For this uniform stretch example:} \(\Pten\) is spatially constant, so the internal forcing is especially clean conceptually.
+
+\medskip
+\textbf{Where FE enters later:} choose \(\bm{\phi}=\bm{\phi}_m\) basis functions \(\Rightarrow\) compute nodal forces by quadrature/assembly.
+
+\end{frame}
+
+\begin{frame}{Example: where IB coupling would enter (if the block is immersed)}
+\small
+Once you have \(\FLag(\X,t)\), the IB coupling produces Eulerian forcing:
+\[
+\fEuler(\x,t) = \int_{B_0} \FLag(\X,t)\,\deltah(\x-\chi(\X,t))\,dV.
+\]
+
+The fluid velocity is then solved from Navier--Stokes/Stokes, and the block moves by
+\[
+\chi_t(\X,t) = \int_{\Omega} \uEuler(\x,t)\,\deltah(\x-\chi(\X,t))\,d\x.
+\]
+
+\medskip
+\textbf{Two distinct experiment styles:}
+\begin{itemize}
+\item \textbf{Kinematic test (this slide deck’s example):} prescribe \(\chi\) and compute stresses/forces (validation).
+\item \textbf{Fully coupled IBFE:} compute \(\chi\) dynamically from the fluid+solid coupling (simulation).
+\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}{Example: evaluation checklist (what to verify)}
+\small
+Even before coding full IBFE, this example is useful for verification.
+
+\medskip
+\textbf{Solid-side checks:}
+\begin{itemize}
+\item Kinematics: \(\Fdef=\mathrm{diag}(\lambda,1,1)\), \(J=\lambda\), \(\Cten=\mathrm{diag}(\lambda^2,1,1)\).
+\item Objectivity sanity check: pure rotation should give \(W\) unchanged and (for isotropic models) no strain energy change.
+\item Small-strain limit: as \(\lambda\to 1\), stresses should scale linearly with \(\lambda-1\).
+\end{itemize}
+
+\medskip
+\textbf{Coupling-side checks (once immersed):}
+\begin{itemize}
+\item Net force consistency: \(\int_{\Omega}\fEuler\,d\x \approx \int_{B_0}\FLag\,dV\).
+\item Refinement: forces and motion should converge as the mesh and grid are refined.
+\item Energy trend (Stokes/viscous dissipation): elastic energy should decrease unless driven.
+\end{itemize}
+
+\end{frame}
+
+
+
+% ====================================================
+\end{document}

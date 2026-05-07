@@ -1,0 +1,237 @@
+\documentclass{beamer}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\title{Immersed Boundary Method Backup Slides for Exams and Talks}
+\author{Laura Miller}
+\date{\today}
+\begin{document}
+% ============================================================
+% BACKUP SLIDES: Meaning of force spreading + discretization + NS LHS
+% ============================================================
+
+% ------------------------------------------------------------
+\begin{frame}{[Backup] Meaning of force spreading (what the equation enforces)}
+\footnotesize
+
+\textbf{IB coupling definition (force spreading):}
+\[
+\boxed{
+\mathbf{f}(\mathbf{x},t)
+=
+\int_{\mathcal U}
+\mathbf{F}(\mathbf{X},t)\,
+\delta\!\big(\mathbf{x}-\boldsymbol{\chi}(\mathbf{X},t)\big)\,d\mathbf{X}
+}
+\]
+
+\medskip
+\textbf{Interpretation in words:}
+\begin{itemize}\itemsep3pt
+\item $\mathbf{F}(\mathbf{X},t)$ is a force density attached to material labels $\mathbf{X}\in\mathcal U$.
+\item $\delta(\mathbf{x}-\chi(\mathbf{X},t))$ deposits that force at the \emph{current physical location}
+      $\mathbf{x}=\chi(\mathbf{X},t)$.
+\item $\mathbf{f}(\mathbf{x},t)$ is the corresponding \emph{Eulerian body-force density} used in Navier--Stokes.
+\end{itemize}
+
+\medskip
+\textbf{Key idea:} this is a compact way to express ``forces carried by the structure become forces applied to the fluid
+at the structure's current location.''
+
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{[Backup] Meaning of force spreading (integrate over a region)}
+\footnotesize
+
+Let $\Gamma\subset\Omega$ be any Eulerian region.
+
+\medskip
+Start with the definition:
+\[
+\mathbf{f}(\mathbf{x},t)=\int_{\mathcal U}\mathbf{F}(\mathbf{X},t)\,
+\delta(\mathbf{x}-\chi(\mathbf{X},t))\,d\mathbf{X}.
+\]
+
+\medskip
+Integrate over $\Gamma$:
+\[
+\int_{\Gamma}\mathbf{f}(\mathbf{x},t)\,d\mathbf{x}
+=
+\int_{\mathcal U}\mathbf{F}(\mathbf{X},t)\,
+\left(\int_{\Gamma}\delta(\mathbf{x}-\chi(\mathbf{X},t))\,d\mathbf{x}\right)d\mathbf{X}.
+\]
+
+\medskip
+Use the defining property of $\delta$:
+\[
+\int_{\Gamma}\delta(\mathbf{x}-\chi(\mathbf{X},t))\,d\mathbf{x}
+=
+\begin{cases}
+1, & \chi(\mathbf{X},t)\in\Gamma,\\
+0, & \chi(\mathbf{X},t)\notin\Gamma.
+\end{cases}
+\]
+
+\medskip
+\textbf{Conclusion (the intuitive identity):}
+\[
+\boxed{
+\int_{\Gamma}\mathbf{f}(\mathbf{x},t)\,d\mathbf{x}
+=
+\int_{\{\mathbf{X}:\,\chi(\mathbf{X},t)\in\Gamma\}}\mathbf{F}(\mathbf{X},t)\,d\mathbf{X}.
+}
+\]
+
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{[Backup] Swapping the order of integration: what is actually justified?}
+\footnotesize
+
+\textbf{Subtlety:} $\delta$ is a \emph{distribution}, not an $L^1$ function, so classical Fubini/Tonelli
+does not literally apply to
+\[
+\int_{\Gamma}\int_{\mathcal U}\mathbf{F}(\mathbf{X},t)\,\delta(\mathbf{x}-\chi(\mathbf{X},t))\,d\mathbf{X}\,d\mathbf{x}.
+\]
+
+\medskip
+\textbf{Two standard justifications used in IB:}
+
+\medskip
+\textbf{(A) Weak/distribution meaning (clean):}
+for any smooth test function $\boldsymbol{\varphi}(\mathbf{x})$,
+\[
+\int_{\Omega}\mathbf{f}(\mathbf{x},t)\cdot\boldsymbol{\varphi}(\mathbf{x})\,d\mathbf{x}
+:=
+\int_{\mathcal U}\mathbf{F}(\mathbf{X},t)\cdot\boldsymbol{\varphi}(\chi(\mathbf{X},t))\,d\mathbf{X}.
+\]
+No ``swap'' is needed; the delta notation is shorthand for this identity.
+
+\medskip
+\textbf{(B) Regularized delta (what we compute):}
+replace $\delta$ by $\delta_h$ (smooth, bounded, compact support). Then the double integral is absolutely integrable,
+and Fubini is valid.
+
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{[Backup] Regularized delta $\delta_h$: why it makes life easy}
+\footnotesize
+
+In practice we use a regularized kernel $\delta_h$ supported on a few grid cells:
+\[
+\mathbf{f}_h(\mathbf{x},t)=\int_{\mathcal U}\mathbf{F}(\mathbf{X},t)\,
+\delta_h(\mathbf{x}-\chi(\mathbf{X},t))\,d\mathbf{X}.
+\]
+
+\medskip
+\textbf{Why this helps:}
+\begin{itemize}\itemsep3pt
+\item $\delta_h$ is an \emph{ordinary function} (bounded + smooth), so $\mathbf{f}_h$ is an ordinary function.
+\item The coupling becomes weighted sums over nearby grid points / Lagrangian points.
+\item Standard properties (partition of unity, moment conditions) give good force/torque transfer and avoid spurious drift.
+\end{itemize}
+
+\medskip
+\textbf{If asked “what does $\delta_h$ do?”:}
+it spreads (or interpolates) between the Lagrangian mesh and Eulerian grid over a small neighborhood of width $\sim h$.
+
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{[Backup] IBM discretization at a high level (algorithm)}
+\footnotesize
+
+\textbf{Grids:}
+Eulerian grid points $\mathbf{x}_{i}$ (Cartesian mesh spacing $h$), and Lagrangian points $\mathbf{X}_k$
+(or FE quadrature points), with positions $\chi_k^n\approx \chi(\mathbf{X}_k,t^n)$.
+
+\medskip
+\textbf{One time step (high-level):}
+\begin{enumerate}\itemsep3pt
+\item \textbf{Structure forces:} compute $\mathbf{F}_k^n$ from the structure model (springs/beam/FE stresses, etc.).
+\item \textbf{Spread to fluid:} for each Eulerian grid point $\mathbf{x}_i$,
+\[
+\mathbf{f}_i^n \approx \sum_k \mathbf{F}_k^n\,\delta_h(\mathbf{x}_i-\chi_k^n)\,\Delta \mathbf{X}_k.
+\]
+\item \textbf{Fluid solve:} advance Navier--Stokes using $\mathbf{f}^n$ as a body force to get $\mathbf{u}^{n+1},p^{n+1}$.
+\item \textbf{Interpolate to structure:} for each Lagrangian point,
+\[
+\dot{\chi}_k^{n} \approx \sum_i \mathbf{u}_i^{n+1}\,\delta_h(\mathbf{x}_i-\chi_k^{n})\,h^d.
+\]
+\item \textbf{Update structure:} $\chi_k^{n+1}=\chi_k^{n}+\Delta t\,\dot{\chi}_k^{n}$ (or implicit/semi-implicit variant).
+\end{enumerate}
+
+\end{frame}
+
+% ------------------------------------------------------------
+
+
+% ------------------------------------------------------------
+\begin{frame}{[Backup] Navier--Stokes LHS = material acceleration}
+\footnotesize
+
+For an incompressible Newtonian fluid with body force $\mathbf{f}$:
+\[
+\rho\left(\frac{\partial \mathbf{u}}{\partial t} + (\mathbf{u}\cdot\nabla)\mathbf{u}\right)
+=
+-\nabla p + \mu\nabla^2\mathbf{u} + \mathbf{f},
+\qquad \nabla\cdot\mathbf{u}=0.
+\]
+
+\medskip
+\textbf{Left-hand side (LHS):}
+\[
+\boxed{
+\rho\left(\frac{\partial \mathbf{u}}{\partial t} + (\mathbf{u}\cdot\nabla)\mathbf{u}\right)
+=
+\rho\,\frac{D\mathbf{u}}{Dt}
+}
+\]
+is the \textbf{material (total) acceleration} of a fluid parcel.
+
+\medskip
+\textbf{Two pieces:}
+\begin{itemize}\itemsep3pt
+\item \textbf{Local acceleration} $\displaystyle \frac{\partial \mathbf{u}}{\partial t}$:
+change in velocity at a fixed point in space.
+\item \textbf{Advective acceleration} $\displaystyle (\mathbf{u}\cdot\nabla)\mathbf{u}$:
+change in velocity because the parcel moves through spatial velocity gradients.
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{[Backup] LHS in components (what $(\mathbf{u}\cdot\nabla)\mathbf{u}$ means)}
+\footnotesize
+
+Let $\mathbf{u}=(u,v,w)$ in 3D (or omit $w$ in 2D). Then
+\[
+(\mathbf{u}\cdot\nabla)\mathbf{u}
+=
+\left(u\frac{\partial}{\partial x}+v\frac{\partial}{\partial y}+w\frac{\partial}{\partial z}\right)
+\begin{pmatrix}u\\v\\w\end{pmatrix}.
+\]
+
+\medskip
+So each component has the form:
+\[
+\begin{aligned}
+\text{x-component:}\quad
+&\frac{Du}{Dt}=\frac{\partial u}{\partial t} + u\frac{\partial u}{\partial x}+v\frac{\partial u}{\partial y}+w\frac{\partial u}{\partial z},\\[3pt]
+\text{y-component:}\quad
+&\frac{Dv}{Dt}=\frac{\partial v}{\partial t} + u\frac{\partial v}{\partial x}+v\frac{\partial v}{\partial y}+w\frac{\partial v}{\partial z},\\[3pt]
+\text{z-component:}\quad
+&\frac{Dw}{Dt}=\frac{\partial w}{\partial t} + u\frac{\partial w}{\partial x}+v\frac{\partial w}{\partial y}+w\frac{\partial w}{\partial z}.
+\end{aligned}
+\]
+
+\medskip
+\textbf{Quick oral-exam style interpretation:}
+``the parcel accelerates either because time changes at a point (local) or because it advects into a region
+with different velocity (advective).''
+
+\end{frame}
+\end{document}

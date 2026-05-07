@@ -1,0 +1,225 @@
+\documentclass{beamer}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\title{Introduction to the Finite Element Method}
+\author{Your Name}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}{Resources}
+  \begin{itemize}
+    \item \href{https://example.com/resource2}{Resource 2: Topic 2}
+    \item \href{https://example.com/resource3}{Resource 3: Topic 3}
+    \item \href{https://example.com/resource4}{Resource 4: Further Reading}
+    \item \href{https://example.com/resource5}{Resource 5: Online Tools}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{What is the Finite Element Method?}
+    \begin{itemize}
+        \item The finite element method (FEM) is a numerical technique for solving complex engineering and mathematical problems.
+        \item It's widely used in various fields, including structural analysis, fluid mechanics, heat transfer, and electromagnetics.
+        \item FEM is particularly useful for problems with complex geometries, material properties, and boundary conditions.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Discretization}
+    \begin{itemize}
+        \item FEM divides a complex domain into smaller, simpler elements, such as triangles, quadrilaterals, or tetrahedra.
+        \item This process is called discretization, and it transforms a continuous problem into a discrete one that can be solved numerically.
+    \end{itemize}
+    \begin{figure}
+        \includegraphics[width=0.8\textwidth]{discretization.png}
+        \caption{Example of domain discretization.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Shape Functions}
+    \begin{itemize}
+        \item Within each element, the solution is approximated using shape functions.
+        \item Shape functions are simple functions defined over the element, typically polynomials.
+        \item They interpolate the solution between the nodal values, which are the values of the unknown variables at the nodes of the element.
+    \end{itemize}
+    \begin{figure}
+        \includegraphics[width=0.8\textwidth]{shape_functions.png}
+        \caption{Example of shape functions.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Shape Functions: A Mathematical Deep Dive}
+    \begin{itemize}
+        \item Shape functions are fundamental building blocks in the finite element method, used to approximate the solution within each element.
+        \item They are typically chosen to be simple functions, such as polynomials, that are defined over the element domain.
+        \item Shape functions are constructed to satisfy certain properties, such as:
+        \begin{itemize}
+            \item Interpolation: They must interpolate the solution at the nodal points, ensuring that the approximation matches the known values at these points.
+            \item Continuity: They should exhibit a certain degree of continuity across element boundaries, depending on the order of the element and the requirements of the problem.
+            \item Completeness: They should be able to represent constant and linear variations of the solution within the element, ensuring that the approximation can capture the essential behavior of the solution.
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Mathematical Representation of Shape Functions}
+    \begin{itemize}
+        \item Shape functions are typically represented using a local coordinate system ($\xi$, $\eta$) defined over the element domain.
+        \item For example, in a 2D triangular element, the shape functions can be expressed as:
+        \begin{align*}
+        N_1(\xi, \eta) &= 1 - \xi - \eta \\
+        N_2(\xi, \eta) &= \xi \\
+        N_3(\xi, \eta) &= \eta
+        \end{align*}
+        where $N_1$, $N_2$, and $N_3$ are the shape functions associated with the three nodes of the triangle.
+        \item These shape functions are linear polynomials that satisfy the interpolation, continuity, and completeness properties.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Properties of Shape Functions}
+    \begin{itemize}
+        \item Interpolation property: The shape function associated with a particular node has a value of 1 at that node and 0 at all other nodes.
+        \item Partition of unity: The sum of all shape functions at any point within the element is equal to 1.
+        \item Continuity: The shape functions exhibit $C^0$ continuity, meaning that they are continuous across element boundaries but their derivatives may not be.
+        \item Completeness: The shape functions can represent constant and linear variations of the solution within the element.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Higher-Order Shape Functions}
+    \begin{itemize}
+        \item Higher-order shape functions, such as quadratic or cubic polynomials, can be used to achieve higher accuracy in the finite element approximation.
+        \item These shape functions have more nodes per element and can capture more complex variations of the solution.
+        \item However, they also increase the computational cost of the analysis.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Shape Functions in 3D}
+    \begin{itemize}
+        \item Shape functions can be extended to 3D elements, such as tetrahedra and hexahedra.
+        \item The mathematical representation of 3D shape functions is more complex, but the fundamental principles remain the same.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Element Equations}
+    \begin{itemize}
+        \item The equations governing the behavior of each element are derived using variational principles or the Galerkin method.
+        \item These equations relate the nodal values of the unknown variables to the element's properties and the external forces acting on it.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Element Equations in the Hybrid Immersed Boundary Finite Element Method}
+    \begin{itemize}
+        \item In the hybrid immersed boundary finite element method, the structure is discretized using finite elements, while the fluid is discretized using finite differences.
+        \item This leads to a coupled system of equations that governs the behavior of the fluid-structure interaction.
+        \item The element equations for the structure are derived from the principle of virtual work or the principle of minimum potential energy.
+        \item These equations relate the nodal displacements and forces to the element stiffness matrix and the external forces acting on the element.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Mathematical Formulation of Element Equations}
+    \begin{itemize}
+        \item The element equations for a typical finite element can be expressed in matrix form as:
+        \begin{equation*}
+        \mathbf{K}^e \mathbf{u}^e = \mathbf{f}^e
+        \end{equation*}
+        where:
+        \begin{itemize}
+            \item $\mathbf{K}^e$ is the element stiffness matrix
+            \item $\mathbf{u}^e$ is the vector of nodal displacements for the element
+            \item $\mathbf{f}^e$ is the vector of nodal forces for the element
+        \end{itemize}
+        \item The element stiffness matrix $\mathbf{K}^e$ depends on the material properties and geometry of the element.
+        \item The nodal forces $\mathbf{f}^e$ include both external forces and forces due to the interaction with the fluid.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Assembly of Element Equations}
+    \begin{itemize}
+        \item The element equations are assembled into a global system of equations that governs the behavior of the entire structure.
+        \item This assembly process involves combining the element stiffness matrices and nodal force vectors into global matrices and vectors.
+        \item The resulting global system of equations can be expressed as:
+        \begin{equation*}
+        \mathbf{K} \mathbf{u} = \mathbf{f}
+        \end{equation*}
+        where:
+        \begin{itemize}
+            \item $\mathbf{K}$ is the global stiffness matrix
+            \item $\mathbf{u}$ is the global vector of nodal displacements
+            \item $\mathbf{f}$ is the global vector of nodal forces
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Coupling with Fluid Equations}
+    \begin{itemize}
+        \item The global system of equations for the structure is coupled with the fluid equations through the interaction forces.
+        \item The interaction forces are calculated using the immersed boundary method, which involves spreading the forces from the Lagrangian structure to the Eulerian fluid grid and interpolating the fluid velocities back to the structure.
+        \item The coupling between the structure and fluid equations leads to a nonlinear system of equations that must be solved iteratively.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Assembly and Solution}
+    \begin{itemize}
+        \item The element equations are assembled into a global system of equations that governs the behavior of the entire structure.
+        \item This system of equations is then solved numerically to obtain the nodal values of the unknown variables.
+    \end{itemize}
+    \begin{figure}
+        \includegraphics[width=0.8\textwidth]{assembly.png}
+        \caption{Example of assembly process.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Types of Elements}
+    \begin{itemize}
+        \item FEM offers a variety of element types to model different problems, such as 1D, 2D, and 3D elements.
+        \item The choice of element type depends on the geometry of the problem, the desired accuracy, and the computational cost.
+    \end{itemize}
+    \begin{figure}
+        \includegraphics[width=0.8\textwidth]{element_types.png}
+        \caption{Different types of finite elements.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Boundary Conditions}
+    \begin{itemize}
+        \item Boundary conditions are incorporated into the FEM model to represent the physical constraints of the problem.
+        \item They can be essential boundary conditions (e.g., prescribed displacements) or natural boundary conditions (e.g., applied forces).
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Applications of the Finite Element Method}
+    \begin{itemize}
+        \item FEM has numerous applications in various fields, including:
+        \begin{itemize}
+            \item Structural analysis (e.g., stress analysis of bridges, buildings, and aircraft)
+            \item Fluid mechanics (e.g., simulation of blood flow, airflow over an airfoil)
+            \item Heat transfer (e.g., thermal analysis of electronic components)
+            \item Electromagnetics (e.g., design of antennas and waveguides)
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusion}
+    \begin{itemize}
+        \item FEM is a powerful numerical technique for solving complex engineering and mathematical problems.
+        \item It's widely used in various fields due to its versatility and ability to handle complex geometries, material properties, and boundary conditions.
+        \item Understanding FEM is crucial for comprehending the hybrid immersed boundary finite element method, which combines the strengths of both FEM and the immersed boundary method to solve fluid-structure interaction problems.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Glossary of Terms}
+  \begin{description}
+    \item[Stress] A measure of the force acting per unit area within a deformable body.
+    \item[Tensor] A mathematical object that describes a multilinear relationship between sets of algebraic objects related to a vector space.
+    \item[Cauchy Stress Tensor ($\boldsymbol{\sigma}$)] A second-order tensor that describes the state of stress at a point within a material.
+    \item[Normal Stress] Stress acting perpendicular to a surface.
+    \item[Shear Stress] Stress acting parallel to a surface.
+    \item[Pascal (Pa)] The SI unit of pressure or stress, equal to one newton per square meter.
+    \item[Pound per Square Inch (psi)] A unit of pressure or stress in the imperial and US customary systems.
+    \item[Continuum Mechanics] The branch of mechanics that deals with the analysis of the kinematics and mechanical behavior of materials modeled as a continuous mass rather than as discrete particles.
+  \end{description}
+\end{frame}
+
+\end{document}

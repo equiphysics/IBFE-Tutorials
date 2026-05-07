@@ -1,0 +1,271 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage{amsmath, amssymb, bm}
+\usepackage{graphicx}
+
+% ---------- Macros ----------
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\uu}{\bm{u}}
+\newcommand{\pp}{p}
+\newcommand{\Rey}{\mathrm{Re}}
+\newcommand{\nuu}{\nu}
+\newcommand{\tmark}[1]{\hfill{\scriptsize\textcolor{gray}{#1}}}
+
+% Uncomment if you want speaker notes:
+% \usepackage{pgfpages}
+% \setbeameroption{show notes on second screen=right}
+
+\title[Turbulence: What is it?]{What is Turbulence?\\Key Features, Examples, and Why It Matters}
+\author{
+\href{https://cassyni.com/events/HsafxyMiJvA1JVCU9eef3T/seminar}{(adapted from Steve Brunton lecture)}}
+\date{}
+
+\begin{document}
+% -------------------------
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% -------------------------
+\begin{frame}{Lecture roadmap}
+\begin{itemize}
+  \item Why turbulence is hard (and why it matters)
+  \item Canonical flows: a ``vocabulary'' for turbulence
+  \item Examples: pipe, wake, boundary layer, cavity, jets, mixing layers
+  \item ``More complex'' flows (geometry, separation, multi-scale physics)
+  \item Open-source resources: databases and CFD codes
+\end{itemize}
+\end{frame}
+
+
+% -------------------------
+\begin{frame}{Why turbulence is hard}
+\begin{columns}[T,onlytextwidth]
+\column{0.56\textwidth}
+\begin{itemize}
+  \item Turbulence is a \emph{multi-scale}, \emph{history-dependent} dynamics problem.
+  \item Small perturbations can grow, interact, and reorganize the flow.
+  \item Many flows are \emph{linearly stable} yet become turbulent through finite-amplitude disturbances.
+  \item Predicting transition and statistics (drag, mixing, heat transfer, intermittency) is still challenging.
+\end{itemize}
+
+\column{0.44\textwidth}
+\includegraphics[width=\textwidth]{pictures/5-1/turbulence.png}
+
+\vspace{0.35em}
+{\footnotesize A classic motivation appears in the \emph{Feynman Lectures} (Vol.\ II) discusses why predicting real flows is so difficult.}
+\end{columns}
+\end{frame}
+
+% -------------------------
+\begin{frame}{Canonical flows (Van Dyke ``album'')}
+\begin{columns}[T,onlytextwidth]
+\column{0.55\textwidth}
+\begin{block}{Idea}
+A small set of ``canonical'' configurations show up \emph{everywhere}.  Learn these and you gain a language for:
+\begin{itemize}
+  \item transition mechanisms (instability \(\rightarrow\) breakdown),
+  \item coherent structures (vortices, streaks, shear layers),
+  \item scaling laws and nondimensional groups.
+\end{itemize}
+\end{block}
+\column{0.4\textwidth}
+\includegraphics[width=0.75\textwidth]{pictures/5-1/album.png}
+\end{columns}
+\end{frame}
+
+% -------------------------
+\begin{frame}{A minimal tool: Reynolds number}
+\begin{itemize}
+  \item Reynolds number compares inertia to viscosity:
+  \[
+    \mathrm{Re}=\frac{UL}{\nu}.
+  \]
+  \item ``High'' \(\mathrm{Re}\) often means stronger instabilities, thinner boundary layers, and wider separation of scales.
+  \item But \(\mathrm{Re}\) alone does \emph{not} determine the outcome:
+  geometry, forcing, roughness, and disturbance history matter.
+\end{itemize}
+\end{frame}
+
+% =========================
+% Canonical flows
+% =========================
+
+\section{Canonical flows}
+
+% -------------------------
+\begin{frame}{Pipe flow}
+\begin{columns}[T,onlytextwidth]
+\column{0.5\textwidth}
+\begin{itemize}
+  \item Classic internal flow: long straight pipe, pressure-driven.
+  \item Laminar solution exists for all \(\mathrm{Re}\), but becomes \emph{fragile} to disturbances.
+  \item Transition often involves localized ``puffs'' and ``slugs'' (intermittency).
+  \item Active control is possible: carefully designed perturbations can suppress turbulence (drag reduction).
+\end{itemize}
+\column{0.45\textwidth}
+\includegraphics[width=\textwidth]{pictures/5-1/t_0300.jpg}
+\end{columns}
+\end{frame}
+
+%-------------------------------
+\begin{frame}{Pipe flow: Slugs and puffs}
+\begin{itemize}
+\item At high velocities, the flow is turbulent, and at intermediate velocities, transitional. 
+\item The transitional flow is a mix of eddying flows and laminar flows. 
+\item The eddying flows come in different varieties. 
+\begin{itemize}
+\item "Slugs" grow aggressively as they flow downstream; 
+\item "Puffs" maintain a fixed size as they flow downstream. 
+\end{itemize}
+\end{itemize}
+
+\centering
+\includegraphics[width=0.7\textwidth]{pictures/5-1/turbulence-pipe.png}
+
+\vspace{0.35em}
+{\footnotesize Source: Graham, M. Turbulence spreads like wildfire. Nature 526, 508–509 (2015).}
+\end{frame}
+
+%-------------------
+\begin{frame}{Puffs and slugs}
+\begin{itemize}
+\item Schematic of energy spectra corresponding to the flow inside the marked regions. 
+\item Regardless of the flow variety, the energy spectrum is universal for small eddies.
+\end{itemize}
+\centering
+\includegraphics[width=0.75\textwidth]{pictures/5-1/1-goingwiththe.jpg}
+
+\vspace{0.35em}
+{\footnotesize Source: https://phys.org/news/2020-01-insights-mysterious-fluid-motions.html}
+
+\end{frame}
+
+% -------------------------
+\begin{frame}{Wake flows}
+\begin{columns}[T,onlytextwidth]
+\column{0.5\textwidth}
+\begin{itemize}
+  \item Flow past a body leaves a \emph{wake} with a velocity deficit and strong shear.
+  \item Vortex shedding (\(\rightarrow\) K\'arm\'an vortex street) produces unsteady loading and noise.
+  \item Wakes are central to:
+  \begin{itemize}
+    \item aircraft wing tips and propellers,
+    \item wind farms and arrays,
+    \item animal locomotion and swimming.
+  \end{itemize}
+\end{itemize}
+\column{0.45\textwidth}
+\includegraphics[width=\textwidth]{pictures/5-1/t_0360.jpg}
+\end{columns}
+\end{frame}
+
+
+% -------------------------
+\begin{frame}{Boundary layer}
+\begin{columns}[T,onlytextwidth]
+\column{0.56\textwidth}
+\begin{itemize}
+  \item Near a wall, no-slip forces a thin region of strong shear: the boundary layer.
+  \item Key questions:
+  \begin{itemize}
+    \item when does laminar flow transition to turbulence?
+    \item how do near-wall streaks and vortices sustain turbulence?
+    \item how do roughness and pressure gradients change drag?
+  \end{itemize}
+  \item Boundary layers dominate drag and heat transfer on vehicles, buildings, and animals.
+\end{itemize}
+\column{0.44\textwidth}
+\includegraphics[width=\textwidth]{pictures/5-1/turbulent-boundary.png}
+{\footnotesize Source: Dou, Hua-Shu. (2018). Singularity of Navier-Stokes Equations. 10.48550/arXiv.1805.12053.} 
+\end{columns}
+\end{frame}
+
+% -------------------------
+\begin{frame}{Boundary layer: spatial development}
+\centering
+\includegraphics[width=0.92\textwidth]{pictures/5-1/boundary-layer.png}
+\vspace{0.35em}
+
+{\footnotesize Source: https://www.grasacoustics.com/blog/aerodynamic-measurements-components-of-the-boundary-layer}
+\end{frame}
+
+% -------------------------
+\begin{frame}{Cavity flow}
+\begin{columns}[T,onlytextwidth]
+\column{0.58\textwidth}
+\begin{itemize}
+  \item A shear layer forms over a cavity opening.
+  \item Feedback between shear-layer instability and acoustic/pressure waves can create resonant oscillations.
+  \item Applications:
+  \begin{itemize}
+    \item flow over developing heart chambers, aneurysms,
+    \item gaps, steps, and surface defects,
+    \item flow-induced vibration.
+  \end{itemize}
+\end{itemize}
+\column{0.42\textwidth}
+\includegraphics[width=\textwidth]{pictures/5-1/aneurysm.png}
+{\footnotesize Source: Boniforti MA, Magini R, Orosco Salinas T. Hemodynamic Investigation of the Flow Diverter Treatment of Intracranial Aneurysm. Fluids. 2023; 8(7):189. }
+\end{columns}
+\end{frame}
+
+
+
+% =========================
+% More complex flows and resources
+% =========================
+
+
+% -------------------------
+\begin{frame}{Open data: turbulence databases}
+\begin{columns}[T,onlytextwidth]
+\column{0.57\textwidth}
+\begin{itemize}
+  \item Public datasets let you test ideas without running a massive DNS yourself.
+  \item \href{https://turbulence.idies.jhu.edu/home}{Example: Johns Hopkins Turbulence Databases (JHTDB)}  
+  \begin{itemize}
+    \item isotropic turbulence, channel flow, boundary layers, geophysical, \ldots
+    \item query-able via web/API-style interfaces
+    \item great for teaching statistics, structure functions, spectra, and coherent-structure detection
+  \end{itemize}
+\end{itemize}
+\column{0.43\textwidth}
+\includegraphics[width=\textwidth]{pictures/5-1/JHU-dataset.png}
+\end{columns}
+\end{frame}
+
+% -------------------------
+\begin{frame}{Open-source CFD codes}
+\begin{columns}[T,onlytextwidth]
+\column{0.52\textwidth}
+\begin{block}{Two common ecosystems}
+\begin{itemize}
+  \item \href{https://www.openfoam.com/}{\textbf{OpenFOAM}}: finite-volume framework with many RANS/LES solvers; strong community support.
+  \item \href{https://nek5000.mcs.anl.gov/}{\textbf{Nek5000}}: high-order spectral-element code; widely used for DNS/LES in complex geometries.
+\end{itemize}
+\end{block}
+\begin{itemize}
+  \item Choosing a tool depends on: accuracy needs, geometry, turbulence model, and HPC resources.
+\end{itemize}
+\column{0.44\textwidth}
+\includegraphics[width=\textwidth]{pictures/5-1/nek5000-1000x500.jpg}
+\end{columns}
+\end{frame}
+
+% -------------------------
+\begin{frame}{Takeaways}
+\begin{itemize}
+  \item Turbulence is everywhere, but canonical flows give structure to the chaos.
+  \item Each canonical flow highlights different mechanisms (instability, shear, walls, separation, resonance).
+  \item Open videos, datasets, and codes make it easier than ever to \emph{see} turbulence and to explore it quantitatively.
+\end{itemize}
+
+\vspace{0.8em}
+
+\end{frame}
+\end{document}

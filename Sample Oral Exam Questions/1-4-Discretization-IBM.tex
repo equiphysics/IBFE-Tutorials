@@ -1,0 +1,205 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{Sample Oral Exam Questions and Answers\\
+Immersed Boundary Method: Discretization}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Overview of IB Discretization}
+
+\begin{enumerate}[label=\arabic*.]
+
+\item \textbf{What are the three main discretization components of the immersed boundary method?}
+
+\textit{Sample answer:}  
+The IB method discretizes:
+\begin{itemize}
+\item the fluid variables on a fixed Eulerian Cartesian grid,
+\item the structure on a Lagrangian mesh of material points, and
+\item the interaction between them using regularized delta functions.
+\end{itemize}
+
+\item \textbf{Describe the basic sequence of operations performed in one IB time step.}
+
+\textit{Sample answer:}  
+At each time step, elastic forces are computed on the structure, these forces are spread to the fluid grid, the fluid equations are solved, fluid velocities are interpolated back to the structure, and the structure is advanced in time.
+
+\end{enumerate}
+
+\section*{Eulerian Discretization of the Fluid}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{How are the fluid variables discretized in space and time?}
+
+\textit{Sample answer:}  
+Velocity and pressure are discretized on a uniform Cartesian grid with spacing $h = \Delta x$. Time is discretized with a timestep $\Delta t$. Spatial derivatives are typically approximated using second-order finite differences, often on staggered MAC grids.
+
+\item \textbf{Why are staggered grids commonly used in IB implementations?}
+
+\textit{Sample answer:}  
+Staggered grids help avoid pressure–velocity decoupling and improve discrete enforcement of incompressibility by placing velocity and pressure at different locations on the grid.
+
+\item \textbf{Write the semi-implicit discrete Navier--Stokes update used in Peskin-style IB methods.}
+
+\textit{Sample answer:}  
+A common update is
+\[
+\rho\left(\frac{u^{n+1}-u^n}{\Delta t} + S_{\Delta x}(u^n)u^n\right)
+- D_0 p^{n+1}
+= \mu \sum_{\alpha=1}^d D^+_\alpha D^-_\alpha u^{n+1} + f^n,
+\]
+with the incompressibility constraint
+\[
+D_0 \cdot u^{n+1} = 0.
+\]
+
+\item \textbf{Why is this system linear in the unknowns $u^{n+1}$ and $p^{n+1}$?}
+
+\textit{Sample answer:}  
+Because the nonlinear convection term is treated explicitly using $u^n$, and the forcing $f^n$ is known, leaving only linear viscous and pressure terms implicit.
+
+\end{enumerate}
+
+\section*{Lagrangian Discretization of the Structure}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{How is an immersed structure discretized in the IB method?}
+
+\textit{Sample answer:}  
+The structure is discretized using Lagrangian material points with spacing $\Delta q$ (for fibers), $\Delta A$ (for surfaces), or $\Delta V$ (for solids), which approximate the continuous mapping $\chi(q,t)$.
+
+\item \textbf{Where are elastic forces computed, and why?}
+
+\textit{Sample answer:}  
+Elastic forces are computed entirely in Lagrangian coordinates, where material connectivity and constitutive laws are most naturally defined.
+
+\end{enumerate}
+
+\section*{Force Spreading and Velocity Interpolation}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{Write the discrete force-spreading formula.}
+
+\textit{Sample answer:}  
+\[
+f^n(x_i) = \sum_m F^n_m \, \delta_{\Delta x}(x_i - X^n_m)\, \Delta q.
+\]
+
+\item \textbf{Write the discrete velocity interpolation formula.}
+
+\textit{Sample answer:}  
+\[
+U^n_m = \sum_i u^n(x_i)\, \delta_{\Delta x}(x_i - X^n_m)\, (\Delta x)^d.
+\]
+
+\item \textbf{Why is the same regularized delta function used in both formulas?}
+
+\textit{Sample answer:}  
+Using the same kernel ensures consistency and discrete energy balance: the work done by the structure on the fluid equals the work extracted from the fluid by the structure.
+
+\end{enumerate}
+
+\section*{Updating the Structure}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{How is the structure advanced in time in the simplest IB scheme?}
+
+\textit{Sample answer:}  
+Using a forward Euler update:
+\[
+X^{n+1}_m = X^n_m + \Delta t \, U^n_m.
+\]
+
+\item \textbf{What limits the allowable time step in explicit IB schemes?}
+
+\textit{Sample answer:}  
+The time step is limited by fluid CFL conditions and by stiffness in the elastic forces, especially bending forces, which scale like $(\Delta q)^{-4}$.
+
+\end{enumerate}
+
+\section*{Codimension and Structural Forces}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{What is meant by the codimension perspective in the IB method?}
+
+\textit{Sample answer:}  
+Codimension refers to the difference between the fluid dimension and the structure dimension, such as a 1D fiber in a 2D or 3D fluid. The same IB coupling formulas apply regardless of codimension.
+
+\item \textbf{List and briefly describe common force components used for fibers.}
+
+\textit{Sample answer:}  
+Typical forces include target-point (penalty) forces that tether points to prescribed locations, stretching forces that resist changes in arc length, and bending forces that penalize curvature.
+
+\item \textbf{Why do bending forces impose especially severe time-step restrictions?}
+
+\textit{Sample answer:}  
+Because discrete bending forces involve fourth-order derivatives, their stiffness scales as $(\Delta q)^{-4}$, leading to very small stable time steps when treated explicitly.
+
+\end{enumerate}
+
+\section*{Weak Enforcement of No-Slip}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{How is the no-slip condition enforced in the immersed boundary method?}
+
+\textit{Sample answer:}  
+No-slip is enforced weakly by interpolating fluid velocity to the structure using the regularized delta function and advancing the structure with that velocity, rather than enforcing velocity equality pointwise.
+
+\item \textbf{What is meant by grid-scale slip, and what happens as $h \to 0$?}
+
+\textit{Sample answer:}  
+Grid-scale slip refers to small discrepancies between fluid and structure velocities due to regularization. These discrepancies vanish as the grid is refined and $h \to 0$.
+
+\end{enumerate}
+
+\section*{Discrete Delta Functions}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{Describe the tensor-product construction of a discrete delta function.}
+
+\textit{Sample answer:}  
+The discrete delta is built as a tensor product of 1D kernels:
+\[
+\delta_{\Delta x}(x) = \frac{1}{(\Delta x)^d}\prod_{\alpha=1}^d \phi\left(\frac{x_\alpha}{\Delta x}\right),
+\]
+where $\phi$ is compactly supported and symmetric.
+
+\item \textbf{What properties of the cosine kernel make it suitable for IB coupling?}
+
+\textit{Sample answer:}  
+The cosine kernel is symmetric, compactly supported, satisfies a partition-of-unity property, and is simple to implement, making it effective for force spreading and interpolation.
+
+\end{enumerate}
+
+\section*{From Classical to Modern IB Methods}
+
+\begin{enumerate}[label=\arabic*., resume]
+
+\item \textbf{What are the main limitations of the classical Peskin (1996) discretization?}
+
+\textit{Sample answer:}  
+Key limitations include severe time-step restrictions for stiff structures, limited accuracy near immersed boundaries, and assumptions of periodic domains and uniform grids.
+
+\item \textbf{How do modern IB methods address these limitations?}
+
+\textit{Sample answer:}  
+Modern methods introduce implicit or semi-implicit coupling, finite-element structural models (IBFE), adaptive mesh refinement, and multilevel solvers to improve stability, accuracy, and flexibility.
+
+\end{enumerate}
+
+\end{document}

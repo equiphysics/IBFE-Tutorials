@@ -1,0 +1,566 @@
+\documentclass{beamer}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\title{Immersed Boundary Method Discretization}
+\author{Laura Miller}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+
+\begin{frame}{Discretization of the Immersed Boundary Method}
+\small
+The immersed boundary (IB) method discretizes a coupled
+fluid–structure system with:
+\begin{itemize}
+    \item an \textbf{Eulerian grid} for the fluid variables
+    \item a \textbf{Lagrangian mesh} for the immersed structure
+    \item \textbf{regularized delta functions} to couple the two
+\end{itemize}
+
+\medskip
+At each time step, the method alternates between:
+\begin{enumerate}
+    \item solving the fluid equations on a fixed grid,
+    \item computing elastic forces on the structure,
+    \item transferring forces and velocities between grids.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Eulerian Discretization: Fluid Variables}
+\small
+The fluid equations are discretized on a fixed Cartesian grid
+\[
+\mathbf{x}_{i,j} = (i h, j h)
+\quad \text{(or } \mathbf{x}_{i,j,k} \text{ in 3D)}
+\]
+
+
+\medskip
+\begin{itemize}
+    \item Velocity: $\mathbf{u}_{i,j}^n \approx \mathbf{u}(\mathbf{x}_{i,j}, t^n)$
+    \item Pressure: $p_{i,j}^n \approx p(\mathbf{x}_{i,j}, t^n)$
+    \item Grid spacing: $h$
+\end{itemize}
+
+\medskip
+We use $h$ and $\Delta x$ interchangeably to denote the uniform Eulerian grid spacing.
+
+\medskip
+Spatial derivatives are typically approximated using:
+\begin{itemize}
+    \item second-order finite differences,
+    \item staggered (MAC) grids in many IB/IBAMR implementations.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Lagrangian Discretization: Structure Variables}
+\small
+The immersed structure is discretized using material points
+\[
+\mathbf{X}_k^n \approx \boldsymbol{\chi}(\mathbf{q}_k, t^n),
+\]
+where $\mathbf{q}_k$ are reference coordinates.
+
+\medskip
+\begin{itemize}
+    \item Lagrangian spacing: $\Delta s$ (1D), $\Delta A$ (2D), or $\Delta V$ (3D)
+    \item Elastic force density:
+    \[
+    \mathbf{F}_k^n \approx \mathbf{F}(\mathbf{q}_k, t^n)
+    \]
+\end{itemize}
+
+\medskip
+Elastic forces are computed entirely in Lagrangian coordinates,
+using springs, beams, shells, or continuum elasticity models.
+\end{frame}
+
+\begin{frame}{Force Spreading: Lagrangian to Eulerian}
+\small
+Elastic forces computed on the structure are spread to the fluid grid via
+\[
+\mathbf{f}_{i,j}^n
+=
+\sum_k
+\mathbf{F}_k^n\,
+\delta_h(\mathbf{x}_{i,j} - \mathbf{X}_k^n)\,
+\Delta s
+\]
+
+\medskip
+Here $\Delta s$ denotes the appropriate Lagrangian quadrature weight
+(e.g.\ $\Delta s=\Delta q$ for a fiber, $\Delta A$ for a surface).
+
+
+\medskip
+\begin{itemize}
+    \item $\delta_h$ is the regularized delta function
+    \item Each Lagrangian force contributes to nearby fluid grid points
+    \item Compact support ensures locality and efficiency
+\end{itemize}
+
+\medskip
+This discretization approximates the continuous force-spreading integral
+introduced earlier.
+\end{frame}
+
+\begin{frame}{Velocity Interpolation: Eulerian to Lagrangian}
+\small
+The structure moves with the local fluid velocity, interpolated as
+\[
+\mathbf{U}_k^n
+=
+\sum_{\mathbf{i}}
+\mathbf{u}_{\mathbf{i}}^n\,
+\delta_h(\mathbf{x}_{\mathbf{i}} - \mathbf{X}_k^n)\,
+h^{d}
+\]
+
+
+\medskip
+\begin{itemize}
+    \item Uses the \emph{same} regularized delta function as force spreading
+    \item Ensures consistency between force and velocity transfer
+    \item Enforces the no-slip condition in a weak (integral) sense
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Updating the Structure}
+\small
+Once the velocity at each Lagrangian point is known,
+the structure is advanced in time:
+\[
+\mathbf{X}_k^{n+1}
+=
+\mathbf{X}_k^n
++
+\Delta t\, \mathbf{U}_k^n
+\]
+
+\medskip
+\begin{itemize}
+    \item Forward Euler shown for simplicity
+    \item Higher-order and implicit schemes are also used in practice
+    \item Time step restricted by elastic stiffness and fluid stability
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Immersed Boundary Algorithm (One Time Step)}
+\small
+Given $(\mathbf{u}^n, \mathbf{X}^n)$:
+
+\begin{enumerate}
+    \item Compute elastic forces $\mathbf{F}^n$ on the structure
+    \item Spread forces to the fluid grid to obtain $\mathbf{f}^n$
+    \item Solve the fluid equations for $\mathbf{u}^{n+1}$
+    \item Interpolate velocity to obtain $\mathbf{U}^{n+1}$
+    \item Update the structure configuration $\mathbf{X}^{n+1}$
+\end{enumerate}
+
+\medskip
+This cycle is repeated for each time step.
+\end{frame}
+
+\begin{frame}{Time Step Restrictions and Stiffness}
+\small
+
+While conceptually simple, the Peskin (1996) discretization
+imposes practical limitations on the time step.
+
+\medskip
+\textbf{Sources of time step restriction:}
+\begin{itemize}
+    \item Advection CFL condition (explicit convection)
+    \item Strong stiffness from elastic forces
+    \item Additional constraints depending on the time integrator
+\end{itemize}
+
+
+\medskip
+For fiber bending forces:
+\[
+\mathbf{F}_{\text{bend}} \sim \frac{1}{(\Delta q)^4},
+\]
+leading to severe restrictions on $\Delta t$ when treated explicitly.
+
+\medskip
+This motivates later developments:
+\begin{itemize}
+    \item semi-implicit and fully implicit IB schemes
+    \item IBFE and penalty formulations
+    \item adaptive and multilevel solvers
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Codimension Perspective in the IB Method}
+\small
+
+The immersed boundary framework naturally handles structures of
+different dimensions immersed in a higher-dimensional fluid.
+
+\medskip
+\begin{itemize}
+    \item 1D fibers immersed in 2D or 3D fluids
+    \item 2D surfaces immersed in 3D fluids
+    \item (In some extensions) volumetric solids
+\end{itemize}
+
+\medskip
+The same coupling formulas apply in all cases:
+\[
+\mathbf{f}(\mathbf{x})
+=
+\int_{\mathcal{U}}
+\mathbf{F}(\mathbf{X})\,
+\delta(\mathbf{x}-\boldsymbol{\chi}(\mathbf{X}))\,d\mathbf{X},
+\]
+with appropriate quadrature weights.
+
+\medskip
+This flexibility is one of the defining strengths of the IB approach.
+
+\end{frame}
+
+
+
+\begin{frame}{From Overview to a Concrete Implementation}
+\small
+
+So far, we have described the immersed boundary method at a general level:
+\begin{itemize}
+    \item Eulerian–Lagrangian coupling via integral transforms
+    \item Regularized delta functions for interaction
+    \item General algorithmic structure of IB methods
+\end{itemize}
+
+\medskip
+
+We now turn to a \textbf{specific and influential implementation}:
+\begin{itemize}
+    \item the fiber-based immersed boundary method described in \textbf{Peskin (1996)}
+\end{itemize}
+
+\medskip
+
+\textbf{Important caveats:}
+\begin{itemize}
+    \item This discretization reflects design choices made for efficiency and robustness at the time
+    \item Modern IB frameworks (e.g.\ IBAMR, IBFE) generalize or modify several of these steps
+    \item Our goal is understanding the \emph{logic} of the discretization, not prescribing a single best practice
+\end{itemize}
+
+\medskip
+
+With these caveats in mind, we now walk through Peskin’s discretization step by step.
+
+\end{frame}
+
+\begin{frame}{Scope and Assumptions of Peskin (1996)}
+\small
+
+Before diving into the details, it is important to be clear about the
+assumptions underlying the classical fiber-based immersed boundary method
+of Peskin (1996).
+
+\medskip
+\textbf{Key assumptions:}
+\begin{itemize}
+    \item Incompressible, Newtonian fluid
+    \item Uniform Cartesian Eulerian grid
+    \item Periodic computational domain (FFT-based solvers)
+    \item Codimension-1 structures (fibers) immersed in the fluid
+    \item Elastic forces computed in Lagrangian coordinates
+    \item Semi-implicit time stepping (viscosity implicit, coupling explicit)
+\end{itemize}
+
+\medskip
+These assumptions were chosen to emphasize robustness, simplicity,
+and computational efficiency.
+
+\end{frame}
+
+%=======================================================
+% Discretization (slide 70 style)
+%=======================================================
+\begin{frame}{Discretization of Navier-Stokes}
+\small
+On a uniform Eulerian grid with spacing $\Delta x$ and timestep $\Delta t$, a common semi-implicit update is:
+\begin{align*}
+\rho\left(
+\frac{\mathbf{u}^{n+1}-\mathbf{u}^{n}}{\Delta t}
++ \mathcal{S}_{\Delta x}(\mathbf{u}^{n})\,\mathbf{u}^{n}
+\right)
+- \mathbf{D}^{0} p^{n+1}
+&=
+\mu\sum_{\alpha=1}^{d} D^{+}_{\alpha}D^{-}_{\alpha}\mathbf{u}^{n+1}
++\mathbf{f}^{n},\\
+\mathbf{D}^{0}\cdot \mathbf{u}^{n+1} &= 0,
+\end{align*}
+where $d\in\{2,3\}$ is the spatial dimension.
+
+\medskip
+\textbf{Key point:} The system is linear in the unknowns $\mathbf{u}^{n+1}$ and $p^{n+1}$ once $\mathbf{f}^n$ and the explicit convection term are known, so FFT-based solvers are natural on periodic boxes.
+\end{frame}
+
+%=======================================================
+% Discretization details (slide 71 style)
+%=======================================================
+\begin{frame}{Finite difference operators used above}
+\small
+Let $\mathbf{e}_{\alpha}$ denote the Cartesian basis vectors ($\alpha=1,\dots,d$).
+
+\medskip
+\textbf{Centered difference gradient components:}
+\[
+\left(D_{\alpha}^{0}\phi\right)(\mathbf{x})
+=
+\frac{\phi(\mathbf{x}+\Delta x\,\mathbf{e}_{\alpha})-\phi(\mathbf{x}-\Delta x\,\mathbf{e}_{\alpha})}{2\Delta x},
+\qquad
+\mathbf{D}^{0}\phi = (D_{1}^{0}\phi,\dots,D_{d}^{0}\phi).
+\]
+
+\textbf{Forward/backward differences:}
+\[
+\left(D_{\alpha}^{+}\phi\right)(\mathbf{x})
+=
+\frac{\phi(\mathbf{x}+\Delta x\,\mathbf{e}_{\alpha})-\phi(\mathbf{x})}{\Delta x},
+\qquad
+\left(D_{\alpha}^{-}\phi\right)(\mathbf{x})
+=
+\frac{\phi(\mathbf{x})-\phi(\mathbf{x}-\Delta x\,\mathbf{e}_{\alpha})}{\Delta x}.
+\]
+
+\textbf{Skew-symmetric discrete convection (energy-friendly form):}
+\[
+\mathcal{S}_{\Delta x}(\mathbf{u})\,\phi
+=
+\frac{1}{2}\,\mathbf{u}\cdot \mathbf{D}^{0}\phi
++
+\frac{1}{2}\,\mathbf{D}^{0}\cdot(\mathbf{u}\,\phi).
+\]
+\end{frame}
+
+%=======================================================
+% Boundary discretization (slide 72 style)
+%=======================================================
+\begin{frame}{Fiber/Boundary discretization (1D structure in $d$D fluid)}
+\small
+Discretize the immersed fiber by Lagrangian nodes $\mathbf{X}^{n}_{m}\approx \mathbf{X}(q_m,t^n)$
+with spacing $\Delta q$ (using $q$ as the Lagrangian parameter to avoid confusion with meters).
+
+\medskip
+Common force components (additive):
+\[
+\mathbf{F}^{n}_{m}
+=
+\mathbf{F}^{n}_{\text{targ},m}
++
+\mathbf{F}^{n}_{\text{str},m}
++
+\mathbf{F}^{n}_{\text{bend},m}.
+\]
+
+\textbf{Target-point (penalty) force:}
+\[
+\mathbf{F}^{n}_{\text{targ},m}
+=
+k_{\text{targ}}\left(\mathbf{Y}^{n}_{m}-\mathbf{X}^{n}_{m}\right),
+\]
+where $\mathbf{Y}^{n}_{m}$ is a prescribed target location.
+
+\medskip
+\textbf{Stretching force (Hookean tension along the fiber):}
+Define the centered difference
+\[
+\left(D_{q}\mathbf{X}^{n}\right)_m
+=
+\frac{\mathbf{X}^{n}_{m+1}-\mathbf{X}^{n}_{m-1}}{2\Delta q},
+\qquad
+\boldsymbol{\tau}^{n}_m
+=
+\frac{(D_{q}\mathbf{X}^{n})_m}{\left\lVert (D_{q}\mathbf{X}^{n})_m\right\rVert}.
+\]
+A common discrete stretching force is
+\[
+\mathbf{F}^{n}_{\text{str},m}
+=
+k_{\text{str}}\,D_{q}\!\left(\left(\left\lVert D_{q}\mathbf{X}^{n}\right\rVert-1\right)\boldsymbol{\tau}^{n}\right)_m.
+\]
+
+
+\end{frame}
+
+\begin{frame}{Fiber/Boundary discretization (1D structure in $d$D fluid)}
+\textbf{Bending (beam) force (discrete 4th derivative):}
+\[
+\mathbf{F}^{n}_{\text{bend},m}
+=
+k_{\text{bend}}\,
+\frac{\mathbf{X}^{n}_{m-2}-4\mathbf{X}^{n}_{m-1}+6\mathbf{X}^{n}_{m}-4\mathbf{X}^{n}_{m+1}+\mathbf{X}^{n}_{m+2}}{(\Delta q)^4}.
+\]
+    
+\end{frame}
+%=======================================================
+% Spreading + interpolation + update (slide 73 style)
+%=======================================================
+\begin{frame}{Force spreading and velocity interpolation (discrete)}
+\small
+Let Eulerian grid points be $\mathbf{x}_{\mathbf{i}}$ (multi-index $\mathbf{i}$ in $d$D).
+
+\medskip
+\textbf{Spread Lagrangian force to the Eulerian grid:}
+\[
+\mathbf{f}^{n}(\mathbf{x}_{\mathbf{i}})
+=
+\sum_{m}\mathbf{F}^{n}_{m}\;
+\delta_{\Delta x}\!\left(\mathbf{x}_{\mathbf{i}}-\mathbf{X}^{n}_{m}\right)\,\Delta q.
+\]
+
+\textbf{Interpolate Eulerian velocity to the fiber:}
+\[
+\mathbf{U}^{n+1}_{m}
+=
+\sum_{\mathbf{i}}\mathbf{u}^{n+1}(\mathbf{x}_{\mathbf{i}})\;
+\delta_{\Delta x}\!\left(\mathbf{x}_{\mathbf{i}}-\mathbf{X}^{n}_{m}\right)\,(\Delta x)^{d}.
+\]
+
+\textbf{No-slip update of the structure:}
+\[
+\frac{\mathbf{X}^{n+1}_{m}-\mathbf{X}^{n}_{m}}{\Delta t}
+=
+\mathbf{U}^{n+1}_{m}
+\qquad\Longleftrightarrow\qquad
+\mathbf{X}^{n+1}_{m}=\mathbf{X}^{n}_{m}+\Delta t\,\mathbf{U}^{n+1}_{m}.
+\]
+
+\medskip
+Here $\delta_{\Delta x}$ is a regularized approximation of the $d$-D Dirac delta.
+\end{frame}
+
+\begin{frame}{Weak Enforcement of the No-Slip Condition}
+\small
+
+In the immersed boundary method, the no-slip condition is not enforced
+pointwise at the structure.
+
+\medskip
+Instead:
+\begin{itemize}
+    \item Fluid velocity is interpolated to Lagrangian points using $\delta_h$
+    \item The structure is advanced using this interpolated velocity
+    \item Forces are spread back to the fluid using the same kernel
+\end{itemize}
+
+\medskip
+As a result, no-slip is enforced \textbf{in an averaged (integral) sense}:
+\[
+\frac{d\mathbf{X}}{dt}(\mathbf{q},t)
+\approx
+\int \mathbf{u}(\mathbf{x},t)\,
+\delta_h(\mathbf{x}-\boldsymbol{\chi}(\mathbf{q},t))\,d\mathbf{x}.
+\]
+
+\medskip
+Small grid-scale slip may occur, but vanishes as $h \to 0$.
+
+\end{frame}
+
+%=======================================================
+% Discrete delta function (slide 74 style) -- cosine kernel
+%=======================================================
+\begin{frame}{A common discrete delta: tensor-product cosine kernel}
+\small
+A standard choice is a tensor-product kernel:
+\[
+\delta_{\Delta x}(\mathbf{x})
+=
+\frac{1}{(\Delta x)^{d}}
+\prod_{\alpha=1}^{d}\phi\!\left(\frac{x_{\alpha}}{\Delta x}\right),
+\qquad d\in\{2,3\}.
+\]
+
+\medskip
+\textbf{Cosine (4-point support) 1D kernel:}
+\[
+\phi(s)=
+\begin{cases}
+\frac{1}{4}\left(1+\cos\!\left(\frac{\pi s}{2}\right)\right), & |s|\le 2,\\[6pt]
+0, & |s|>2.
+\end{cases}
+\]
+
+\medskip
+\textbf{Useful properties (designed for IB coupling):}
+\begin{itemize}
+\item Symmetric: $\phi(s)=\phi(-s)$.
+\item Compact support: only nodes within $2\Delta x$ contribute in each coordinate.
+\item Partition of unity (discrete “mass conservation”):
+\[
+\sum_{j\in\mathbb{Z}}\phi(s-j)=1.
+\]
+\end{itemize}
+\end{frame}
+
+\begin{frame}{From Peskin (1996) to Modern IB Methods}
+\small
+
+The discretization we have examined is foundational, but not the end
+of the story.
+
+\medskip
+\begin{center}
+\begin{tabular}{l|c|c}
+\textbf{Feature} & \textbf{Peskin (1996)} & \textbf{Modern IB (e.g.\ IBAMR)} \\
+\hline
+Structure type & Fibers & Fibers, surfaces, solids \\
+Elasticity & Discrete springs/beams & FE-based continuum models \\
+Coupling & Mostly explicit & Semi-/fully implicit \\
+Solvers & FFT, periodic & Multilevel, adaptive \\
+\end{tabular}
+\end{center}
+
+\medskip
+Understanding the classical method provides essential insight into
+why modern IB methods are designed the way they are.
+
+\end{frame}
+
+\begin{frame}{Roadmap: From Classical IB to Modern Methods}
+\small
+
+The discretization presented here follows Peskin (1996) and provides a
+clear conceptual foundation for immersed boundary methods.
+
+\medskip
+\textbf{What this formulation does well:}
+\begin{itemize}
+    \item Robust Eulerian–Lagrangian coupling
+    \item Simple handling of moving, deformable structures
+    \item Clear physical interpretation of forces and motion
+\end{itemize}
+
+\medskip
+\textbf{Key limitations of the classical approach:}
+\begin{itemize}
+    \item Severe time step restrictions for stiff structures
+    \item Limited accuracy near immersed boundaries
+    \item Periodic-domain and uniform-grid assumptions
+\end{itemize}
+
+\medskip
+\textbf{Natural extensions developed later:}
+\begin{itemize}
+    \item Implicit and semi-implicit coupling strategies
+    \item Finite-element structure models (IBFE)
+    \item Adaptive mesh refinement and multilevel solvers
+\end{itemize}
+
+\end{frame}
+
+\end{document}

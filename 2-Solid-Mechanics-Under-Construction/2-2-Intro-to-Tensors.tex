@@ -1,0 +1,1352 @@
+\documentclass{beamer}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usefonttheme{serif} 
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+
+
+\title{Introduction to Tensors}
+
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}{Introduction to Tensors}
+    \begin{itemize}
+        \item Tensors are mathematical objects that generalize scalars, vectors, and matrices. 
+        \item They are essential tools for describing physical quantities that have both magnitude and multiple directions, such as stress, strain, and the moment of inertia.
+        \item Tensors are represented by arrays of numbers, where the number of indices indicates the order of the tensor. 
+        \begin{itemize}
+            \item Scalar: 0th-order tensor (magnitude only) 
+            \item Vector: 1st-order tensor (magnitude and one direction) 
+            \item Matrix: 2nd-order tensor (magnitude and two directions) 
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Tensor Notation}
+    \begin{itemize}
+        \item Tensors are often represented using index notation, where subscripts indicate the components of the tensor. 
+        \item For example, the components of a vector $\mathbf{v}$ can be represented as $v_i$, where $i$ can take on values 1, 2, or 3 in three-dimensional space. 
+        \item Similarly, the components of a matrix $\mathbf{A}$ can be represented as $A_{ij}$, where $i$ and $j$ can each take on values 1, 2, or 3. 
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Tensor Operations}
+    \begin{itemize}
+        \item Tensors can be added, subtracted, and multiplied by scalars, just like vectors and matrices. 
+        \item They can also be multiplied together using the tensor product, which combines two tensors to form a higher-order tensor. 
+        \item Other important tensor operations include the dot product and the cross product, which are generalizations of the corresponding vector operations. 
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{What Is a Basis?}
+
+\begin{itemize}
+
+    \item A \textbf{basis} is a set of linearly independent vectors that allows us
+          to represent any vector or tensor in component form.
+          Different bases give different component matrices, but the
+          underlying geometric object does not change.
+
+    \item The familiar \textbf{Cartesian basis}
+          $\{\mathbf{e}_1,\mathbf{e}_2,\mathbf{e}_3\}$ is:
+          \begin{itemize}
+              \item orthonormal,
+              \item fixed in space,
+              \item aligned with the coordinate axes.
+          \end{itemize}
+
+    \item We often introduce a \textbf{rotated Cartesian basis}
+          $\{\mathbf{m}_1,\mathbf{m}_2,\mathbf{m}_3\}$ via a rotation matrix $Q$:
+          \[
+              \mathbf{m}_i = Q\,\mathbf{e}_i.
+          \]
+          The basis changes, but the physical vector or tensor does not.
+
+    \item Understanding different bases is essential for interpreting how tensors
+          transform and why their component matrices change under rotation.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Other Common Bases in Mechanics}
+
+\begin{itemize}
+
+    \item Not all bases are orthonormal or fixed.
+          In many physical problems, \textbf{curvilinear bases} arise naturally.
+
+    \item \textbf{Cylindrical basis}:
+          \[
+              \{\mathbf{e}_r, \mathbf{e}_\theta, \mathbf{e}_z\}
+          \]
+          Useful in pipes, rotating machinery, and axisymmetric geometry.
+          Basis vectors vary with position.
+
+    \item \textbf{Spherical basis}:
+          \[
+              \{\mathbf{e}_r, \mathbf{e}_\theta, \mathbf{e}_\phi\}
+          \]
+          Arises in pressure vessels, planetary models, and radially symmetric systems.
+
+    \item \textbf{Oblique or skew bases}:
+          Basis vectors are not orthogonal.
+          Common in crystal mechanics and finite element methods.
+
+    \item In each case, tensor components look different,
+          but the tensor itself is unchanged.
+          This is exactly why the \textbf{tensor transformation law} matters.
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Tensor Transformation Law (Layman’s Definition)}
+
+\textbf{Big Idea:}  
+A tensor is a physical or geometric object that does \emph{not} depend on how we choose
+to describe it.  
+Only its \emph{components} change when we change our point of view.
+
+\medskip
+
+\textbf{What changes?}  
+\begin{itemize}
+    \item When we rotate or change our coordinate system, the numbers in a tensor's
+          matrix may look different.
+    \item But the underlying object—the stretching, rotating, or mapping it represents—stays the same.
+\end{itemize}
+
+\medskip
+
+\textbf{Tensor Transformation Law (in words):}  
+\begin{quote}
+When we change coordinates, a tensor automatically adjusts its components in just the
+right way so that it still describes the same physical or geometric process.
+\end{quote}
+
+\end{frame}
+
+\begin{frame}
+
+\textbf{Why this matters:}
+\begin{itemize}
+    \item A true tensor gives the same prediction no matter what coordinate system we use.
+    \item This is how we know the stress tensor, strain tensor, and deformation gradient
+          describe real physical things—not artifacts of our notation.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Tensor Transformation Law}
+
+Let $\{ \mathbf{e}_1, \mathbf{e}_2, \mathbf{e}_3 \}$ and 
+$\{ \mathbf{m}_1, \mathbf{m}_2, \mathbf{m}_3 \}$ be two Cartesian bases.
+Let $Q$ be the orthogonal transformation matrix whose components are
+\[
+Q_{ij} = \mathbf{m}_i \cdot \mathbf{e}_j .
+\]
+
+\medskip
+If $S$ is a second-order tensor with components $S_{ij}$ in the 
+$\mathbf{e}$-basis, then its components in the 
+$\mathbf{m}$-basis are given by the \textbf{tensor transformation law}:
+\[
+S^{(m)} = Q\, S^{(e)}\, Q^{T}.
+\]
+
+\[
+S^{(m)}_{ij} 
+= 
+Q_{ik}\, S^{(e)}_{kl}\, Q_{jl}.
+\]
+
+\medskip
+\begin{itemize}
+\item This ensures that $S$ represents the \emph{same linear map}, even when the basis changes.
+\item Scalars (0th order) remain unchanged; vectors (1st order) transform as $v^{(m)} = Q v^{(e)}$;  
+  tensors (2nd order) transform with \emph{two} factors of $Q$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Matrix Representation of a Tensor -- Part 1}
+
+\begin{itemize}
+
+\item To compute with tensors, we express them in components relative to a basis,
+just like vectors.
+
+\item Consider the displacement gradient \(\nabla \mathbf{u}\) of a vector field
+\(\mathbf{u}(x_1,x_2,x_3)\).  
+It is the linear map defined by
+\[
+d\mathbf{u} = (\nabla \mathbf{u})\, d\mathbf{x}.
+\]
+
+\item Let \(\{ \mathbf{e}_1,\mathbf{e}_2,\mathbf{e}_3 \}\) be a Cartesian basis.
+We now express both \(d\mathbf{u}\) and \(d\mathbf{x}\) in components relative to this basis.
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Matrix Representation of a Tensor -- Part 2}
+
+\begin{itemize}
+
+\item Using the component forms of \(d\mathbf{u}\) and \(d\mathbf{x}\),
+the definition
+\[
+d\mathbf{u} = (\nabla \mathbf{u})\, d\mathbf{x}
+\]
+gives
+\begin{align*}
+du_1 &= \frac{\partial u_1}{\partial x_1} dx_1
+     + \frac{\partial u_1}{\partial x_2} dx_2
+     + \frac{\partial u_1}{\partial x_3} dx_3, \\
+du_2 &= \frac{\partial u_2}{\partial x_1} dx_1
+     + \frac{\partial u_2}{\partial x_2} dx_2
+     + \frac{\partial u_2}{\partial x_3} dx_3, \\
+du_3 &= \frac{\partial u_3}{\partial x_1} dx_1
+     + \frac{\partial u_3}{\partial x_2} dx_2
+     + \frac{\partial u_3}{\partial x_3} dx_3.
+\end{align*}
+
+\item Written in matrix form:
+\[
+\begin{bmatrix}
+du_1 \\ du_2 \\ du_3
+\end{bmatrix}
+=
+\begin{bmatrix}
+\frac{\partial u_1}{\partial x_1} &
+\frac{\partial u_1}{\partial x_2} &
+\frac{\partial u_1}{\partial x_3} \\[6pt]
+\frac{\partial u_2}{\partial x_1} &
+\frac{\partial u_2}{\partial x_2} &
+\frac{\partial u_2}{\partial x_3} \\[6pt]
+\frac{\partial u_3}{\partial x_1} &
+\frac{\partial u_3}{\partial x_2} &
+\frac{\partial u_3}{\partial x_3}
+\end{bmatrix}
+\begin{bmatrix}
+dx_1 \\ dx_2 \\ dx_3
+\end{bmatrix}.
+\]
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Matrix Representation of a Tensor -- Part 3}
+
+\begin{itemize}
+
+\item The displacement gradient \(\nabla \mathbf{u}\) is therefore represented by
+a \(3\times 3\) matrix whose entries are
+\[
+(\nabla \mathbf{u})_{ij} = \frac{\partial u_i}{\partial x_j}.
+\]
+
+\item Every second-order tensor can be represented this way.  
+A general tensor \(S\) has components
+\[
+S =
+\begin{bmatrix}
+S_{11} & S_{12} & S_{13} \\
+S_{21} & S_{22} & S_{23} \\
+S_{31} & S_{32} & S_{33}
+\end{bmatrix}.
+\]
+
+\item Because it behaves like a linear map, we may perform all standard
+matrix operations: addition, multiplication, transpose, inverse, determinant, etc.
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Matrix Representation of a Tensor -- Part 4}
+
+\begin{itemize}
+
+\item One may compute eigenvalues, eigenvectors, tensor square roots, exponentials,
+and other matrix functions using the component matrix.
+
+\item The components \(S_{ij}\) depend on the chosen basis.  
+Changing the basis changes the component matrix.
+
+\item However, the tensor itself --- the underlying linear map --- is basis independent.
+
+\item Thus, if
+\[
+\mathbf{v} = S\,\mathbf{u},
+\]
+then this relation holds in \emph{every} coordinate system, even though the
+matrix representation of \(S\), \(\mathbf{u}\), and \(\mathbf{v}\) may change.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Example: The Gradient of a Vector Field}
+
+Let $\mathbf{u}(\mathbf{x})$ be a vector field in $\mathbb{R}^3$, and define its
+gradient as the second-order tensor
+\[
+\nabla \mathbf{u} 
+= 
+\begin{bmatrix}
+\frac{\partial u_1}{\partial x_1} &
+\frac{\partial u_1}{\partial x_2} &
+\frac{\partial u_1}{\partial x_3} \\[6pt]
+\frac{\partial u_2}{\partial x_1} &
+\frac{\partial u_2}{\partial x_2} &
+\frac{\partial u_2}{\partial x_3} \\[6pt]
+\frac{\partial u_3}{\partial x_1} &
+\frac{\partial u_3}{\partial x_2} &
+\frac{\partial u_3}{\partial x_3}
+\end{bmatrix}.
+\]
+
+For a small displacement $\mathrm{d}\mathbf{x}$, the change in $\mathbf{u}$ satisfies
+\[
+\mathrm{d}\mathbf{u}
+= (\nabla \mathbf{u})\, \mathrm{d}\mathbf{x}.
+\]
+
+\vspace{0.2cm}
+\begin{itemize}
+\item $\nabla \mathbf{u}$ linearly maps a vector $\mathrm{d}\mathbf{x}$ to a new vector $\mathrm{d}\mathbf{u}$.
+\item Because this map takes one vector to another vector, it is a \textbf{second-order tensor}.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Why the Gradient is a Tensor}
+
+A second-order tensor is a linear operator that maps vectors to vectors.  
+The displacement gradient does exactly this:
+\[
+\mathrm{d}\mathbf{u} = (\nabla \mathbf{u})\,\mathrm{d}\mathbf{x}.
+\]
+
+\begin{itemize}
+\item The components of $(\nabla \mathbf{u})$ are
+\[
+(\nabla \mathbf{u})_{ij} = 
+\frac{\partial u_i}{\partial x_j}.
+\]
+\item This object is basis-independent: transforming the basis transforms its components according to the tensor transformation law.
+\item Therefore the gradient of a vector field is a true \textbf{second-order tensor}.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Forces on Surfaces: The Traction Vector}
+
+\begin{itemize}
+
+\item In a solid or fluid, internal forces act across imaginary surfaces inside the material.
+\item Consider a small surface patch with unit normal vector $\mathbf{n}$.
+\item The \textbf{traction vector} $\mathbf{t}$ is the force per unit area acting \emph{on that surface} in the direction the material on one side exerts on the other.
+
+\[
+\mathbf{t} = \frac{\text{force on the patch}}{\text{area of the patch}}
+\]
+
+\item The traction vector generally \textbf{does not} point in the normal direction; it can have tangential (shear) components.
+\item Every choice of $\mathbf{n}$ gives a different traction $\mathbf{t}(\mathbf{n})$.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{The Stress Tensor as a Linear Map}
+
+\begin{itemize}
+
+\item Cauchy’s fundamental observation: the traction vector depends \emph{linearly} on the surface normal.
+\item Therefore, there exists a \textbf{second-order tensor} $\boldsymbol{\sigma}$ such that
+
+\[
+\mathbf{t}(\mathbf{n}) = \boldsymbol{\sigma}\,\mathbf{n}.
+\]
+
+\item This means:
+\begin{itemize}
+  \item Input: a direction $\mathbf{n}$.
+  \item Output: a vector $\mathbf{t}$ giving the force per unit area acting across a surface with that normal.
+\end{itemize}
+
+\item The mapping $\mathbf{n} \mapsto \mathbf{t}$ is the defining operation of the stress tensor.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Component Form of the Stress Tensor}
+
+\begin{itemize}
+
+\item In a Cartesian basis $\{\mathbf{e}_1,\mathbf{e}_2,\mathbf{e}_3\}$,
+the components $\sigma_{ij}$ represent:
+\[
+\sigma_{ij} = \mathbf{e}_i \cdot (\boldsymbol{\sigma} \,\mathbf{e}_j).
+\]
+
+\item Interpretation:
+\begin{itemize}
+  \item $j$ = orientation of the surface normal,
+  \item $i$ = direction of the traction vector.
+\end{itemize}
+
+\item Written as a matrix:
+\[
+\boldsymbol{\sigma}
+=
+\begin{bmatrix}
+\sigma_{11} & \sigma_{12} & \sigma_{13} \\
+\sigma_{21} & \sigma_{22} & \sigma_{23} \\
+\sigma_{31} & \sigma_{32} & \sigma_{33}
+\end{bmatrix}.
+\]
+
+\item Symmetry (\(\sigma_{ij}=\sigma_{ji}\)) arises when there are no internal torques.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{The Cauchy Stress Tensor and Traction Vectors}
+
+\textbf{Cauchy Stress Tensor.}
+In continuum mechanics, the Cauchy stress tensor 
+$\boldsymbol{\sigma}$ (named after Augustin–Louis Cauchy), also
+called the \emph{true stress tensor}, completely characterizes
+the internal state of stress at a material point in the
+\emph{current} (deformed) configuration.
+
+\medskip
+
+\begin{itemize}
+    \item It is a second–order tensor with nine components, $\sigma_{ij}.$
+
+    \item It maps a unit direction vector $\mathbf{e}$ to the
+          \textbf{traction vector} $\mathbf{T}(\mathbf{e})$ acting
+          on the surface whose normal is $\mathbf{e}$:
+    \[
+        \mathbf{T}(\mathbf{e}) = \boldsymbol{\sigma}\,\mathbf{e},
+        \qquad
+        T_j(\mathbf{e}) = \sum_i \sigma_{ij} e_i.
+    \]
+
+    \item The traction vector gives the \emph{force per unit area}
+          transmitted across that surface.
+
+    \item Units: both $\boldsymbol{\sigma}$ and $\mathbf{T}$ have
+          SI units of pascals (Pa). The direction vector 
+          $\mathbf{e}$ is dimensionless.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Properties and Uses of the Cauchy Stress Tensor}
+
+\begin{itemize}
+
+    \item $\boldsymbol{\sigma}$ obeys the \textbf{tensor transformation law}:
+    the components change with the coordinate system, but the physical
+    traction vector $\mathbf{T}(\mathbf{e})$ does not.
+
+
+    \item The Cauchy stress tensor is the appropriate stress measure for
+          \textbf{small deformations} and is central in 
+          \textbf{linear elasticity} and most engineering stress analyses.
+
+    \item For \textbf{large or finite deformations}, alternative stress measures
+          are used:
+    \begin{itemize}
+        \item Piola–Kirchhoff stress tensors,
+        \item the Biot stress tensor,
+        \item the Kirchhoff stress tensor.
+    \end{itemize}
+
+    \item Despite the different forms, each of these stress measures relates
+          a direction to the force transmitted across a surface—i.e., each
+          is a tensor that maps vectors to vectors.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Traction Vectors on an Infinitesimal Cube}
+
+\begin{itemize}
+
+    \item Consider a very small cube of material inside a solid.
+          Each face has an outward unit normal:
+          $\mathbf{e}_1$, $\mathbf{e}_2$, $\mathbf{e}_3$.
+
+    \item The internal forces transmitted across these faces are described
+          by traction vectors:
+    \[
+        \mathbf{T}(\mathbf{e}_1),\quad
+        \mathbf{T}(\mathbf{e}_2),\quad
+        \mathbf{T}(\mathbf{e}_3).
+    \]
+
+    \item By Cauchy's theorem:
+    \[
+        \mathbf{T}(\mathbf{e}_i) = \boldsymbol{\sigma}\,\mathbf{e}_i.
+    \]
+
+    \item Each traction vector generally contains both:
+    \begin{itemize}
+        \item a \textbf{normal component} (normal stress),
+        \item a \textbf{tangential component} (shear stress).
+    \end{itemize}
+
+    \item Together, these tractions define the entire state of stress
+          at the point—i.e., they determine the components
+          $\sigma_{ij}$ of the Cauchy stress tensor.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Traction Vectors and the Cauchy Stress Tensor}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.75\textwidth]{pictures/2-2/cauchy_stress_wiki.png}
+    \caption{
+        Cauchy stress tensor representation showing traction vectors on the
+        faces of an infinitesimal cube (image: Wikipedia, CC BY-SA 3.0).
+    }
+\end{figure}
+
+\end{frame}
+
+
+\begin{frame}{Material Motion and the Deformation Gradient}
+
+\begin{itemize}
+
+\item Let a material point move from position $\mathbf{x}$ in the reference configuration to $\mathbf{w}(\mathbf{x})$ in the deformed configuration.
+\item Consider a small material line element $d\mathbf{x}$.
+\item After deformation, it becomes
+\[
+d\mathbf{w} = \mathbf{F}\,d\mathbf{x},
+\]
+where $\mathbf{F}$ is the \textbf{deformation gradient tensor}.
+
+\item $\mathbf{F}$ describes local stretch, shear, and rotation of material fibers.
+\item It is the derivative of the motion:
+\[
+F_{ij} = \frac{\partial w_i}{\partial x_j}.
+\]
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Deformation Gradient Acting on Material Fibers}
+
+\begin{itemize}
+    \item Think of the body as filled with tiny material line elements (fibers).
+    \item In the reference configuration, a small fiber has vector
+          $d\mathbf{x}$.
+    \item After deformation, that fiber becomes
+          \[
+              d\mathbf{w} = \mathbf{F}\,d\mathbf{x}.
+          \]
+    \item The deformation gradient $\mathbf{F}$:
+          \begin{itemize}
+              \item stretches fibers,
+              \item shears them,
+              \item and can rotate them.
+          \end{itemize}
+    \item At a point, $\mathbf{F}$ summarizes how all nearby fibers move.
+\end{itemize}
+
+\vspace{0.3cm}
+
+
+
+\end{frame}
+
+
+\begin{frame}{Why the Deformation Gradient Is a Tensor}
+
+\begin{itemize}
+
+\item $\mathbf{F}$ maps one vector ($d\mathbf{x}$) to another ($d\mathbf{w}$) in a linear way.
+\item This mapping is purely geometric — it does not depend on the coordinate system.
+\item Its components transform correctly under a basis change:
+\[
+F^{(m)} = Q\,F^{(e)}\,Q^T.
+\]
+
+\item Therefore $\mathbf{F}$ is a true second-order tensor:
+\begin{itemize}
+  \item independent of the description,
+  \item dependent only on the physical deformation.
+\end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Putting It Together: Stress and Deformation Gradient}
+
+\begin{itemize}
+
+\item \textbf{Stress tensor} $\boldsymbol{\sigma}$: describes internal forces transmitted across surfaces.
+\[
+\mathbf{t} = \boldsymbol{\sigma}\,\mathbf{n}.
+\]
+
+\item \textbf{Deformation gradient} $\mathbf{F}$: describes how material line elements transform.
+\[
+d\mathbf{w} = \mathbf{F}\,d\mathbf{x}.
+\]
+
+\item Both objects:
+\begin{itemize}
+  \item map vectors to vectors,
+  \item have component matrices that depend on the basis,
+  \item represent physical laws independent of the coordinate system,
+  \item are therefore second-order tensors.
+\end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Difference Between a Matrix and a Tensor -- Part 1}
+
+\begin{itemize}
+    \item In a given basis, a second-order tensor can be represented by a
+          $3 \times 3$ matrix of components.
+    \item However, \emph{not every} $3 \times 3$ matrix represents a tensor.
+    \item Any $3 \times 3$ matrix $[A]$ defines a rule
+    \[
+        \begin{bmatrix} b_1 \\[2pt] b_2 \\[2pt] b_3 \end{bmatrix}
+        =
+        \begin{bmatrix}
+            a_{11} & a_{12} & a_{13} \\
+            a_{21} & a_{22} & a_{23} \\
+            a_{31} & a_{32} & a_{33}
+        \end{bmatrix}
+        \begin{bmatrix} u_1 \\[2pt] u_2 \\[2pt] u_3 \end{bmatrix},
+    \]
+    where $(u_1,u_2,u_3)$ are the components of some vector $\mathbf{u}$.
+    \item The question is: does this matrix really represent a
+          \emph{geometric} object (a tensor), or is it just an arbitrary
+          collection of numbers?
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Difference Between a Matrix and a Tensor -- Part 2}
+
+\begin{itemize}
+    \item A tensor is a linear map that is \textbf{independent of the basis}.
+          Its component matrix must change in a specific way when we change
+          coordinates.
+    \item Suppose we change to a new Cartesian basis and compute:
+    \begin{itemize}
+        \item the new components of $\mathbf{u}$,
+        \item the new $3 \times 3$ matrix of numbers representing the same rule.
+    \end{itemize}
+    \item Using the new components of $\mathbf{u}$ and the new matrix,
+          we obtain a new output with components $(\beta_1,\beta_2,\beta_3)$.
+    \item If $(b_1,b_2,b_3)$ and $(\beta_1,\beta_2,\beta_3)$ are related by the
+          \emph{same} change-of-basis rule as any other vector, then the matrix
+          is behaving like the components of a vector-valued linear map.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Difference Between a Matrix and a Tensor -- Part 3}
+
+\begin{itemize}
+    \item In other words: the matrix represents a \textbf{tensor} if and only if
+          its components obey the \textbf{tensor transformation law}:
+    \[
+        S^{(m)} = Q\, S^{(e)}\, Q^{T},
+    \]
+    where $Q$ is the orthogonal matrix relating the two bases.
+    \item If this transformation law holds, then:
+    \begin{itemize}
+        \item the map $\mathbf{v} = S\,\mathbf{u}$ is independent of the basis,
+        \item the component triplets $(b_1,b_2,b_3)$ and $(\beta_1,\beta_2,\beta_3)$
+              are just different coordinate representations of the same vector.
+    \end{itemize}
+    \item If the matrix does \emph{not} transform this way, it does not represent
+          a genuine tensor; it is just an arbitrary matrix.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Motivation: Building a Tensor from Two Directions}
+
+\begin{itemize}
+
+    \item A second-order tensor is a linear map that takes a vector
+          $\mathbf{u}$ and produces another vector.
+
+    \item Sometimes we want a tensor whose behavior is determined by
+          \emph{two specific directions}: 
+          \begin{itemize}
+              \item one direction along which the output should point,
+              \item another direction that controls how strongly the input
+                    contributes.
+          \end{itemize}
+
+    \item The \textbf{dyadic product} provides precisely this construction.
+
+    \item Given two vectors $\mathbf{a}$ and $\mathbf{b}$, the dyadic product
+          defines a tensor $S = \mathbf{a} \otimes \mathbf{b}$ whose action on
+          any vector $\mathbf{u}$ is
+          \[
+              S\,\mathbf{u}
+              = (\mathbf{a} \otimes \mathbf{b})\,\mathbf{u}
+              = \mathbf{a}\,(\mathbf{b} \cdot \mathbf{u}).
+          \]
+          \end{itemize}
+\end{frame}
+
+\begin{frame}{Motivation: Building a Tensor from Two Directions}
+\begin{itemize}
+    \item Interpretation:
+          \begin{itemize}
+              \item First, measure how much of $\mathbf{u}$ lies in direction
+                    $\mathbf{b}$ (the scalar projection $\mathbf{b}\cdot\mathbf{u}$).
+              \item Then, scale the vector $\mathbf{a}$ by that amount.
+          \end{itemize}
+
+    \item The result is always a vector \emph{parallel to $\mathbf{a}$}, with
+          magnitude depending on the component of $\mathbf{u}$ in the
+          direction of $\mathbf{b}$.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Components of a Dyadic Product and Tensor Construction}
+
+\begin{itemize}
+
+    \item In a Cartesian basis $\{\mathbf{e}_1,\mathbf{e}_2,\mathbf{e}_3\}$,
+          the components of $S = \mathbf{a} \otimes \mathbf{b}$ are simply
+          outer products of the components of $\mathbf{a}$ and $\mathbf{b}$:
+          \[
+              S_{ij} = a_i\, b_j.
+          \]
+
+    \item In matrix form:
+          \[
+          \begin{bmatrix}
+              a_1 b_1 & a_1 b_2 & a_1 b_3 \\
+              a_2 b_1 & a_2 b_2 & a_2 b_3 \\
+              a_3 b_1 & a_3 b_2 & a_3 b_3
+          \end{bmatrix}.
+          \]
+
+    \item A single dyadic product cannot represent an arbitrary tensor,
+          because $S\,\mathbf{u}$ is always parallel to $\mathbf{a}$.
+          So the mapping is too restrictive.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Components of a Dyadic Product and Tensor Construction}
+
+\begin{itemize}
+    \item However, dyadic products form a natural \emph{basis} for all
+          second-order tensors.
+
+    \item If $\mathbf{e}_1,\mathbf{e}_2,\mathbf{e}_3$ is a basis, then the nine
+          dyads
+          \[
+              \mathbf{e}_i \otimes \mathbf{e}_j
+          \]
+          form a basis for the space of all $3\times 3$ tensors.
+
+    \item Therefore, \textbf{any} second-order tensor can be written as a sum of
+          dyadic products:
+          \[
+              S = \sum_{i=1}^{3} \sum_{j=1}^{3} S_{ij}\,
+                  \mathbf{e}_i \otimes \mathbf{e}_j.
+          \]
+          This expresses the tensor in terms of simple “direction-pair”
+          building blocks.
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Representing Tensor Components with Matrices}
+    \begin{itemize}
+        \item   Second-order tensors can be represented by matrices.
+
+        \item   Consider a general second-order tensor \( \mathbf{S} \).
+
+        \item   In a given basis, we can express \(\mathbf{S}\) using its components \(S_{ij}\) arranged in a 3x3 matrix:
+
+            \[
+            \mathbf{S} =
+            \begin{bmatrix}
+                S_{11} & S_{12} & S_{13} \\
+                S_{21} & S_{22} & S_{23} \\
+                S_{31} & S_{32} & S_{33}
+            \end{bmatrix}
+            \]
+
+        \item   Here, \(i\) and \(j\) each range from 1 to 3 in 3-dimensional space.
+
+        \item   The values of the components \(S_{ij}\) depend on the choice of basis.
+
+        \item   This matrix representation allows us to apply matrix operations (addition, multiplication, etc.) to tensors.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Defining Individual Tensor Components}
+\begin{itemize}
+    \item Where the individual components are defined as: 
+    \begin{align*}
+        S_{11} &= e_1 \cdot (S e_1), & S_{12} &= e_1 \cdot (S e_2), & S_{13} &= e_1 \cdot (S e_3) \\
+        S_{21} &= e_2 \cdot (S e_1), & S_{22} &= e_2 \cdot (S e_2), & S_{23} &= e_2 \cdot (S e_3) \\
+        S_{31} &= e_3 \cdot (S e_1), & S_{32} &= e_3 \cdot (S e_2), & S_{33} &= e_3 \cdot (S e_3)
+    \end{align*}
+    \item The tensor representation can also use dyadic form:
+    \[
+    S = \sum_{i=1}^{3} \sum_{j=1}^{3} S_{ij} e_i \otimes e_j
+    \]
+    \item This is useful for polar coordinates.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Adding Second Order Tensors}
+\begin{itemize}
+    \item If S and T are tensors, then \(U = S + T\) is also a tensor. 
+    \item If the Cartesian components of U, S, and T are defined by matrices, then: 
+    \[
+    \begin{bmatrix}
+        U_{11} & U_{12} & U_{13} \\
+        U_{21} & U_{22} & U_{23} \\
+        U_{31} & U_{32} & U_{33}
+    \end{bmatrix} =
+    \begin{bmatrix}
+        S_{11} + T_{11} & S_{12} + T_{12} & S_{13} + T_{13} \\
+        S_{21} + T_{21} & S_{22} + T_{22} & S_{23} + T_{23} \\
+        S_{31} + T_{31} & S_{32} + T_{32} & S_{33} + T_{33}
+    \end{bmatrix}
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Product of a Tensor and a Vector}
+\begin{itemize}
+    \item Let a be a vector and S a second order tensor.  Then
+    \[
+    v = S u
+    \]
+    is a vector. 
+    \item Let \((u_1, u_2, u_3)\) and \((v_1, v_2, v_3)\) be the components of vectors u and v, and let the Cartesian components of S be defined as above. 
+    \item Then
+    \[
+    \begin{bmatrix}
+        v_1 \\
+        v_2 \\
+        v_3
+    \end{bmatrix} =
+    \begin{bmatrix}
+        S_{11} & S_{12} & S_{13} \\
+        S_{21} & S_{22} & S_{23} \\
+        S_{31} & S_{32} & S_{33}
+    \end{bmatrix}
+    \begin{bmatrix}
+        u_1 \\
+        u_2 \\
+        u_3
+    \end{bmatrix} =
+    \begin{bmatrix}
+        S_{11} u_1 + S_{12} u_2 + S_{13}u_3 \\
+        S_{21} u_1 + S_{22} u_2 + S_{23}u_3 \\
+        S_{31} u_1 + S_{32} u_2 + S_{33}u_3
+    \end{bmatrix}
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Product of a Vector and a Tensor}
+\begin{itemize}
+    \item Let $\mathbf{u}$ be a vector and $S$ a second-order tensor. Then
+    \[
+      \mathbf{v} = \mathbf{u} S
+    \]
+    is also a vector.
+    \item In component form (with respect to a Cartesian basis):
+    \[
+      v_i = \sum_{j=1}^3 u_j\, S_{ji}, \qquad i = 1,2,3.
+    \]
+    \item In matrix notation:
+    \[
+      \begin{bmatrix} v_1 & v_2 & v_3 \end{bmatrix}
+      =
+      \begin{bmatrix} u_1 & u_2 & u_3 \end{bmatrix}
+      \begin{bmatrix}
+        S_{11} & S_{12} & S_{13} \\
+        S_{21} & S_{22} & S_{23} \\
+        S_{31} & S_{32} & S_{33}
+      \end{bmatrix}.
+    \]
+    \item In general, $\mathbf{u} S \neq S \mathbf{u}$ (unless $S$ is symmetric).
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Product of Two Tensors}
+\small
+\begin{itemize}
+    \item Let $T$ and $S$ be second–order tensors. Then $U = TS$ is also a tensor.
+    \item Write the components of $U$, $T$, and $S$ as $3\times 3$ matrices:
+\[
+U =
+\begin{bmatrix}
+U_{11} & U_{12} & U_{13} \\
+U_{21} & U_{22} & U_{23} \\
+U_{31} & U_{32} & U_{33}
+\end{bmatrix}
+=
+\begin{bmatrix}
+T_{11} & T_{12} & T_{13} \\
+T_{21} & T_{22} & T_{23} \\
+T_{31} & T_{32} & T_{33}
+\end{bmatrix}
+\begin{bmatrix}
+S_{11} & S_{12} & S_{13} \\
+S_{21} & S_{22} & S_{23} \\
+S_{31} & S_{32} & S_{33}
+\end{bmatrix}
+\]
+
+\vspace{-2mm}
+\tiny
+\[
+= \begin{bmatrix}
+T_{11}S_{11} + T_{12}S_{21} + T_{13}S_{31} &
+T_{11}S_{12} + T_{12}S_{22} + T_{13}S_{32} &
+T_{11}S_{13} + T_{12}S_{23} + T_{13}S_{33} \\
+T_{21}S_{11} + T_{22}S_{21} + T_{23}S_{31} &
+T_{21}S_{12} + T_{22}S_{22} + T_{23}S_{32} &
+T_{21}S_{13} + T_{22}S_{23} + T_{23}S_{33} \\
+T_{31}S_{11} + T_{32}S_{21} + T_{33}S_{31} &
+T_{31}S_{12} + T_{32}S_{22} + T_{33}S_{32} &
+T_{31}S_{13} + T_{32}S_{23} + T_{33}S_{33}
+\end{bmatrix}
+\]
+\small
+    \item Tensor products are not commutative: $TS \neq ST$.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Tensor Transpose}
+\begin{itemize}
+    \item Let S be a tensor. The transpose of S, denoted by \(S^T\), is defined such that
+    \[
+    u S^T = S u
+    \]
+    \item If the components of S are defined by a 3x3 matrix, then the components of \(S^T\) are: 
+    \[
+    S^T =
+    \begin{bmatrix}
+        S_{11} & S_{21} & S_{31} \\
+        S_{12} & S_{22} & S_{32} \\
+        S_{13} & S_{23} & S_{33}
+    \end{bmatrix}
+    \]
+    i.e., the rows and columns are interchanged. 
+    \item For tensors A and B: 
+    \[
+    (A B)^T = B^T A^T
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Tensor Trace}
+\begin{itemize}
+    \item Let S be a tensor with components defined by a \(3 \times 3\) matrix. 
+    \item The trace of S, denoted by tr(S) or trace(S), is the sum of the diagonal elements: 
+    \[
+    trace(S) = S_{11} + S_{22} + S_{33}
+    \]
+    \item For any Cartesian basis \(\{e_1, e_2, e_3\}\):
+    \[
+    trace(S) = e_1 \cdot (S e_1) + e_2 \cdot (S e_2) + e_3 \cdot (S e_3)
+    \]
+    \item The trace of a tensor is invariant under a change of basis. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Tensor Contraction: Inner Product}
+\begin{itemize}
+    \item Let S and T be two second order tensors. 
+    \item The inner product of S and T is a scalar, denoted by \(S : T\). 
+    \item Using components of S and T in a basis: 
+    \[
+    S : T = S_{11}T_{11} + S_{12}T_{12} + S_{13}T_{13}
+    \]
+    \[
+    + S_{21}T_{21} + S_{22}T_{22} + S_{23}T_{23}
+    \]
+    \[
+    + S_{31}T_{31} + S_{32}T_{32} + S_{33}T_{33}
+    \]
+    \item Note that \(S : T = T : S\) and \(S : I = trace(S)\) where I is the identity tensor. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Tensor Contraction: Outer Product}
+\begin{itemize}
+    \item Let S and T be two second order tensors. 
+    \item The outer product of S and T is a scalar, denoted by \(S \cdot \cdot T\). 
+    \item Using components of S and T in a basis:
+    \[
+    S \cdot \cdot T = S_{11}T_{11} + S_{21}T_{12} + S_{31}T_{13}
+    \]
+    \[
+    + S_{12}T_{21} + S_{22}T_{22} + S_{32}T_{23}
+    \]
+    \[
+    + S_{13}T_{11} + S_{23}T_{32} + S_{33}T_{33}
+    \]
+    \item Note that \(S \cdot \cdot T = S^T : T\) 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Tensor Determinant}
+\begin{itemize}
+    \item The determinant of a tensor is the determinant of its component matrix in a basis. 
+    \item For a second order tensor: 
+    \[
+    det S = det
+    \begin{bmatrix}
+        S_{11} & S_{12} & S_{13} \\
+        S_{21} & S_{22} & S_{23} \\
+        S_{31} & S_{32} & S_{33}
+    \end{bmatrix}
+    \]
+    \small
+    \[
+    = S_{11}(S_{22}S_{33} - S_{23}S_{32}) + S_{12}(S_{23}S_{31} - S_{21}S_{33}) + S_{13}(S_{21}S_{32} - S_{31}S_{22})
+    \]
+
+    \item For tensors S and T: 
+    \[
+    det(S) = det(S^T)
+    \]
+    \[
+    det(S T) = det(S)det(T)
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Tensor Inverse}
+\begin{itemize}
+    \item Let S be a second order tensor. 
+    \item The inverse of S, denoted by \(S^{-1}\), exists if and only if \(det(S) \neq 0\), and is defined by: 
+    \[
+    S^{-1} S = I
+    \]
+    where I is the identity tensor.
+    \item The inverse can be computed from the inverse of the component matrix. 
+    \item A compact form for a general 3D second order tensor is complex, and methods like Gaussian elimination are preferred. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Tensor Eigenvalues and Eigenvectors}
+\begin{itemize}
+    \item The scalars \(\lambda\) and unit vectors m which satisfy
+    \[
+    S m = \lambda m
+    \]
+    are known as the eigenvalues and eigenvectors of S, or the principal values and principal directions of S.
+    \item Note that \(\lambda\) may be complex.
+    \item For a second order tensor in three dimensions, there are generally three values of \(\lambda\) and three unique unit vectors m which satisfy this equation.
+    \item Occasionally, there may be only two or one value of \(\lambda\). If this is the case, there are infinitely many possible vectors m that satisfy the equation.
+    \item The eigenvalues of a tensor, and the components of the eigenvectors, may be computed by finding the eigenvalues and eigenvectors of the matrix of components.
+    \item The eigenvalues of a symmetric tensor are always real.
+    \item The eigenvalues of a skew tensor are always pure imaginary or zero.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Change of Basis}
+\begin{itemize}
+    \item Let S be a tensor, and let \(\{e_1, e_2, e_3\}\) be a Cartesian basis.
+    \item Suppose that the components of S in the basis \(\{e_1, e_2, e_3\}\) are known to be
+    \[
+    [S^{(e)}] =
+    \begin{bmatrix}
+        S_{11}^{(e)} & S_{12}^{(e)} & S_{13}^{(e)} \\
+        S_{21}^{(e)} & S_{22}^{(e)} & S_{23}^{(e)} \\
+        S_{31}^{(e)} & S_{32}^{(e)} & S_{33}^{(e)}
+    \end{bmatrix}
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Change of Basis (continued)}
+\begin{itemize}
+    \item Now, suppose that we wish to compute the components of S in a second Cartesian basis, \(\{m_1, m_2, m_3\}\). Denote these components by
+    \[
+    [S^{(m)}] =
+    \begin{bmatrix}
+        S_{11}^{(m)} & S_{12}^{(m)} & S_{13}^{(m)} \\
+        S_{21}^{(m)} & S_{22}^{(m)} & S_{23}^{(m)} \\
+        S_{31}^{(m)} & S_{32}^{(m)} & S_{33}^{(m)}
+    \end{bmatrix}
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Change of Basis: Transformation Matrix}
+\begin{itemize}
+    \item To do so, first compute the components of the transformation matrix [Q]
+    \[
+    [Q] =
+    \begin{bmatrix}
+        m_1 \cdot e_1 & m_1 \cdot e_2 & m_1 \cdot e_3 \\
+        m_2 \cdot e_1 & m_2 \cdot e_2 & m_2 \cdot e_3 \\
+        m_3 \cdot e_1 & m_3 \cdot e_2 & m_3 \cdot e_3
+    \end{bmatrix}
+    \]
+    (this is the same matrix you would use to transform vector components from \(\{e_1, e_2, e_3\}\) to \(\{m_1, m_2, m_3\}\)).
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Change of Basis: Tensor Transformation}
+\begin{itemize}
+    \item Then,
+    \[
+    [S^{(m)}] = [Q] [S^{(e)}] [Q]^T
+    \]
+    or, written out in full
+    \tiny
+    \[
+    \begin{bmatrix}
+        S_{11}^{(m)} & S_{12}^{(m)} & S_{13}^{(m)} \\
+        S_{21}^{(m)} & S_{22}^{(m)} & S_{23}^{(m)} \\
+        S_{31}^{(m)} & S_{32}^{(m)} & S_{33}^{(m)}
+    \end{bmatrix} = \]
+    \\
+    \[
+    \begin{bmatrix}
+        m_1 \cdot e_1 & m_1 \cdot e_2 & m_1 \cdot e_3 \\
+        m_2 \cdot e_1 & m_2 \cdot e_2 & m_2 \cdot e_3 \\
+        m_3 \cdot e_1 & m_3 \cdot e_2 & m_3 \cdot e_3
+    \end{bmatrix}
+    \begin{bmatrix}
+        S_{11}^{(e)} & S_{12}^{(e)} & S_{13}^{(e)} \\
+        S_{21}^{(e)} & S_{22}^{(e)} & S_{23}^{(e)} \\
+        S_{31}^{(e)} & S_{32}^{(e)} & S_{33}^{(e)}
+    \end{bmatrix}
+    \begin{bmatrix}
+        m_1 \cdot e_1 & m_2 \cdot e_1 & m_3 \cdot e_1 \\
+        m_1 \cdot e_2 & m_2 \cdot e_2 & m_3 \cdot e_2 \\
+        m_1 \cdot e_3 & m_2 \cdot e_3 & m_3 \cdot e_3
+    \end{bmatrix}
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Change of Basis: Proof}
+\begin{itemize}
+    \item To prove this result, let u and v be vectors satisfying
+    \[
+    v = S u
+    \]
+    \item Denote the components of u and v in the two bases by \(u^{(e)}\), \(v^{(e)}\) and \(u^{(m)}\), \(v^{(m)}\) respectively.
+    \item Recall that the vector components are related by
+    \[
+    u^{(m)} = [Q] u^{(e)} \qquad u^{(e)} = [Q]^T u^{(m)}
+    \]
+    \[
+    v^{(m)} = [Q] v^{(e)} \qquad v^{(e)} = [Q]^T v^{(m)}
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Change of Basis: Proof (continued)}
+\begin{itemize}
+    \item Now, we could express the tensor-vector product in either basis
+    \[
+    v^{(m)} = [S^{(m)}] u^{(m)}
+    \]
+    \[
+    v^{(e)} = [S^{(e)}] u^{(e)}
+    \]
+    \item Substitute for \(u^{(e)}\) and \(v^{(e)}\) from above into the second of these two relations, we see that
+    \[
+    [Q]^T v^{(m)} = [S^{(e)}] [Q]^T u^{(m)}
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Change of Basis: Proof (end)}
+\begin{itemize}
+    \item Recall that
+    \[
+    [Q] [Q]^T = [I]
+    \]
+    \item so multiplying both sides by [Q] shows that
+    \[
+    v^{(m)} = [Q] [S^{(e)}] [Q]^T u^{(m)}
+    \]
+    \item so, comparing with the first of equation (1)
+    \[
+    [S^{(m)}] = [Q] [S^{(e)}] [Q]^T
+    \]
+    as stated.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Invariants}
+\begin{itemize}
+    \item Invariants of a tensor are functions of the tensor components which remain constant under a basis change.
+    \item That is to say, the invariant has the same value when computed in two arbitrary bases \(\{e_1, e_2, e_3\}\) and \(\{m_1, m_2, m_3\}\).
+    \item A symmetric second order tensor always has three independent invariants.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Examples of Invariants}
+\begin{itemize}
+    \item Examples of invariants are
+    \begin{enumerate}
+        \item The three eigenvalues
+        \item The determinant
+        \item The trace
+        \item The inner and outer products
+    \end{enumerate}
+    \item These are not all independent—for example any of 2-4 can be calculated in terms of 1.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Special Tensors: Identity Tensor}
+\begin{itemize}
+    \item The identity tensor I is the tensor such that, for any tensor S or vector v
+    \[
+    I v = v I = v
+    \]
+    \[
+    S I = I S = S
+    \]
+    \item In any basis, the identity tensor has components
+    \[
+    \begin{bmatrix}
+        1 & 0 & 0 \\
+        0 & 1 & 0 \\
+        0 & 0 & 1
+    \end{bmatrix}
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Special Tensors: Symmetric Tensor}
+\begin{itemize}
+    \item A symmetric tensor S has the property
+    \[
+    S = S^T
+    \]
+    \item The components of a symmetric tensor have the form
+    \[
+    \begin{bmatrix}
+        S_{11} & S_{12} & S_{13} \\
+        S_{12} & S_{22} & S_{23} \\
+        S_{13} & S_{23} & S_{33}
+    \end{bmatrix}
+    \]
+    so that there are only six independent components of the tensor, instead of nine.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Special Tensors: Skew Tensor}
+\begin{itemize}
+    \item A skew tensor S has the property
+    \[
+    S^T = -S
+    \]
+    \item The components of a skew tensor have the form
+    \[
+    \begin{bmatrix}
+        0 & S_{12} & S_{13} \\
+        -S_{12} & 0 & S_{23} \\
+        -S_{13} & -S_{23} & 0
+    \end{bmatrix}
+    \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Special Tensors: Orthogonal Tensors}
+\begin{itemize}
+    \item An orthogonal tensor S has the property
+    \[
+    S S^T = S^T S = I
+    \]
+    \[
+    S^{-1} = S^T
+    \]
+    \item An orthogonal tensor must have \(det(S) = \pm 1\). A tensor with \(det(S) = +1\) is known as a proper orthogonal tensor.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Copyright Notice}
+\begin{itemize}
+    \item A.F. Bower, 2006
+    \item This site is made freely available for educational purposes.
+    \item You may extract parts of the text for non-commercial purposes provided that the source is cited.
+    \item Please respect the author's copyright.
+\end{itemize}
+\end{frame}
+\end{document}

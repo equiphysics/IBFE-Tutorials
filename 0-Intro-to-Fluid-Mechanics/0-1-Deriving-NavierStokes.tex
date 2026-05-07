@@ -1,0 +1,1619 @@
+\documentclass[aspectratio=169]{beamer}
+
+% ---------- Beamer Theme ----------
+\usetheme{metropolis} % or remove if you prefer your default
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% ---------- Packages ----------
+\usepackage{amsmath, amssymb, bm, physics, mathtools}
+\usepackage{siunitx}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+% ---------- Macros ----------
+\newcommand{\uu}{\bm{u}}
+\newcommand{\n}{\bm{n}}
+\newcommand{\x}{\bm{x}}
+\newcommand{\I}{\mathbf{I}}
+\newcommand{\D}{\mathsf{D}} % rate-of-strain tensor
+% \DeclareMathOperator{\grad}{\nabla}
+\DeclareMathOperator{\divg}{\nabla\!\cdot}
+%\DeclareMathOperator{\curl}{\nabla\times}
+
+\title{From Euler to Navier--Stokes}
+\subtitle{Material derivative, forces, and the viscous stress tensor}
+\author{Laura A. Miller}
+\institute{University of Arizona}
+\date{}
+
+\begin{document}
+
+% =========================================================
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% =========================================================
+
+\begin{frame}{Gentle Introductions to Fluid Dynamics}
+\textbf{For students new to fluids, including biologists:}
+\tiny
+\begin{itemize}
+  \item \textbf{MIT OpenCourseWare: Introduction to Fluid Mechanics (1.060)}  
+  Conceptual, with physical intuition before equations  
+  \url{https://ocw.mit.edu/courses/1-060-engineering-mechanics-ii-fluid-dynamics-fall-2013/}
+
+  \item \textbf{Harvard Natural Sciences Lectures: Fluids \& Biological Flows}  
+  Demonstrations + biological context  
+  \url{https://projects.iq.harvard.edu/sciencelectures}
+
+  \item \textbf{NPTEL “Fluid Mechanics for Biological Systems” (IIT Guwahati)}  
+  Directly aimed at life-science audiences  
+  \url{https://nptel.ac.in/courses/102103084}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{More Advanced Fluid Dynamics Lecture Resources — University Courses}
+\begin{itemize}
+  \item \textbf{MIT OpenCourseWare}
+  \begin{itemize}
+    \item 2.25 Advanced Fluid Mechanics  
+    \url{https://ocw.mit.edu/courses/2-25-advanced-fluid-mechanics-fall-2013/}
+    \item 2.06 Fluid Dynamics  
+    \url{https://ocw.mit.edu/courses/2-06-fluid-dynamics-spring-2020/}
+  \end{itemize}
+
+  \item \textbf{Cambridge University Engineering Dept}  
+  Fluid Mechanics I \& II lecture notes  
+  \url{https://www-civ.eng.cam.ac.uk/cued-lecture-notes/fluids/}
+
+  \item \textbf{Caltech GALCIT — Fluid Mechanics}  
+  \url{https://www.galcit.caltech.edu/education}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Video Lecture Playlists}
+
+\begin{itemize}
+  \item \textbf{Stanford CFD Lectures (Duraisamy)}  
+  \url{https://www.youtube.com/playlist?list=PLd3hlSJsX_ImKP68wfKjvRlKq2Ot3PuuX}
+
+  \item \textbf{NPTEL – IIT Kanpur Fluid Mechanics}  
+  \url{https://nptel.ac.in/courses/112104118}
+
+  \item \textbf{Flow Visualization — Univ. of Colorado Boulder}  
+  \url{https://www.flowvis.org/}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Additional References}
+
+\begin{itemize}
+  \item \textbf{L.C. Evans — PDE Notes (for NS theory)}  
+  \url{https://math.ucdavis.edu/~evans/}
+
+  \item \textbf{Dabiri Lab — Bio-inspired Fluid Dynamics}  
+  \url{https://dabirilab.com/videos/}
+
+  \item \textbf{APS Division of Fluid Dynamics Tutorials}  
+  \url{https://www.aps.org/units/dfd/meetings/video.cfm}
+\end{itemize}
+
+\end{frame}
+
+
+% --- INTRODUCTORY SLIDES: Notation and Vector Operators ---
+\section{Summary of Notation}
+\footnotesize
+\begin{frame}{Basic Definitions}
+\begin{block}{Position vector}
+\[
+\mathbf{x} = (x_1, x_2, x_3) = (x, y, z)
+\]
+\end{block}
+\begin{block}{Velocity vector}
+\[
+\mathbf{u} = (u_1, u_2, u_3) = (u, v, w)
+\]
+\end{block}
+\begin{block}{Other quantities}
+\begin{itemize}
+  \item $\rho$ – density (kg/m$^3$)
+  \item $p$ – pressure (Pa)
+  \item $\mu$ – dynamic viscosity (Pa·s)
+  \item $\mathbf{g}$ – gravitational acceleration vector (m/s$^2$)
+\end{itemize}
+\end{block}
+\end{frame}
+
+%------------------------------------------------------------
+
+\begin{frame}{Vector differential operators}
+\begin{columns}[T,onlytextwidth]
+\column{0.55\textwidth}
+\begin{block}{Gradient of a scalar $\phi$}
+\[
+\nabla \phi =
+\left(
+\frac{\partial \phi}{\partial x},
+\frac{\partial \phi}{\partial y},
+\frac{\partial \phi}{\partial z}
+\right)
+\]
+\end{block}
+
+\begin{block}{Divergence of a vector $\mathbf{u}$}
+\[
+\nabla \!\cdot\! \mathbf{u}
+= \frac{\partial u}{\partial x}
++ \frac{\partial v}{\partial y}
++ \frac{\partial w}{\partial z}
+\]
+\end{block}
+
+\column{0.45\textwidth}
+\begin{block}{Curl of a vector $\mathbf{u}$}
+\[
+\nabla \!\times\! \mathbf{u} =
+\begin{vmatrix}
+\mathbf{i} & \mathbf{j} & \mathbf{k} \\
+\dfrac{\partial}{\partial x} &
+\dfrac{\partial}{\partial y} &
+\dfrac{\partial}{\partial z} \\
+u & v & w
+\end{vmatrix}
+=
+\left[
+\begin{aligned}
+\frac{\partial w}{\partial y} - \frac{\partial v}{\partial z} \\
+\frac{\partial u}{\partial z} - \frac{\partial w}{\partial x} \\
+\frac{\partial v}{\partial x} - \frac{\partial u}{\partial y}
+\end{aligned}
+\right]
+\]
+\end{block}
+\end{columns}
+\end{frame}
+
+
+%------------------------------------------------------------
+
+\begin{frame}{Summary of notation}
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{l l}
+\textbf{Symbol} & \textbf{Meaning} \\ \hline
+$\mathbf{x} = (x, y, z)$ & Position vector \\
+$\mathbf{u} = (u, v, w)$ & Velocity vector \\
+$p$ & Pressure \\
+$\rho$ & Density \\
+$\mu$ & Dynamic viscosity \\
+$\mathbf{g}$ & Body-force acceleration \\
+$\nabla \phi$ & Gradient of scalar $\phi$ \\
+$\nabla \!\cdot\! \mathbf{u}$ & Divergence of $\mathbf{u}$ \\
+$\nabla \!\times\! \mathbf{u}$ & Curl (vorticity) of $\mathbf{u}$ \\
+$\nabla^2 \mathbf{u}$ & Laplacian (componentwise) of $\mathbf{u}$
+\end{tabular}
+\end{center}
+\end{frame}
+
+\section{Kinematics \& Material Derivative}
+
+\begin{frame}{Derivation of the Material Derivative}
+\small
+\textbf{Goal:} Express the rate of change of a field $\phi(\bm{x},t)$ \\
+as experienced by a moving fluid parcel.
+
+\vspace{0.4cm}
+
+\textbf{1. Follow a fluid parcel:}
+\[
+\bm{x} = \bm{x}(t), \qquad \frac{d\bm{x}}{dt} = \bm{u}(\bm{x},t)
+\]
+
+\textbf{2. Apply the chain rule along the trajectory:}
+\[
+\frac{d\phi}{dt}
+= \pdv{\phi}{t} + \frac{d\bm{x}}{dt} \cdot \grad \phi
+\]
+
+\textbf{3. Substitute the parcel velocity:}
+\[
+\boxed{
+\frac{D\phi}{Dt}
+= \pdv{\phi}{t} + (\bm{u}\cdot\grad)\phi
+}
+\]
+
+\vspace{0.4cm}
+\end{frame}
+
+\begin{frame}{Derivation of the Material Derivative Cont'd}
+\textbf{Interpretation:}
+\begin{itemize}
+  \item $\displaystyle \pdv{\phi}{t}$ — local (Eulerian) rate of change at a point.
+  \item $\displaystyle (\bm{u}\cdot\grad)\phi$ — convective rate of change due to motion.
+  \item Sum gives the total rate of change following the fluid.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Material Derivative for a Scalar Field}
+
+\textbf{Goal:} Rate of change of a quantity $\phi(x,y,z,t)$ following the flow.
+
+\vspace{0.4cm}
+
+A parcel moves as $\bm{x}(t) = (x(t), y(t), z(t))$ with velocity
+\[
+\frac{d\bm{x}}{dt} = (u, v, w) = \bm{u}.
+\]
+
+Apply the chain rule along the parcel trajectory:
+\[
+\frac{d\phi}{dt}
+= \pdv{\phi}{t}
++ \frac{dx}{dt}\pdv{\phi}{x}
++ \frac{dy}{dt}\pdv{\phi}{y}
++ \frac{dz}{dt}\pdv{\phi}{z}.
+\]
+
+\vspace{0.4cm}
+
+Substitute $\frac{dx}{dt}=u$, $\frac{dy}{dt}=v$, $\frac{dz}{dt}=w$:
+\[
+\boxed{
+\frac{D\phi}{Dt}
+= \pdv{\phi}{t}
++ u\pdv{\phi}{x}
++ v\pdv{\phi}{y}
++ w\pdv{\phi}{z}
+}
+\]
+
+\end{frame}
+
+\begin{frame}{Material Derivative for a Vector Field}
+
+For a vector field $\bm{u}(\bm{x},t) = (u,v,w)$,
+apply the material derivative to each component:
+
+\[
+\frac{D\bm{u}}{Dt}
+= \pdv{\bm{u}}{t} + (\bm{u}\cdot\nabla)\bm{u}.
+\]
+
+\vspace{0.4cm}
+
+Expanded form:
+\[
+(\bm{u}\cdot\nabla)\bm{u}
+= \left(
+u\pdv{u}{x} + v\pdv{u}{y} + w\pdv{u}{z},\;
+u\pdv{v}{x} + v\pdv{v}{y} + w\pdv{v}{z},\;
+u\pdv{w}{x} + v\pdv{w}{y} + w\pdv{w}{z}
+\right).
+\]
+
+\vspace{0.4cm}
+
+\textbf{Interpretation:}
+\begin{itemize}
+  \item $\displaystyle \pdv{\bm{u}}{t}$ — local acceleration.
+  \item $\displaystyle (\bm{u}\cdot\nabla)\bm{u}$ — convective acceleration.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Component Form of the Material Derivative}
+
+\textbf{Each component separately:}
+\begin{align*}
+\frac{Du}{Dt} &= \pdv{u}{t} + u\pdv{u}{x} + v\pdv{u}{y} + w\pdv{u}{z},\\[6pt]
+\frac{Dv}{Dt} &= \pdv{v}{t} + u\pdv{v}{x} + v\pdv{v}{y} + w\pdv{v}{z},\\[6pt]
+\frac{Dw}{Dt} &= \pdv{w}{t} + u\pdv{w}{x} + v\pdv{w}{y} + w\pdv{w}{z}.
+\end{align*}
+
+\vspace{0.3cm}
+
+\textbf{Summary:}
+\[
+\boxed{
+\frac{D\bm{u}}{Dt}
+= \left(
+\frac{Du}{Dt},
+\frac{Dv}{Dt},
+\frac{Dw}{Dt}
+\right)
+}
+\]
+
+\vspace{0.3cm}
+
+These terms represent the total acceleration of a fluid parcel.
+
+\end{frame}
+
+\begin{frame}{Material Derivative}
+We track a parcel with position $\x(t)$ and velocity $\uu(\x,t)$.
+\[
+\frac{D}{Dt} = \pdv{}{t} + \uu\cdot\grad
+\]
+Applied to velocity:
+\[
+\frac{D\uu}{Dt} = \pdv{\uu}{t} + (\uu\cdot\grad)\uu
+\]
+This is the acceleration of a fluid parcel (left-hand side of Euler / Navier--Stokes).
+\end{frame}
+
+\begin{frame}{Physical Meaning of Incompressibility}
+
+\textbf{Imagine:} a small dyed blob of fluid moves with the flow.
+
+\vspace{0.4cm}
+
+As the blob moves, its shape may distort, but for an
+\textbf{incompressible fluid} the \textit{volume of the blob stays constant}.
+
+\vspace{0.4cm}
+
+\textbf{Let:}
+\begin{itemize}
+  \item $V(t)$ — volume of the blob at time $t$
+  \item $\bm{u}$ — velocity field of the fluid
+\end{itemize}
+
+Then incompressibility means:
+\[
+\boxed{\frac{dV}{dt} = 0.}
+\]
+
+\vspace{0.4cm}
+
+We will now express this volume change in terms of the velocity field.
+\end{frame}
+
+
+\begin{frame}{Volume Flux Through a Closed Surface}
+\small
+Consider a fixed closed surface $S$ that encloses a region $V$ in the fluid,
+with outward unit normal $\bm{n}$.
+
+\vspace{0.4cm}
+
+At each point on $S$, the component of velocity along the outward normal is
+\[
+\bm{u}\cdot\bm{n}.
+\]
+
+The volume of fluid leaving through a small surface element $\delta S$
+in unit time is:
+\[
+(\bm{u}\cdot\bm{n})\,\delta S.
+\]
+
+\vspace{0.4cm}
+
+Integrating over the whole surface gives the \textbf{net volume rate}
+at which fluid leaves the region:
+\[
+\boxed{\frac{dV}{dt} = \oint_S \bm{u}\cdot\bm{n}\, dS.}
+\]
+
+If the fluid is incompressible, this rate must be zero for every closed surface.
+
+\[
+\boxed{\oint_S \bm{u}\cdot\bm{n}\, dS = 0.}
+\]
+
+\end{frame}
+
+\begin{frame}{From Surface Flux to Divergence Condition}
+
+\textbf{Recall the Divergence Theorem:}
+\[
+\boxed{
+\oint_S \bm{u}\cdot\bm{n}\, dS
+= \int_V (\nabla\cdot\bm{u})\, dV.
+}
+\]
+
+
+If $\displaystyle \oint_S \bm{u}\cdot\bm{n}\, dS = 0$ for any closed surface $S$,
+then the integrand must vanish everywhere inside $V$:
+
+\[
+\boxed{\nabla\cdot\bm{u} = 0.}
+\]
+
+\textbf{Interpretation:}
+\begin{itemize}
+  \item No net flux of volume out of any region.
+  \item Fluid elements neither expand nor contract.
+  \item The flow field is divergence-free.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Mass Conservation}
+For density $\rho(\x,t)$:
+\[
+\pdv{\rho}{t} + \divg(\rho \uu) = 0.
+\]
+Incompressible limit (constant $\rho$):
+\[
+\divg \uu = 0.
+\]
+\end{frame}
+
+
+
+% =========================================================
+\section{Forces: Pressure via Surface Tractions}
+
+\begin{frame}{Pressure via Surface Traction}
+
+\textbf{Setup:} Let $S$ be a closed surface enclosing a small dyed blob of fluid,
+with outward unit normal $\bm{n}$ (pointing \emph{out of the blob}).
+
+\vspace{0.35cm}
+
+\textbf{Pressure assumption (isotropic normal stress):}
+\[
+\text{Force on } \delta S \text{ from the surrounding fluid } = \; p(\bm{x},t)\,\bm{n}\,\delta S,
+\]
+where $p(\bm{x},t)$ is a scalar, independent of the direction of $\bm{n}$ (\emph{the pressure}).
+
+\vspace{0.35cm}
+\end{frame}
+
+\begin{frame}{Pressure via Surface Traction}
+\textbf{Sign convention / traction on the blob:}
+Because pressure is \emph{compressive}, the traction \emph{on the blob} is
+\[
+\boxed{\;\bm{t}_{\text{on blob}} = -\,p\,\bm{n}\;}
+\]
+(the outward normal $\bm{n}$ points out of the blob, so the pressure force points inward).
+
+\vspace{0.35cm}
+
+\textbf{Net pressure force on the blob:}
+\[
+\boxed{\;\bm{F}_{p,\text{blob}} = \displaystyle -\oint_S p\,\bm{n}\,dS\;}
+\]
+(The negative sign encodes that compression acts opposite the outward normal.)
+\end{frame}
+
+\begin{frame}{From Surface Traction to $-\nabla p$ (Volume Form)}
+
+\textbf{Gradient/Divergence step (a.k.a. “gradient theorem” here):}
+Apply Gauss’s divergence theorem \emph{componentwise}.
+For each Cartesian basis vector $\bm{e}_i$,
+\[
+\oint_S (p\,\bm{e}_i)\cdot\bm{n}\,dS
+= \int_V \nabla\cdot(p\,\bm{e}_i)\,dV
+= \int_V \partial_i p\,dV.
+\]
+Stacking components gives the vector identity
+\[
+\boxed{\;\oint_S p\,\bm{n}\,dS \;=\; \int_V \nabla p\,dV\;}
+\]
+(“surface integral of $p\,\bm{n}$ equals volume integral of $\nabla p$”).
+
+\vspace{0.35cm}
+
+\textbf{Hence, the net pressure force on the blob:}
+\[
+\bm{F}_{p,\text{blob}} = -\oint_S p\,\bm{n}\,dS
+= -\int_V \nabla p\,dV.
+\]
+
+\end{frame}
+
+\begin{frame}{From Surface Traction to $-\nabla p$ (Volume Form)}
+\textbf{Small-blob limit (nearly uniform $\nabla p$):}
+If the blob is small so that $\nabla p$ is approximately constant in $V$,
+\[
+\boxed{\;\bm{F}_{p,\text{blob}} \approx -\,(\nabla p)\,\delta V\;}
+\]
+points toward lower pressure.
+
+\vspace{0.35cm}
+
+\textbf{Sign check (Newton’s III):}
+The force the \emph{blob exerts on the surrounding fluid} is the opposite:
+\[
+\bm{F}_{p,\text{surroundings}} \approx +\,(\nabla p)\,\delta V.
+\]
+\end{frame}
+
+
+% =========================================================
+\section{Euler’s Equations (Inviscid)}
+
+\begin{frame}{Equations of Motion for an Ideal Fluid}
+
+\textbf{Definition (ideal fluid):}
+\begin{enumerate}
+  \item[(i)] \textit{Incompressible}: no dyed blob of fluid can change volume as it moves.
+  \item[(ii)] \textit{Constant density}: $\rho$ is the same for all fluid elements and for all time $t$.
+  \item[(iii)] \textit{Pressure traction}: the force exerted across a geometrical surface element
+               $\bm{n}\,\delta S$ within the fluid is
+               \[
+                 p\,\bm{n}\,\delta S,
+               \]
+               where $p(x,y,z,t)$ is a scalar, independent of the normal direction $\bm{n}$ (the \emph{pressure}).
+\end{enumerate}
+
+\medskip
+Forces are compressive, acting opposite the outward normal on a dyed blob.
+
+\end{frame}
+
+\begin{frame}{Momentum Balance on a Dyed Blob with Gravity}
+
+\textbf{Blob:} small control mass of volume $\delta V$ moving with the fluid; outward normal $\bm{n}$.
+
+\medskip
+\textbf{Pressure force on the blob:}
+\[
+\bm{F}_p \;=\; -\oint_S p\,\bm{n}\,dS \;=\; -\int_{\delta V} \nabla p\,dV \;\approx\; -(\nabla p)\,\delta V.
+\]
+
+\textbf{Body force (gravity) per unit mass:} $\bm{g}$ \quad $\Rightarrow$ \quad
+\[
+\bm{F}_g \;=\; \int_{\delta V} \rho\,\bm{g}\,dV \;\approx\; \rho\,\bm{g}\,\delta V.
+\]
+\end{frame}
+
+\begin{frame}{Momentum Balance on a Dyed Blob with Gravity}
+\textbf{Total force on the blob:}
+\[
+\boxed{\;\bm{F}_{\text{total}} \;=\; \big(-\nabla p + \rho\,\bm{g}\big)\,\delta V\;}
+\]
+
+\textbf{Newton’s 2nd law (blob mass $\rho\,\delta V$):}
+\[
+\rho\,\delta V\,\frac{D\bm{u}}{Dt} \;=\; \big(-\nabla p + \rho\,\bm{g}\big)\,\delta V.
+\]
+
+Cancel $\delta V$ to obtain the acceleration equation.
+
+\end{frame}
+
+\begin{frame}{Euler’s Equations for an Ideal (Inviscid) Incompressible Fluid}
+
+From the blob momentum balance:
+\[
+\boxed{\;\frac{D\bm{u}}{Dt} \;=\; -\,\frac{1}{\rho}\,\nabla p \;+\; \bm{g}\;}
+\quad\text{with}\quad
+\frac{D}{Dt}=\pdv{}{t}+\bm{u}\cdot\nabla.
+\]
+
+\medskip
+\textbf{Incompressibility (kinematic):}
+\[
+\boxed{\;\nabla\cdot\bm{u}=0\;}
+\]
+(Fluid parcels do not change volume; density is constant.)
+
+\end{frame}
+
+\begin{frame}{Euler (Inviscid) Equations in Components}
+
+Let $\bm{u}=(u,v,w)$ and $\bm{g}=(g_x,g_y,g_z)$.
+Then
+\begin{align*}
+\frac{Du}{Dt} &= \pdv{u}{t} + u\pdv{u}{x} + v\pdv{u}{y} + w\pdv{u}{z}
+               \;=\; -\,\frac{1}{\rho}\,\pdv{p}{x} + g_x,\\[6pt]
+\frac{Dv}{Dt} &= \pdv{v}{t} + u\pdv{v}{x} + v\pdv{v}{y} + w\pdv{v}{z}
+               \;=\; -\,\frac{1}{\rho}\,\pdv{p}{y} + g_y,\\[6pt]
+\frac{Dw}{Dt} &= \pdv{w}{t} + u\pdv{w}{x} + v\pdv{w}{y} + w\pdv{w}{z}
+               \;=\; -\,\frac{1}{\rho}\,\pdv{p}{z} + g_z.
+\end{align*}
+
+\medskip
+\textbf{Incompressibility:}
+\[
+\boxed{\;\pdv{u}{x}+\pdv{v}{y}+\pdv{w}{z}=0\;}
+\]
+
+\end{frame}
+
+
+% =========================================================
+\section{From Euler to Navier--Stokes: Add Viscosity}
+
+\begin{frame}{Momentum Balance with Stresses}
+Cauchy momentum equation introduces the Cauchy stress tensor $\bm{\sigma}$:
+\[
+\rho \frac{D\uu}{Dt} = \divg \bm{\sigma} + \rho \bm{f}.
+\]
+Split stress into pressure and deviatoric parts:
+\[
+\bm{\sigma} = -p \I + \bm{\tau},
+\]
+where $\bm{\tau}$ is the viscous (deviatoric) stress tensor.
+\end{frame}
+
+
+\begin{frame}{The Stress Vector}
+\small
+Let $\bm{x}$ denote the position of a fixed point in the fluid,
+and let $\delta S$ be a small geometrical surface element through $\bm{x}$,
+with unit normal $\bm{n}$.
+
+\vspace{0.4cm}
+
+The \textbf{force} exerted by the fluid on the side of the surface
+towards which $\bm{n}$ is directed is assumed to be
+\[
+\boxed{\;\bm{t}\,\delta S\;}
+\]
+where $\bm{t}$ is the \textbf{stress vector} acting on that surface.
+
+\vspace{0.4cm}
+
+For an inviscid fluid:
+\[
+\bm{t} = -\,p(\bm{x},t)\,\bm{n}.
+\]
+
+In general, $\bm{t}$ may have both normal and tangential components.
+
+\vspace{0.3cm}
+\textbf{Goal:} Express $\bm{t}$ in terms of quantities defined at the point $\bm{x}$,
+independent of the orientation of the surface.
+\end{frame}
+\begin{frame}{Definition of the Stress Tensor}
+\small
+To describe all possible stress vectors at a point,
+we define nine local quantities $T_{ij}$:
+
+\vspace{0.3cm}
+
+\[
+\boxed{\;
+T_{ij} = \text{$i$-component of stress on a surface with normal in the $j$-direction.}
+\;}
+\]
+
+\vspace{0.3cm}
+
+In matrix form (Cartesian coordinates):
+\[
+\bm{T} =
+\begin{pmatrix}
+T_{xx} & T_{xy} & T_{xz}\\
+T_{yx} & T_{yy} & T_{yz}\\
+T_{zx} & T_{zy} & T_{zz}
+\end{pmatrix}.
+\]
+
+Each column corresponds to a face normal direction;
+each row corresponds to a component of force.
+
+\vspace{0.4cm}
+
+Our goal is to relate the stress vector $\bm{t}$ on an arbitrarily oriented
+surface (with unit normal $\bm{n}$) to these tensor components $T_{ij}$.
+\end{frame}
+\begin{frame}{Stress on an Arbitrary Surface}
+\footnotesize
+Consider a small tetrahedron of fluid (Fig.~6.3 in Acheson):
+one large face has outward normal $\bm{n}$,
+and three coordinate faces are perpendicular to $x$, $y$, and $z$ axes.
+
+\vspace{0.3cm}
+
+Apply the principle of linear momentum to the tetrahedron:
+
+\begin{itemize}
+  \item Stress on main face (normal $\bm{n}$): $\bm{t}\,\delta S$.
+  \item Stress on coordinate faces (normals $-\bm{e}_x$, $-\bm{e}_y$, $-\bm{e}_z$): 
+  $-\,T_{i1}n_x\delta S$, $-\,T_{i2}n_y\delta S$, $-\,T_{i3}n_z\delta S$.
+\end{itemize}
+
+Balancing $i$-components of force as the tetrahedron shrinks ($\delta V\propto L^3$, $\delta S\propto L^2$):
+
+\[
+t_i = T_{ij}\,n_j,
+\quad \text{(summation on $j$ implied).}
+\]
+
+\vspace{0.4cm}
+
+\textbf{Vector form:}
+\[
+\boxed{\;\bm{t} = \bm{T}\,\bm{n}\;}
+\]
+
+This relation is known as \textbf{Cauchy’s stress principle}.
+
+\end{frame}
+\begin{frame}{Cauchy’s Equation of Motion}
+\small
+Consider any infinitesimal fluid element of volume $\delta V$.
+
+\textbf{Forces acting:}
+\begin{itemize}
+  \item Surface (stress) forces: $\displaystyle \oint_S \bm{t}\,dS = \oint_S \bm{T}\bm{n}\,dS$
+  \item Body forces: $\rho\,\bm{g}\,\delta V$
+\end{itemize}
+
+\vspace{0.3cm}
+
+Apply the divergence theorem:
+\[
+\oint_S \bm{T}\bm{n}\,dS = \int_V \nabla\cdot\bm{T}\,dV.
+\]
+
+\textbf{Linear momentum balance:}
+\[
+\rho\,\frac{D\bm{u}}{Dt} = \nabla\cdot\bm{T} + \rho\,\bm{g}.
+\]
+
+\vspace{0.4cm}
+
+\textbf{This is Cauchy’s equation of motion.}
+
+\vspace{0.2cm}
+
+Special cases:
+\[
+\bm{T} = -p\mathbf{I} \quad \Rightarrow \quad
+\rho\frac{D\bm{u}}{Dt} = -\nabla p + \rho\bm{g} \quad (\text{Euler}).
+\]
+
+\end{frame}
+
+
+% =========================================================
+\section{How to Build the Viscous Stress Tensor}
+
+\begin{frame}{Cauchy Stress and Momentum Balance}
+\begin{block}{Traction vector on an arbitrary surface}
+For a surface with unit normal $\mathbf{n}$ at a point,
+\[
+\mathbf{t}(\mathbf{n}) = \boldsymbol{\sigma}\,\mathbf{n},
+\qquad
+\boldsymbol{\sigma} = (\sigma_{ij})\ \text{is the Cauchy stress tensor.}
+\]
+Here $\boldsymbol{\sigma}$ maps the direction $\mathbf{n}$ to the
+force per unit area across that surface.
+\end{block}
+
+\begin{block}{Cauchy equation of motion}
+Balance of linear momentum for a fluid of density $\rho$:
+\[
+\rho\,\frac{D\mathbf{u}}{Dt}
+=
+\nabla\!\cdot \boldsymbol{\sigma}
++ \rho\,\mathbf{g}.
+\]
+\end{block}
+\end{frame}
+
+\begin{frame}{Split Stress into Pressure and Viscous Parts}
+\begin{columns}[T,onlytextwidth]
+\column{0.55\textwidth}
+\[
+\boldsymbol{\sigma} = -p\,I + \boldsymbol{\tau},
+\]
+\begin{itemize}
+  \item $-pI$ is the isotropic (pressure) stress.
+  \item $\boldsymbol{\tau}$ is the deviatoric (viscous) stress.
+\end{itemize}
+
+\column{0.45\textwidth}
+\begin{block}{Symmetry}
+No internal torques (no couple stresses) implies
+\[
+\sigma_{ij}=\sigma_{ji}.
+\]
+\end{block}
+\end{columns}
+\end{frame}
+
+\begin{frame}{The Rate-of-Strain Tensor: What It Measures}
+\small
+\textbf{Goal:} Describe how nearby fluid particles deform relative to each other.
+
+\medskip
+
+For a velocity field $\mathbf{u}(\mathbf{x})$, the velocity gradient $\nabla \mathbf{u}$
+contains \emph{all} local information about stretching, shearing, and rotation.
+
+\medskip
+
+But only the \textbf{symmetric part} produces physical deformation:
+\[
+D = \frac12\!\left( \nabla \mathbf{u} + (\nabla \mathbf{u})^{\!\top} \right).
+\]
+
+\begin{itemize}
+\item $D$ measures how a small fluid element is \emph{stretched or sheared}.
+\item The antisymmetric part
+\[
+W = \frac12\!\left( \nabla\mathbf{u} - (\nabla\mathbf{u})^{\!\top} \right)
+\]
+represents rigid-body rotation only — it does \emph{not} generate stresses.
+\item Thus $D$ is the unique second-order tensor describing deformation rate.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Geometric Interpretation of $D$}
+
+Consider two nearby particles separated by a small vector $d\mathbf{x}$.
+
+\[
+\text{relative velocity} \;\;\; d\mathbf{u} = (\nabla \mathbf{u})\, d\mathbf{x}.
+\]
+
+Decompose using symmetry:
+\[
+d\mathbf{u}
+= D\,d\mathbf{x} + W\,d\mathbf{x}.
+\]
+
+\begin{itemize}
+\item $D\,d\mathbf{x}$: changes length and angle of $d\mathbf{x}$  
+      (stretching and shearing).
+\item $W\,d\mathbf{x}$: rotates the line element without deformation.
+\end{itemize}
+
+\vspace{0.2cm}
+
+Thus $D$ captures the \emph{actual deformation} of the material, making it
+the natural quantity for determining viscous stresses.
+
+\end{frame}
+
+\begin{frame}{What Constitutive Laws Should Look Like}
+
+A constitutive law for viscous stress $\boldsymbol{\tau}$ must satisfy:
+
+\begin{enumerate}
+\item \textbf{Linearity} (Newtonian assumption):  
+      stress depends linearly on the rate of deformation.
+\item \textbf{Locality}: stress at a point depends only on $\nabla \mathbf{u}$ at that point.
+\item \textbf{Objectivity}: rigid-body motions must not generate stress.
+\item \textbf{Isotropy}: material has no preferred direction.
+\end{enumerate}
+
+\medskip
+
+These restrictions dramatically narrow down the possible forms of $\boldsymbol{\tau}$.
+
+\end{frame}
+
+\begin{frame}{Why Isotropy Determines the Functional Form}
+
+For an \textbf{isotropic} material, $\boldsymbol{\tau}$ cannot depend on direction.
+Therefore, $\boldsymbol{\tau}$ may be built only from:
+
+\begin{itemize}
+\item the symmetric tensor $D$,
+\item its trace, $\nabla\!\cdot\mathbf{u}$ (a scalar),
+\item and the identity tensor $I$.
+\end{itemize}
+
+\medskip
+
+\textbf{Most general linear, isotropic tensor function:}
+\[
+\boxed{
+\boldsymbol{\tau}
+=
+2\mu\, D
++
+\lambda\,(\nabla\!\cdot\mathbf{u})\,I
+}
+\]
+
+\begin{itemize}
+\item $\mu$ — dynamic viscosity (shear response)
+\item $\lambda$ — bulk viscosity (volumetric response)
+\end{itemize}
+
+\textbf{This is the only possible linear isotropic relation.}
+
+\end{frame}
+
+\begin{frame}{Special Case: Incompressible Newtonian Fluids}
+
+If the flow is incompressible:
+\[
+\nabla\!\cdot\mathbf{u}=0,
+\]
+the constitutive law simplifies to
+\[
+\boldsymbol{\tau}=2\mu D.
+\]
+
+Component form:
+\[
+\sigma_{ij}
+=
+-p\,\delta_{ij}
++
+\mu\!\left(
+\frac{\partial u_i}{\partial x_j}
++
+\frac{\partial u_j}{\partial x_i}
+\right).
+\]
+
+\begin{itemize}
+\item Pressure accounts for isotropic normal stresses.
+\item Viscosity produces shear stresses proportional to deformation rate.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Divergence of the Viscous Stress}
+
+For constant $\mu$ (and $\lambda$ if used),
+\[
+\nabla\!\cdot(2\mu D)
+=
+\mu \nabla^2 \mathbf{u}
++
+\mu\,\nabla(\nabla\!\cdot\mathbf{u}).
+\]
+
+\medskip
+
+For incompressible flows:
+\[
+\nabla\!\cdot\mathbf{u}=0
+\quad\Rightarrow\quad
+\nabla\!\cdot\boldsymbol{\tau}
+=
+\mu \nabla^2 \mathbf{u}.
+\]
+
+This provides the familiar \textbf{viscous diffusion term} in Navier–Stokes.
+
+\end{frame}
+
+\begin{frame}{Putting It All Together: Navier–Stokes}
+
+Start from Cauchy momentum balance:
+\[
+\rho\,\frac{D\mathbf{u}}{Dt}
+=
+\nabla\!\cdot \boldsymbol{\sigma}
++
+\rho\,\mathbf{g},
+\qquad
+\boldsymbol{\sigma}
+=
+-pI + \boldsymbol{\tau}.
+\]
+
+Insert the constitutive law for incompressible Newtonian fluids:
+\[
+\boldsymbol{\tau}=2\mu D,
+\qquad
+\nabla\!\cdot\boldsymbol{\tau}
+=\mu\nabla^2\mathbf{u}.
+\]
+
+\[
+\boxed{
+\rho\left(
+\frac{\partial\mathbf{u}}{\partial t}
++
+(\mathbf{u}\!\cdot\!\nabla)\mathbf{u}
+\right)
+=
+-\nabla p
++
+\mu\nabla^2\mathbf{u}
++
+\rho\mathbf{g},
+\qquad
+\nabla\!\cdot\mathbf{u}=0.
+}
+\]
+
+\textbf{This is the Navier–Stokes equation for an incompressible Newtonian fluid.}
+
+\end{frame}
+
+
+
+
+
+
+
+
+
+% =========================================================
+\section{Navier--Stokes Equations}
+
+\begin{frame}{Navier--Stokes Equations in Partial Derivative Form}
+\footnotesize
+For an incompressible Newtonian fluid with constant viscosity $\mu$ and density $\rho$,
+the momentum equations in $(x,y,z)$ coordinates are:
+
+\[
+\rho \left(
+\frac{\partial u}{\partial t}
++ u\,\frac{\partial u}{\partial x}
++ v\,\frac{\partial u}{\partial y}
++ w\,\frac{\partial u}{\partial z}
+\right)
+=
+-\frac{\partial p}{\partial x}
++ \mu\left(
+\frac{\partial^2 u}{\partial x^2}
++ \frac{\partial^2 u}{\partial y^2}
++ \frac{\partial^2 u}{\partial z^2}
+\right)
++ \rho g_x,
+\]
+
+\[
+\rho \left(
+\frac{\partial v}{\partial t}
++ u\,\frac{\partial v}{\partial x}
++ v\,\frac{\partial v}{\partial y}
++ w\,\frac{\partial v}{\partial z}
+\right)
+=
+-\frac{\partial p}{\partial y}
++ \mu\left(
+\frac{\partial^2 v}{\partial x^2}
++ \frac{\partial^2 v}{\partial y^2}
++ \frac{\partial^2 v}{\partial z^2}
+\right)
++ \rho g_y,
+\]
+
+\[
+\rho \left(
+\frac{\partial w}{\partial t}
++ u\,\frac{\partial w}{\partial x}
++ v\,\frac{\partial w}{\partial y}
++ w\,\frac{\partial w}{\partial z}
+\right)
+=
+-\frac{\partial p}{\partial z}
++ \mu\left(
+\frac{\partial^2 w}{\partial x^2}
++ \frac{\partial^2 w}{\partial y^2}
++ \frac{\partial^2 w}{\partial z^2}
+\right)
++ \rho g_z.
+\]
+
+\medskip
+
+Incompressibility constraint:
+\[
+\frac{\partial u}{\partial x}
++ \frac{\partial v}{\partial y}
++ \frac{\partial w}{\partial z}
+= 0.
+\]
+
+\end{frame}
+
+
+\begin{frame}{Navier--Stokes in Component Form}
+\footnotesize
+For an incompressible Newtonian fluid with constant viscosity $\mu$ and density $\rho$,
+the momentum equations in component form are:
+
+\[
+\rho\left(
+\frac{\partial u_i}{\partial t}
++ u_j\,\frac{\partial u_i}{\partial x_j}
+\right)
+=
+-\frac{\partial p}{\partial x_i}
++ \mu\,\frac{\partial^2 u_i}{\partial x_j^2}
++ \rho\,g_i,
+\qquad i = 1,2,3.
+\]
+
+\medskip
+
+Explicitly, in $(x,y,z)$ coordinates:
+
+\[
+\begin{aligned}
+\rho\left(u_{1,t} + u_1 u_{1,x} + u_2 u_{1,y} + u_3 u_{1,z}\right)
+&= -p_{,x} + \mu\left(u_{1,xx}+u_{1,yy}+u_{1,zz}\right) + \rho g_1,\\[4pt]
+\rho\left(u_{2,t} + u_1 u_{2,x} + u_2 u_{2,y} + u_3 u_{2,z}\right)
+&= -p_{,y} + \mu\left(u_{2,xx}+u_{2,yy}+u_{2,zz}\right) + \rho g_2,\\[4pt]
+\rho\left(u_{3,t} + u_1 u_{3,x} + u_2 u_{3,y} + u_3 u_{3,z}\right)
+&= -p_{,z} + \mu\left(u_{3,xx}+u_{3,yy}+u_{3,zz}\right) + \rho g_3.
+\end{aligned}
+\]
+
+The incompressibility condition is
+
+\[
+u_{1,x} + u_{2,y} + u_{3,z} = 0.
+\]
+
+\end{frame}
+
+\begin{frame}{Understanding Each Term: A Guided Breakdown}
+
+The momentum equation in component form:
+
+\[
+\rho\left(
+\frac{\partial u_i}{\partial t}
++ u_j\,\frac{\partial u_i}{\partial x_j}
+\right)
+=
+-\frac{\partial p}{\partial x_i}
++ \mu\,\frac{\partial^2 u_i}{\partial x_j^2}
++ \rho\,g_i.
+\]
+
+\begin{itemize}
+\item $\displaystyle \frac{\partial u_i}{\partial t}$ — \textbf{local acceleration}
+\item $\displaystyle u_j \frac{\partial u_i}{\partial x_j}$ — \textbf{advective acceleration}
+\item $\displaystyle -\frac{\partial p}{\partial x_i}$ — \textbf{pressure-gradient force}
+\item $\displaystyle \mu \frac{\partial^2 u_i}{\partial x_j^2}$ — \textbf{viscous diffusion of momentum}
+\item $\rho g_i$ — \textbf{body forces} (gravity, buoyancy, etc.)
+\end{itemize}
+
+\medskip
+
+This is just Newton’s $F=ma$ applied to a fluid element, written in tensor form.
+
+\end{frame}
+
+\begin{frame}{Steady Navier--Stokes Equations}
+
+For a steady incompressible Newtonian flow, 
+\[
+\frac{\partial \mathbf{u}}{\partial t} = 0.
+\]
+
+The Navier--Stokes equations reduce to:
+\[
+\rho\,(\mathbf{u}\cdot\nabla)\mathbf{u}
+=
+-\nabla p
++ \mu\,\nabla^2 \mathbf{u}
++ \rho\,\mathbf{g},
+\qquad
+\nabla\cdot\mathbf{u} = 0.
+\]
+
+\begin{itemize}
+  \item No time dependence — acceleration comes only from advection.
+  \item Important for fully developed pipe/channel flows.
+  \item Still nonlinear and generally difficult to solve.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{1D Navier--Stokes (Incompressible)}
+
+Assume velocity only in one direction: 
+\[
+\mathbf{u} = (u(x,t),\,0,\,0),
+\qquad
+u_y = u_z = 0.
+\]
+
+Then incompressibility gives:
+\[
+\frac{\partial u}{\partial x} = 0
+\quad\Rightarrow\quad
+u = u(t) \text{ or } u = u(y) \text{ in channel flow.}
+\]
+
+Momentum equation becomes:
+\[
+\rho\,\frac{\partial u}{\partial t}
+=
+-\frac{\partial p}{\partial x}
++ \mu\,\frac{\partial^2 u}{\partial y^2}
++ \rho\,g_x.
+\]
+
+\begin{itemize}
+  \item Forms basis of Poiseuille and Couette flow.
+  \item Nonlinearity disappears — no advection term.
+  \item Widely used for analytical benchmark solutions.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{2D Navier--Stokes (Incompressible)}
+
+Assume $\mathbf{u} = (u(x,y,t),\, v(x,y,t),\, 0)$.
+
+Momentum equations:
+\[
+\rho\left(
+\frac{\partial u}{\partial t}
++ u\,u_x + v\,u_y
+\right)
+=
+- p_x
++ \mu\left(u_{xx}+u_{yy}\right)
++ \rho g_x,
+\]
+
+\[
+\rho\left(
+\frac{\partial v}{\partial t}
++ u\,v_x + v\,v_y
+\right)
+=
+- p_y
++ \mu\left(v_{xx}+v_{yy}\right)
++ \rho g_y.
+\]
+
+Incompressibility constraint:
+\[
+u_x + v_y = 0.
+\]
+
+\begin{itemize}
+  \item Used for cavity flow, cylinder wake, airfoil sections.
+  \item Still nonlinear — supports vortex shedding and separation.
+\end{itemize}
+
+\end{frame}
+
+
+% =========================================================
+\section{Boundary Conditions}
+
+\begin{frame}{Boundary Conditions for Navier--Stokes}
+
+To solve the Navier--Stokes equations, the PDEs must be supplemented with
+\emph{boundary conditions} on the domain boundary $\partial\Omega$.
+
+\medskip
+
+Boundary conditions determine:
+\begin{itemize}
+  \item how the fluid interacts with solid walls,
+  \item what enters and exits the domain,
+  \item whether momentum or stress is prescribed,
+  \item whether the flow is constrained or free to adjust.
+\end{itemize}
+
+Different choices produce very different physical behavior.
+
+\end{frame}
+
+\begin{frame}{Dirichlet Boundary Conditions}
+
+A \textbf{Dirichlet boundary condition} specifies the value of the solution:
+
+\[
+\mathbf{u} = \mathbf{u}_b \quad \text{on } \partial\Omega_D.
+\]
+
+Common examples:
+\begin{itemize}
+  \item \textbf{No-slip wall:}
+        \[
+        \mathbf{u} = \mathbf{0}
+        \]
+  \item \textbf{Prescribed inflow:}
+        \[
+        \mathbf{u} = \mathbf{u}_{\text{in}}(t)
+        \]
+  \item \textbf{Moving boundary:}
+        \[
+        \mathbf{u} = \mathbf{U}_{\text{wall}}(t)
+        \]
+\end{itemize}
+
+Dirichlet BCs fix the velocity and completely constrain motion at the boundary.
+
+\end{frame}
+
+\begin{frame}{Neumann Boundary Conditions}
+\footnotesize
+
+A \textbf{Neumann boundary condition} specifies the \emph{flux} or \emph{gradient}
+rather than the value of the field.
+
+For momentum, this means prescribing the \textbf{traction}:
+
+\[
+\boldsymbol{\sigma}\,\mathbf{n}
+=
+\mathbf{t}_b
+\quad \text{on } \partial\Omega_N.
+\]
+
+Examples:
+\begin{itemize}
+  \item \textbf{Stress-free surface:}
+        \[
+        \boldsymbol{\sigma}\,\mathbf{n} = \mathbf{0}
+        \]
+  \item \textbf{Outflow traction:}
+        \[
+        -p\,\mathbf{n} + \mu (\nabla\mathbf{u} + \nabla\mathbf{u}^{\!\top})\mathbf{n}
+        = \mathbf{t}_{\text{out}}
+        \]
+  \item \textbf{No-penetration (normal only):}
+        \[
+        \mathbf{u}\cdot\mathbf{n} = 0
+        \quad\Rightarrow\quad
+        \text{normal velocity gradient unspecified}
+        \]
+\end{itemize}
+
+Neumann BCs arise naturally from momentum balance and variational formulations.
+
+\end{frame}
+
+\begin{frame}{Robin (Mixed) Boundary Conditions}
+\footnotesize
+A \textbf{Robin boundary condition} combines Dirichlet and Neumann data:
+
+\[
+\alpha\,\mathbf{u}
++
+\beta\,(\boldsymbol{\sigma}\,\mathbf{n})
+=
+\mathbf{g}
+\quad \text{on } \partial\Omega_R.
+\]
+
+Examples:
+\begin{itemize}
+  \item \textbf{Navier slip} (partial slip at walls):
+        \[
+        \mathbf{u}_\parallel
+        =
+        \ell_s \left(
+        (\boldsymbol{\sigma}\,\mathbf{n})_\parallel
+        \right)
+        \]
+        where $\ell_s$ is a slip length.
+  \item \textbf{Porous or resistive boundaries} (Darcy-type):
+        \[
+        \mathbf{u}\cdot\mathbf{n}
+        +
+        K\,(\boldsymbol{\sigma}\,\mathbf{n})\cdot\mathbf{n}
+        =
+        0
+        \]
+\end{itemize}
+
+Robin BCs interpolate between fully constrained and fully free boundaries.
+
+
+\end{frame}
+
+\begin{frame}{Other Common Boundary Conditions in Fluid Mechanics}
+
+\begin{itemize}
+  \item \textbf{Slip (inviscid wall assumption):}
+        \[
+        \mathbf{u}\cdot\mathbf{n} = 0,
+        \qquad
+        (\boldsymbol{\sigma}\,\mathbf{n})_\parallel = \mathbf{0}
+        \]
+  \item \textbf{Periodic boundaries:}
+        \[
+        \mathbf{u}(\mathbf{x}) = \mathbf{u}(\mathbf{x} + L_i \mathbf{e}_i),
+        \qquad
+        p(\mathbf{x}) = p(\mathbf{x} + L_i \mathbf{e}_i)
+        \]
+        used in channel flow and turbulence.
+  \item \textbf{Far-field / open boundaries:}
+        \[
+        \frac{\partial \mathbf{u}}{\partial n} = 0
+        \quad\text{or}\quad
+        \boldsymbol{\sigma}\,\mathbf{n} = \mathbf{0}
+        \]
+  \item \textbf{Free surface (air–water interface):}
+        \[
+        \boldsymbol{\sigma}\,\mathbf{n}
+        = -p_{\text{atm}}\mathbf{n}
+        + \gamma\,\kappa\,\mathbf{n}
+        \quad (\text{surface tension})
+        \]
+\end{itemize}
+
+Different boundary choices can drastically change the flow solution.
+
+\end{frame}
+
+\begin{frame}{How to Choose Boundary Conditions}
+
+Consider:
+\begin{itemize}
+  \item Physics of the domain (solid wall? open flow? interface?)
+  \item What is known and what the solution must determine
+  \item Numerical stability (outflow BCs are delicate)
+  \item Whether the boundary should constrain momentum or stress
+\end{itemize}
+
+\medskip
+
+\textbf{Rule of thumb:}
+\begin{itemize}
+  \item Dirichlet for inflow and solid walls,
+  \item Neumann/traction or ``do–nothing'' for outflow,
+  \item Periodic when the physics repeats.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{How Many Boundary Conditions Do We Need?}
+
+For incompressible Navier--Stokes, the velocity satisfies
+second--order PDEs. Therefore:
+
+\begin{itemize}
+  \item Each velocity component needs \emph{one} boundary condition
+        on the boundary $\partial\Omega$.
+  \item At every boundary point, specify \textbf{either}
+        \begin{itemize}
+           \item a \textbf{Dirichlet} condition (velocity), e.g.\ $\mathbf{u}=\mathbf{u}_b$, \\
+           \item or a \textbf{Neumann} condition (traction), e.g.\ $\boldsymbol{\sigma}\mathbf{n}=\mathbf{t}_b$.
+        \end{itemize}
+  \item Velocity BCs may be mixed over the boundary:
+        \[
+        \partial\Omega
+        = \partial\Omega_D \cup \partial\Omega_N,
+        \qquad
+        \partial\Omega_D \cap \partial\Omega_N = \varnothing.
+        \]
+  \item The pressure has no evolution equation and is determined only up to a constant:
+        \begin{itemize}
+           \item one additional constraint is required (e.g.\ fix $p$ at a point, or prescribe traction on part of the boundary).
+        \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Why We Do Not Prescribe Pressure Directly}
+\footnotesize
+In incompressible Navier--Stokes, the pressure has \textbf{no time evolution equation}.
+Instead, it is determined by the momentum balance and the incompressibility constraint.
+
+\medskip
+
+\begin{itemize}
+  \item The pressure appears only through its \textbf{gradient}:
+  \[
+    -\nabla p
+  \]
+  so adding a constant to $p$ does not change the physics.
+  \item Pressure is therefore a \textbf{Lagrange multiplier} enforcing
+  \[
+    \nabla\!\cdot \mathbf{u} = 0.
+  \]
+  \item The pressure field is obtained by solving a Poisson equation:
+  \[
+    \nabla^2 p = \nabla\!\cdot\big( \rho(\mathbf{u}\!\cdot\!\nabla)\mathbf{u} \big),
+  \]
+  which uses boundary information from the \textbf{velocity} or \textbf{traction}, not $p$ itself.
+  \item Only one extra condition is needed (e.g.\ fix $p$ at a point or specify traction on part of $\partial\Omega$) to make $p$ unique.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Do People Ever Prescribe Pressure as a Boundary Condition?}
+\footnotesize
+\textbf{Yes — but only in specific situations.}  
+In incompressible Navier--Stokes, pressure is not an independent field with its own
+evolution equation, so we do \emph{not} freely assign $p$ on boundaries.
+
+\medskip
+
+\textbf{Cases often called ``pressure BCs'':}
+\begin{itemize}
+  \item \textbf{Traction (Neumann) condition:}
+        \[
+        \boldsymbol{\sigma}\mathbf{n} = -p_{\text{ext}}\mathbf{n}
+        \]
+        e.g.\ free surface, outflow to atmosphere.
+  \item \textbf{Reference value for uniqueness:}
+        \[
+        p(x_0)=0
+        \]
+        fixes the additive constant.
+  \item \textbf{Special cases:}
+        steady Stokes flow, certain outflow boundaries,
+        or compressible flow where $p$ is thermodynamic.
+\end{itemize}
+
+\medskip
+
+\textbf{Important:}  
+Prescribing both $p$ \emph{and} normal velocity overconstrains the system and is ill-posed.
+
+\end{frame}
+
+\begin{frame}{Well-Posed vs.\ Ill-Posed Boundary Conditions}
+
+\textbf{Well-posed examples:}
+\footnotesize
+\begin{itemize}
+  \item \textbf{Inflow–outflow:}
+  \[
+    \mathbf{u} = \mathbf{u}_{\text{in}} \text{ on } \partial\Omega_{\text{in}}, 
+    \qquad
+    \boldsymbol{\sigma}\mathbf{n} = \mathbf{0} \text{ on } \partial\Omega_{\text{out}}.
+  \]
+  \item \textbf{No-slip walls + traction elsewhere:}
+  \[
+    \mathbf{u} = \mathbf{0} \text{ on } \partial\Omega_{\text{wall}}, \quad
+    \boldsymbol{\sigma}\mathbf{n} = \mathbf{t}_b \text{ on } \partial\Omega_{\text{free}}.
+  \]
+  \item \textbf{Periodic domain:}
+  velocity and pressure equal on opposite faces.
+\end{itemize}
+
+\medskip
+
+\textbf{Ill-posed or incorrect examples:}
+\begin{itemize}
+  \item Prescribing \emph{both} $\mathbf{u}$ and $\boldsymbol{\sigma}\mathbf{n}$ on the same boundary segment.
+  \item Specifying pressure \emph{and} normal velocity at an outflow.
+  \item Applying $\mathbf{u}=\mathbf{0}$ on the \emph{entire} boundary with no forcing
+        $\Rightarrow$ trivial solution only.
+\end{itemize}
+
+\medskip
+
+\textbf{Key rule:}  
+Assign \emph{one} condition per velocity component at each boundary point—either Dirichlet or Neumann, not both.
+
+\end{frame}
+
+
+
+% =========================================================
+\section{References}
+\begin{frame}{References}
+D.\,J. Acheson, \textit{Elementary Fluid Dynamics}. Clarendon Press.\\[4pt]
+Any standard continuum mechanics text for the Cauchy stress and Newtonian constitutive law.
+\end{frame}
+
+% =========================================================
+\section{Appendix: Mini-Derivations}
+
+\begin{frame}{Mini: From Control Volume to Differential Form}
+Apply Reynolds Transport Theorem and the divergence theorem to convert surface tractions to volume forces:
+\[
+\int_S \bm{\sigma}\,\n\,dS = \int_V \divg \bm{\sigma}\, dV.
+\]
+Combine with linear momentum balance to get the Cauchy equation.
+\end{frame}
+
+\begin{frame}{Mini: Identity for $\divg(2\mu \D)$}
+For constant $\mu$:
+\[
+\divg(2\mu \D)
+= \mu \nabla^2 \uu + \mu\,\grad(\divg \uu).
+\]
+(Use $\nabla^2 \uu \equiv \grad(\divg\uu) - \curl(\curl\uu)$ and symmetry of $\D$.)
+\end{frame}
+
+\end{document}

@@ -1,0 +1,141 @@
+\documentclass[12pt]{article}
+
+% === Packages ===
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault} % modern sans-serif look
+
+% === Formatting tweaks ===
+\setstretch{1.15}
+\setlist[enumerate]{itemsep=0.4em, topsep=0.2em}
+\titleformat{\section}{\Large\bfseries\sffamily}{\thesection.}{1em}{}
+\titleformat{\subsection}{\large\bfseries\sffamily}{\thesubsection}{1em}{}
+
+% === Title ===
+\title{\vspace{-2em}\textbf{Applied Mathematics Oral Exam Questions and Model Answers}\\
+\large From Euler to Navier--Stokes}
+\author{Prepared for Graduate Oral Examination}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+% === Optional Intro Paragraph ===
+These questions are designed for an applied mathematics oral examination following a research presentation on fluid dynamics.  
+They emphasize conceptual understanding of the material derivative, incompressibility, the stress tensor, and the derivation and interpretation of the Navier--Stokes equations.  
+Students are typically expected to demonstrate fluency in physical interpretation, modeling assumptions, and connections to research contexts rather than detailed on-board derivations.
+
+\section*{Applied Mathematics Oral Exam Questions and Model Answers:\\
+From Euler to Navier--Stokes}
+
+\subsection*{1. Kinematics and Material Derivative}
+\begin{enumerate}
+\item \textbf{Question:} Explain the difference between the local and convective components of the material derivative.\\
+\textbf{Answer:} The local term $\partial \phi/\partial t$ measures how a quantity changes at a fixed point in space. The convective term $(u \cdot \nabla)\phi$ accounts for the change experienced by a fluid parcel as it moves through spatial gradients in the field. Together they represent the total derivative following the flow.
+
+\item \textbf{Question:} How does the material derivative help us interpret acceleration in a flow field?\\
+\textbf{Answer:} The acceleration of a fluid particle is given by $D u/Dt = \partial u/\partial t + (u \cdot \nabla)u$. It shows that acceleration depends both on local unsteadiness and spatial changes experienced as the parcel moves.
+
+\item \textbf{Question:} Give a physical example where the convective term dominates the local term.\\
+\textbf{Answer:} In steady but spatially varying flow around an airfoil, $\partial u/\partial t = 0$ but $(u \cdot \nabla)u$ is large, so acceleration arises purely from convection.
+\end{enumerate}
+
+\subsection*{2. Incompressibility and Mass Conservation}
+\begin{enumerate}
+\item \textbf{Question:} What does $\nabla \cdot u = 0$ mean physically?\\
+\textbf{Answer:} The divergence-free condition means fluid elements neither expand nor contract; the volume of any small parcel is conserved in time.
+
+\item \textbf{Question:} How would you detect deviations from incompressibility?\\
+\textbf{Answer:} By measuring density changes or divergence of the velocity field from data. In simulations, monitoring $\nabla \cdot u$ provides a diagnostic.
+
+\item \textbf{Question:} Why is constant density often assumed even for slightly compressible fluids?\\
+\textbf{Answer:} When flow speeds are much smaller than the speed of sound (low Mach number), density variations are negligible and the incompressible approximation is accurate.
+\end{enumerate}
+
+\subsection*{3. Pressure and Euler’s Equations}
+\begin{enumerate}
+\item \textbf{Question:} How does pressure arise as a surface traction?\\
+\textbf{Answer:} Pressure represents an isotropic normal stress acting on any surface element. The net pressure force on a small control volume is $-\!\int_S p n\,dS$, which becomes $-\nabla p$ per unit volume.
+
+\item \textbf{Question:} What assumptions distinguish Euler’s equations from Navier--Stokes?\\
+\textbf{Answer:} Euler’s equations neglect viscosity, assuming the stress tensor is purely isotropic ($T = -pI$). Navier--Stokes includes viscous stresses through the term $\mu \nabla^2 u$.
+
+\item \textbf{Question:} Give a physical example where Euler’s equations are adequate and one where they fail.\\
+\textbf{Answer:} Euler’s equations are suitable for high-Reynolds-number, inviscid flows such as external aerodynamics far from boundaries. They fail near solid surfaces or in low-Reynolds-number flows where viscous effects dominate.
+\end{enumerate}
+
+\subsection*{4. Cauchy Stress Tensor and Momentum Balance}
+\begin{enumerate}
+\item \textbf{Question:} What additional information does the Cauchy stress tensor contain compared to pressure?\\
+\textbf{Answer:} The tensor includes both normal and shear components of stress, describing how momentum is transferred in all directions, not just isotropically.
+
+\item \textbf{Question:} Why must the stress tensor be symmetric?\\
+\textbf{Answer:} Conservation of angular momentum for infinitesimal elements requires zero net torque, implying $T_{ij} = T_{ji}$ in the absence of body couples.
+
+\item \textbf{Question:} Interpret each term in $\rho \frac{D u}{D t} = \nabla \cdot T + \rho g$.\\
+\textbf{Answer:} The left-hand side is the material acceleration (rate of momentum change). $\nabla \cdot T$ represents internal stresses acting through adjacent fluid, and $\rho g$ is the external body force such as gravity.
+\end{enumerate}
+
+\subsection*{5. Viscous Stress and Newtonian Fluids}
+\begin{enumerate}
+\item \textbf{Question:} What is the physical meaning of the rate-of-strain tensor $D$?\\
+\textbf{Answer:} $D$ quantifies the local rate at which fluid elements deform (stretch and shear) without rotation. It captures how velocity differences generate internal friction.
+
+\item \textbf{Question:} What are the key assumptions behind $\tau = 2\mu D + \lambda (\nabla \cdot u)I$?\\
+\textbf{Answer:} The relation assumes the fluid is isotropic, Newtonian (stress proportional to rate of strain), and that viscous effects depend only on instantaneous deformation rate, not history.
+
+\item \textbf{Question:} How does viscosity act as momentum diffusion?\\
+\textbf{Answer:} Molecular interactions transfer momentum between adjacent layers of fluid, smoothing velocity gradients analogous to diffusion of heat.
+
+\item \textbf{Question:} When does the Newtonian assumption break down?\\
+\textbf{Answer:} In non-Newtonian fluids such as polymers, suspensions, blood, or mucus, where stress depends nonlinearly or history-dependently on strain rate.
+\end{enumerate}
+
+\subsection*{6. Navier--Stokes Equations}
+\begin{enumerate}
+\item \textbf{Question:} Explain the physical meaning of each term in the incompressible Navier--Stokes equations.\\
+\textbf{Answer:} $\rho(\partial u/\partial t)$ represents local acceleration, $\rho(u \cdot \nabla)u$ convective acceleration, $-\nabla p$ pressure forces, $\mu \nabla^2 u$ viscous diffusion, and $\rho g$ body forces.
+
+\item \textbf{Question:} How does adding viscosity change the qualitative flow behavior?\\
+\textbf{Answer:} Viscosity introduces energy dissipation, enforces the no-slip condition, and smooths small-scale features. It prevents discontinuities and allows the existence of boundary layers.
+
+\item \textbf{Question:} In which regimes does the Reynolds number play a dominant role?\\
+\textbf{Answer:} At high Reynolds numbers inertial forces dominate, often leading to turbulence. At low Reynolds numbers viscous forces dominate, producing smooth, reversible, laminar flows.
+
+\item \textbf{Question:} What does the term $\mu \nabla^2 u$ represent physically?\\
+\textbf{Answer:} It describes the diffusion of momentum in space, tending to equalize velocity gradients much like diffusion equalizes temperature gradients.
+\end{enumerate}
+
+\subsection*{7. Boundary Conditions and Non-Dimensionalization}
+\begin{enumerate}
+\item \textbf{Question:} Explain the physical reasoning behind the no-slip and no-penetration conditions.\\
+\textbf{Answer:} No-penetration ($u \cdot n=0$) ensures impermeable walls, while no-slip ($u=0$) arises from molecular adhesion between fluid and solid surfaces, matching their velocities.
+
+\item \textbf{Question:} Why do we nondimensionalize the Navier--Stokes equations?\\
+\textbf{Answer:} It identifies key dimensionless parameters such as the Reynolds number, facilitates comparison between systems of different scales, and simplifies numerical and theoretical analysis.
+
+\item \textbf{Question:} What insight does the Reynolds number provide?\\
+\textbf{Answer:} It measures the ratio of inertial to viscous forces and predicts flow regime transitions—low $Re$ means laminar and steady, high $Re$ means turbulent and unsteady behavior.
+\end{enumerate}
+
+\subsection*{8. Broader and Applied Questions}
+\begin{enumerate}
+\item \textbf{Question:} What numerical challenges arise at high Reynolds numbers?\\
+\textbf{Answer:} The equations become stiff due to wide scale separation; small time steps and fine grids are needed to resolve turbulent structures, making direct simulation computationally expensive.
+
+\item \textbf{Question:} How might the stress--strain relation change for complex or non-Newtonian fluids?\\
+\textbf{Answer:} The stress may depend on strain history, rate magnitude, or additional internal variables, requiring constitutive laws such as power-law, Bingham, or viscoelastic models.
+
+\item \textbf{Question:} In modeling biological or soft-matter flows, which assumptions must be revisited?\\
+\textbf{Answer:} Constant viscosity, incompressibility, and linear stress--strain relationships may not hold; coupling to elasticity, porosity, or surface tension effects may be required.
+
+\item \textbf{Question:} How would you connect the continuum Navier--Stokes framework to molecular-scale descriptions?\\
+\textbf{Answer:} Through statistical mechanics or kinetic theory: averaging molecular motions yields continuum quantities like density, velocity, and stress; parameters such as viscosity can be derived from microscopic interactions.
+\end{enumerate}
+\end{document}
