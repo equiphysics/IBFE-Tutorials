@@ -219,7 +219,7 @@ A convenient immersed description uses a \textbf{single Eulerian stress tensor} 
 \end{frame}
 
 % ------------------------------------------------------------
-\begin{frame}{IB form of the equations of motion}
+\begin{frame}{IB form of the equations of motion (strong form)}
 \small
 \textbf{Fluid momentum + incompressibility (in \(\Omega\)):}
 \[
@@ -227,17 +227,15 @@ A convenient immersed description uses a \textbf{single Eulerian stress tensor} 
 = -\nabla_{\!x}p + \mu\nabla_{\!x}^2\uEuler + \fEuler(\x,t),
 \qquad \nabla_{\!x}\cdot\uEuler(\x,t)=0.
 \]
+\scriptsize Here \(\rho\) is the \emph{common} mass density of the coupled fluid--structure system (neutral-buoyancy assumption: \(\rho_{\text{solid}}=\rho_{\text{fluid}}\)). The structure inertia is therefore captured by the Eulerian momentum equation; there is no separate \(\rho_0\,\ddot{\chi}\) term.
 
 \medskip
-\textbf{Immersed force density (written as Lagrangian integrals):}
+\small
+\textbf{Eulerian elastic force density --- a sum of two Lagrangian integrals (Griffith \& Luo 2017, Eq.\,6):}
 \[
 \fEuler(\x,t)
-= \int_{B_0}\big(\nabla_{\!X}\cdot \Pten(\X,t)\big)\,
-\deltah\!\left(\x-\chi(\X,t)\right)\,dV
-\]
-\[
-\textbf{t}(\x,t)=\int_{\partial B_0}\big(-\Pten(\X,t)\Nvec(\X)\big)\,
-\deltah\!\left(\x-\chi(\X,t)\right)\,dA.
+= \underbrace{\int_{B_0}\big(\divX \Pten(\X,t)\big)\,\deltah\!\left(\x-\chi(\X,t)\right)\,dV}_{\text{internal (volume) force, smooth body force on fluid}}
+\;\;\underbrace{-\;\int_{\partial B_0}\Pten(\X,t)\,\Nvec(\X)\,\deltah\!\left(\x-\chi(\X,t)\right)\,dA}_{\text{transmission (boundary) force, singular layer}}.
 \]
 
 \medskip
@@ -248,7 +246,7 @@ A convenient immersed description uses a \textbf{single Eulerian stress tensor} 
 \]
 
 \medskip
-\textbf{Interpretation:} the volume and boundary traction terms are \emph{both} spread to the Eulerian grid using \(\deltah\).
+\textbf{Interpretation:} \(\fEuler\) packages both the smooth internal stress-divergence and the surface traction as one immersed forcing on the fluid. Volume and boundary terms are \emph{both} spread to the Eulerian grid using \(\deltah\).
 \end{frame}
 
 
@@ -318,7 +316,7 @@ Use the reference divergence theorem:
 
 \begin{frame}{Balance of linear momentum (reference strong form) and the IB goal}
 \small
-Because \(V_0\) is arbitrary, the integral balance implies the \textbf{pointwise strong form}:
+Because \(V_0\) is arbitrary, the integral balance implies the \textbf{pointwise (Lagrangian) strong form}:
 \[
 \rho_0(\X)\,\chi_{tt}(\X,t)=\divX\Pten(\X,t)+\bm{B}(\X,t)
 \qquad \text{in } B_0.
@@ -334,12 +332,17 @@ A \textbf{body force per unit reference volume} (units N/m\(^3\) in 3D). Example
 Often in tutorials we set \(\bm{B}=\bm{0}\) to focus on elastic forces from \(\Pten\).
 
 \medskip
-\textbf{Why we care (IB/IBFE context):}
-the fluid solver wants an \emph{Eulerian} force density \(\fEuler(\x,t)\) on \(\Omega\).
-So we will next rewrite these solid forces (\(\divX\Pten\) and boundary tractions) as an Eulerian forcing term via the IB kernel \(\deltah\).
-\\
+\textbf{IBFE caveat:} In the coupled IBFE system the inertia term \(\rho_0\,\chi_{tt}\) does \emph{not} appear separately --- the structure moves with the fluid (\(\partial \chi/\partial t = \uEuler\circ\chi\)), so its inertia is already captured by the Eulerian momentum equation under neutral buoyancy. We retain the Lagrangian form here only to derive the elastic force density.
 
- $$\fEuler(\x,t)=\int_{B_0}(\divX\Pten)\,\deltah(\x-\chi)\,dV.$$
+\medskip
+\textbf{Why we care:}
+the fluid solver wants an \emph{Eulerian} force density \(\fEuler(\x,t)\) on \(\Omega\).
+So we rewrite the solid forces (\(\divX\Pten\) \emph{and} boundary tractions \(-\Pten\Nvec\)) as immersed forcings via the IB kernel \(\deltah\):
+\[
+\fEuler(\x,t)
+=\int_{B_0}(\divX\Pten)\,\deltah(\x-\chi)\,dV
+\;-\;\int_{\partial B_0}\Pten\Nvec\,\deltah(\x-\chi)\,dA.
+\]
 \end{frame}
 
 
@@ -400,8 +403,10 @@ If we start from a reference description of solid forces, two types of contribut
 \[
 \fEuler(\x,t)=\fEuler^{\text{vol}}(\x,t)+\fEuler^{\text{bdry}}(\x,t).
 \]
+\scriptsize Keeping the two pieces separate corresponds to the \emph{partitioned} weak formulation of Griffith \& Luo (2017), where the smooth volumetric force and the singular surface layer are treated as distinct contributions. The unified weak formulation (next slides) collapses them into a single Lagrangian density.
 
 \medskip
+\small
 \textbf{Next:} define a \emph{single} Lagrangian force density \(\FLag(\X,t)\) via a weak form so we only need one spreading integral.
 \end{frame}
 
@@ -538,6 +543,10 @@ With this definition, the weak momentum balance becomes simply
 \]
 
 \medskip
+\scriptsize \textbf{This is the unified weak form of Griffith \& Luo (2017), Eq.\,(11):} when admissible test functions \(\bm{\psi}\) are not required to vanish on \(\partial B_0\), the single density \(\FLag\) automatically packages both the internal stress-divergence \(\divX\Pten\) and the transmission traction \(-\Pten\Nvec\). The discretized partitioned form (where one keeps a separate boundary integral) is generally more accurate when the Lagrangian mesh is coarser than the Eulerian grid.
+
+\medskip
+\small
 \textbf{Next:} spread \(\FLag\) to the Eulerian grid with one integral transform.
 \end{frame}
 
@@ -576,8 +585,10 @@ find \(\FLag(\X,t)\) such that for all \(\bm{\psi}(\X)\),
 \[
 \pdv{\chi}{t}(\X,t)=\int_{\Omega}\uEuler(\x,t)\,\deltah\!\big(\x-\chi(\X,t)\big)\,d\x.
 \]
+\scriptsize With the singular kernel \(\delta\), this reduces to the pointwise no-slip statement \(\partial \chi/\partial t = \uEuler(\chi(\X,t),t)\). Combined with \(\divx\uEuler=0\), this implies the structure is incompressible at the continuous level: \(J\equiv 1\) (Griffith \& Patankar 2020). Volumetric stabilization in the structural model controls discrete drift away from \(J=1\).
 
 \medskip
+\small
 \textbf{Key takeaway:}
 the weak form \emph{combines} the volume forcing and boundary traction contributions into the single Lagrangian body force \(\FLag\),
 so the fluid sees only one immersed forcing term \(\fEuler\).
@@ -708,14 +719,16 @@ J(\X,t)=\det\Fdef(\X,t),\qquad
 \]
 
 \medskip
-A simple \textbf{PK1 active stress} consistent with “tension along fibers” is
+A simple \textbf{PK1 active stress} consistent with ``tension along fibers'' is
 \[
 \Pten^{a}(\X,t)=J(\X,t)\,T(\X,t)\,\avec(\X,t)\otimes \fhat(\X)
 =
 J\,T\,\Fdef\,\fhat\,\fhat^{T}.
 \]
+\scriptsize Origin: this corresponds to the Cauchy active stress \(\sigmaC^{a}=T\,(\avec\otimes\avec)\) with \(\avec=\Fdef\,\fhat\) (\emph{not} unit-normalized). Pushing forward via \(\Pten=J\sigmaC\Fdef^{-T}\) and using \((\Fdef\fhat)^T\Fdef^{-T}=\fhat^T\) gives the formula above. Under this convention, \(T\) has units of stress per (mapped fiber length)\(^2\); other conventions use a unit-normalized current fiber direction \(\avec/\|\avec\|\) and absorb the factor differently.
 
 \medskip
+\small
 \textbf{Why this form is convenient:} it is expressed in reference variables and drops directly into
 \(-\int \Pten:\nabla_X \bm{\psi}\).
 \end{frame}
@@ -1077,6 +1090,31 @@ Even before coding full IBFE, this example is useful for verification.
 \end{frame}
 
 
+% ============================================================
+% References / Further reading
+% ============================================================
+\section{References and further reading}
+
+\begin{frame}{References for this tutorial}
+\footnotesize
+\textbf{Primary IBFE references:}
+\begin{itemize}
+\item B.\,E.\ Griffith and X.\ Luo, ``Hybrid finite difference/finite element immersed boundary method,'' \emph{Int.\ J.\ Numer.\ Meth.\ Engng.}, 109:1--26, 2017. --- Source of both the strong form (Eq.\,6) and the unified/partitioned weak forms used in these slides; introduces force spreading from quadrature points rather than from nodes.
+\item D.\ Boffi, L.\ Gastaldi, L.\ Heltai, and C.\,S.\ Peskin, ``On the hyper-elastic formulation of the immersed boundary method,'' \emph{Comput.\ Methods Appl.\ Mech.\ Engng.}, 197:2210--2231, 2008. --- Introduces the variational immersed-boundary form that Griffith \& Luo build on.
+\item B.\,E.\ Griffith and N.\,A.\ Patankar, ``Immersed methods for fluid--structure interaction,'' \emph{Annu.\ Rev.\ Fluid Mech.}, 52:421--448, 2020. --- Modern overview, including the implication \(J\equiv 1\) at the continuous level and the role of volumetric stabilization.
+\item C.\,S.\ Peskin, ``The immersed boundary method,'' \emph{Acta Numerica}, 11:479--517, 2002. --- The foundational IB formulation, regularized delta kernels, and force-spreading/velocity-interpolation operators.
+\end{itemize}
+
+\medskip
+\textbf{Active tension / jellyfish modeling:}
+\begin{itemize}
+\item A.\,P.\ Hoover, A.\ Griffith, and L.\,A.\ Miller, ``Quantifying performance in the medusan mechanospace with an actively swimming three-dimensional jellyfish model,'' \emph{J.\ Fluid Mech.}, 813:1112--1155, 2017.
+\item A.\,P.\ Hoover, B.\,E.\ Griffith, and L.\,A.\ Miller, ``Neuromechanical wave resonance in jellyfish swimming,'' \emph{PNAS}, 2019.
+\end{itemize}
+
+\medskip
+\textbf{Software:} The IBAMR open-source library (\href{https://ibamr.github.io}{ibamr.github.io}) implements the IBFE method described above.
+\end{frame}
 
 % ====================================================
 \end{document}

@@ -197,7 +197,12 @@
 \begin{frame}{Notation note: \(\Fdef\) vs \(\FLag\) in IB/IBFE}
 \small
 Many immersed boundary (IB) and IBFE papers use \(\FLag(\X,t)\) to denote the \textbf{Lagrangian force density}
-defined on the structure mesh.
+defined on the structure mesh. For example, Griffith \& Luo (2017) write the unified weak form as
+\[
+\int_U \FLag(\X,t)\cdot\bm{V}(\X)\,d\X
+= -\int_U \Pten^{\,e}(\X,t)\!:\!\gradX \bm{V}(\X)\,d\X
+\]
+where \(\Pten^{\,e}=\partial W^e/\partial \bm{F}\) and the symbol \(\bm{F}\) appears \emph{twice} --- once as the deformation gradient and once (as \(\bm{F}(\X,t)\)) as the Lagrangian force density.
 
 \medskip
 In solid mechanics, the symbol \(\bm{F}\) is traditionally used for the \textbf{deformation gradient}.
@@ -1047,8 +1052,9 @@ Equivalently,
 \medskip
 \textbf{Check 2 (symmetry):}
 \begin{itemize}
-\item \(\sigmaC\) is often symmetric in standard (non-polar) continua.
-\item \(\Pten\) is generally not symmetric even if \(\sigmaC\) is symmetric (because of the \(\Fdef^{-T}\) mapping).
+\item \(\sigmaC\) is symmetric in standard (non-polar) continua --- this follows from balance of angular momentum.
+\item \(\Pten\) is generally \emph{not} symmetric even when \(\sigmaC\) is symmetric (because of the \(\Fdef^{-T}\) mapping in \(\Pten = J\sigmaC\Fdef^{-T}\)). The symmetry condition for \(\Pten\) reads \(\Pten\Fdef^T = \Fdef\Pten^T\).
+\item \(\Sten = \Fdef^{-1}\Pten\) \emph{is} symmetric whenever \(\sigmaC\) is symmetric (one reason it pairs naturally with \(\Eten\)).
 \end{itemize}
 
 \end{frame}
@@ -1271,7 +1277,28 @@ W(\Fdef) = W_{\mathrm{iso}}(\text{shape change}) + W_{\mathrm{vol}}(J).
 \]
 
 \medskip
-\textbf{Note:} In immersed boundary settings, the surrounding fluid is often incompressible; some formulations rely on that coupling, but solids may still require volumetric control depending on the model and numerics.
+\textbf{Note (IBFE-specific):} Because the fluid is incompressible (\(\divx\uEuler = 0\)) and the structure moves with the fluid (\(\partial \chi/\partial t = \uEuler\circ\chi\)), the continuous IBFE formulation already implies \(J\equiv 1\). However, the \emph{discrete} scheme typically allows volumetric drift, so the volumetric energy \(W_{\mathrm{vol}}(J)\) is best viewed as a \textbf{stabilization} term and \(\kappa\) as a stabilization parameter rather than a true bulk modulus (Griffith \& Patankar 2020).
+
+\end{frame}
+
+\begin{frame}{Modified deformation gradient \(\bar{\bm{F}}\) (volume--deviatoric split)}
+\small
+A useful trick for nearly incompressible IBFE: multiplicatively split \(\Fdef\) into volumetric and isochoric (volume-preserving) parts,
+\[
+\Fdef = J^{1/3}\,\bar{\Fdef},\qquad
+\bar{\Fdef} := J^{-1/3}\,\Fdef,
+\qquad \det \bar{\Fdef} = 1.
+\]
+
+\medskip
+\textbf{Why this matters in IBFE:} Build the shearing energy from \emph{modified} invariants
+\[
+\bar{I}_1 = \mathrm{tr}(\bar{\Cten}),\quad \bar{I}_2 = \tfrac12\bigl((\mathrm{tr}\,\bar{\Cten})^2-\mathrm{tr}(\bar{\Cten}^2)\bigr),\qquad \bar{\Cten} = \bar{\Fdef}^T \bar{\Fdef},
+\]
+so that the shearing part \(W(\bar{\Fdef})\) is by construction insensitive to volume change, and the volumetric stabilization \(W_{\mathrm{vol}}(J)\) is the \emph{only} term that responds to \(J\neq 1\).
+
+\medskip
+\textbf{Result reported by Griffith \& Patankar (2020):} For nearly incompressible IBFE, using both modified invariants \emph{and} a volumetric stabilization yields accuracy comparable to standard stabilized FEM for incompressible elasticity (e.g., the twisted beam / Mooney--Rivlin benchmark of Bonet et al.\ 2015).
 
 \end{frame}
 
@@ -1295,11 +1322,13 @@ W(\Fdef) = W_{\mathrm{iso}}(\text{shape change}) + W_{\mathrm{vol}}(J).
   \end{itemize}
 
   \medskip
-  \textbf{Example (one common choice):}
+  \textbf{Two common choices:}
   \[
   W_{\mathrm{vol}}(J)=\frac{\kappa}{2}(J-1)^2
-  \quad (\kappa \text{ large}).
+  \quad\text{or}\quad
+  W_{\mathrm{vol}}(J)=\frac{\kappa}{2}(\ln J)^2.
   \]
+  \scriptsize Both satisfy \(W_{\mathrm{vol}}(1)=W'_{\mathrm{vol}}(1)=0\), so no extra energy/stress is added at \(J=1\). We use the \(\ln J\) form for the neo-Hookean below; it is the choice used in the IBFE literature (Griffith \& Patankar 2020).
   \end{column}
 
   \begin{column}{0.50\textwidth}
@@ -1362,10 +1391,13 @@ Second Piola:
 \medskip
 Cauchy stress:
 \[
-\sigmaC = \frac{1}{J}\,\Pten\,\Fdef^T.
+\sigmaC = \frac{1}{J}\,\Pten\,\Fdef^T
+       = \frac{1}{J}\,\pdv{W}{\Fdef}\,\Fdef^T.
 \]
+\scriptsize (The right-hand expression goes directly from energy to Cauchy stress, bypassing \(\Pten\); see Griffith \& Patankar 2020.)
 
 \medskip
+\small
 \textbf{Interpretation:} \(\Pten\) is convenient to compute in the reference frame; \(\sigmaC\) is what appears naturally in current-frame balance laws.
 
 \end{frame}
@@ -1413,6 +1445,39 @@ and conversely
 
 \end{frame}
 
+
+
+\begin{frame}{How FE approximates \(\chi\) and \(\Fdef\) (concrete picture)}
+\footnotesize
+Triangulate the reference body \(B_0\) with elements \(B_0^{\,e}\) and \(C^0\) interpolatory basis functions \(\{\phi_l(\X)\}_{l=1}^{M}\) attached to nodes \(\{\X_l\}\). Let \(\chi_l(t):=\chi(\X_l,t)\) be the \emph{moving} positions of the nodes.
+
+\medskip
+\textbf{Approximate the deformation map:}
+\[
+\chi_h(\X,t) \;=\; \sum_{l=1}^{M} \chi_l(t)\,\phi_l(\X).
+\]
+
+\medskip
+\textbf{Take the material gradient (just a sum of derivatives of basis functions):}
+\[
+\Fdef{}_h(\X,t)
+\;=\; \gradX \chi_h(\X,t)
+\;=\; \sum_{l=1}^{M} \chi_l(t)\,\gradX \phi_l(\X),
+\quad
+J_h = \det \Fdef{}_h.
+\]
+
+\medskip
+\textbf{Where things ``live'':}
+\begin{itemize}
+\item \(\chi_h\) is continuous on \(B_0\) (because we use \(C^0\) elements).
+\item \(\Fdef{}_h\) is generally \emph{piecewise} continuous: smooth inside each element, with jumps across element boundaries.
+\item Therefore \(\Pten_h = \partial W/\partial \Fdef\big|_{\Fdef = \Fdef{}_h}\) is also generally piecewise continuous (Griffith \& Luo 2017, \S3.2).
+\end{itemize}
+
+\medskip
+\textbf{Why this matters for IBFE:} forces are typically evaluated at \emph{quadrature points} inside each element (where \(\Fdef{}_h\) is well defined), \emph{not} only at nodes. This is what enables the use of Lagrangian meshes that can be coarser than the background Eulerian grid.
+\end{frame}
 
 
 \begin{frame}{Module 4 wrap-up}
@@ -1838,6 +1903,32 @@ For neo-Hookean:
 \medskip
 \textbf{Task:} compute \(P_{11}\), \(P_{22}\), \(P_{33}\) and interpret what boundary conditions would be needed for a \emph{uniaxial-stress} test (traction-free sides).
 
+\end{frame}
+
+
+% ============================================================
+% References / Further reading
+% ============================================================
+\section{References and further reading}
+
+\begin{frame}{References for this tutorial}
+\footnotesize
+\textbf{Primary IBFE references (used in checking these notes):}
+\begin{itemize}
+\item B.\,E.\ Griffith and X.\ Luo, ``Hybrid finite difference/finite element immersed boundary method,'' \emph{Int.\ J.\ Numer.\ Meth.\ Engng.}, 109:1--26, 2017. --- Source of the unified/partitioned weak forms used in IBFE; uses the symbol \(\bm{F}\) for both the deformation gradient and the Lagrangian force density (\(\bm{F}(\X,t)\)), motivating our \(\Fdef\) vs.\ \(\FLag\) distinction.
+\item B.\,E.\ Griffith and N.\,A.\ Patankar, ``Immersed methods for fluid--structure interaction,'' \emph{Annu.\ Rev.\ Fluid Mech.}, 52:421--448, 2020. --- Concise modern overview, including hyperelastic structural models (\(\Pten^{\,s}=\partial W/\partial \bm{F}\), \(\sigmaC_s = J^{-1}(\partial W/\partial \bm{F})\bm{F}^T\)), the modified deformation gradient \(\bar{\bm{F}}=J^{-1/3}\bm{F}\), and volumetric stabilization \(U(J)=\tfrac{K}{2}(\ln J)^2\).
+\item C.\,S.\ Peskin, ``The immersed boundary method,'' \emph{Acta Numerica}, 11:479--517, 2002. --- The foundational IB formulation with regularized delta kernels.
+\end{itemize}
+
+\medskip
+\textbf{Continuum/solid mechanics background:}
+\begin{itemize}
+\item G.\,A.\ Holzapfel, \emph{Nonlinear Solid Mechanics: A Continuum Approach for Engineering}, Wiley, 2000.
+\item J.\ Bonet and R.\,D.\ Wood, \emph{Nonlinear Continuum Mechanics for Finite Element Analysis}, 2nd ed., Cambridge, 2008.
+\end{itemize}
+
+\medskip
+\textbf{Software:} The IBAMR open-source library (\href{https://ibamr.github.io}{ibamr.github.io}) implements the IBFE method described above.
 \end{frame}
 
 \end{document}
